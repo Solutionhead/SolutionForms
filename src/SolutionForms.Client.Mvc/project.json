@@ -7,9 +7,9 @@
 
   "dependencies": {
     "AspNet.Identity.RavenDB": "1.0.1",
+    "BrockAllen.MembershipReboot.WebHost": "7.1.0",
     "Microsoft.AspNet.Authentication.Cookies": "1.0.0-rc1-final",
     "Microsoft.AspNet.Diagnostics.Entity": "7.0.0-rc1-final",
-    "Microsoft.AspNet.Identity.Owin": "2.2.1",
     "Microsoft.AspNet.IISPlatformHandler": "1.0.0-rc1-final",
     "Microsoft.AspNet.Mvc": "6.0.0-rc1-final",
     "Microsoft.AspNet.Mvc.TagHelpers": "6.0.0-rc1-final",
@@ -23,7 +23,6 @@
     "Microsoft.Extensions.Logging": "1.0.0-rc1-final",
     "Microsoft.Extensions.Logging.Console": "1.0.0-rc1-final",
     "Microsoft.Extensions.Logging.Debug": "1.0.0-rc1-final",
-    "Microsoft.Owin.Host.SystemWeb": "3.0.1",
     "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0-rc1-final"
   },
 
