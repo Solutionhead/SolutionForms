@@ -1,12 +1,12 @@
-﻿using AspNet.Identity.RavenDB.Stores;
+﻿using BrockAllen.MembershipReboot;
+using Microsoft.AspNet.Authentication.Cookies;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Raven.Client;
+using Microsoft.Extensions.OptionsModel;
 using SolutionForms.Client.Mvc.Entities;
 using SolutionForms.Client.Mvc.Models;
 using SolutionForms.Client.Mvc.Services;
@@ -42,26 +42,16 @@ namespace SolutionForms.Client.Mvc
             // Add framework services.
             services.AddAuthentication();
             services.AddAuthorization();
-            //services.AddIdentity<ApplicationUser, IdentityRole>()
-            //    .AddEntityFrameworkStores<ApplicationDbContext>()
-            //    .AddDefaultTokenProviders();
 
             services.AddMvc();
 
             // Add application services.
 
             #region RavenDB and RavenUserStore
-            
-            services.AddSingleton(provider => RavenContext.DocumentStore);
-            services.AddScoped<UserManager<ApplicationUser>>();
-            services.AddScoped(provider => provider.GetService<IDocumentStore>().OpenAsyncSession());
-            services.AddScoped<IUserStore<ApplicationUser>>(provider =>
-            {
-                var documentSession = provider.GetService<IAsyncDocumentSession>();
-                documentSession.Advanced.UseOptimisticConcurrency = true;
-                return new RavenUserStore<ApplicationUser>(documentSession, false);
-            });
 
+            ConfigureMembershipReboot(services);
+            services.AddSingleton(p => RavenContext.DocumentStore);
+            
             #endregion
 
             services.AddTransient<IEmailSender, AuthMessageSender>();
@@ -89,12 +79,11 @@ namespace SolutionForms.Client.Mvc
 
             app.UseStaticFiles();
 
-            app.UseCookieAuthentication(c =>
-            {
-                c.LoginPath = new PathString("/Account/Login");
-                c.AuthenticationScheme = DefaultAuthenticationTypes.ApplicationCookie;
-                c.AutomaticAuthenticate = true;
-                c.AutomaticChallenge = true;
+            app.UseMembershipReboot(new CookieAuthenticationOptions {
+
+                LoginPath = new PathString("/Account/Login"),
+                AutomaticAuthenticate = true,
+                AutomaticChallenge = true,
             });
             
             // To configure external authentication please see http://go.microsoft.com/fwlink/?LinkID=532715
@@ -109,5 +98,44 @@ namespace SolutionForms.Client.Mvc
 
         // Entry point for the application.
         public static void Main(string[] args) => WebApplication.Run<Startup>(args);
+        
+        public void ConfigureMembershipReboot(IServiceCollection services)
+        {
+            var confg = Configuration.GetSection("membershipReboot");
+            services.Configure<SecuritySettings>(confg);
+            services.AddSingleton(p => new MembershipRebootConfiguration<ApplicationUser>(p.GetService<IOptions<SecuritySettings>>().Value));
+            services.AddScoped<UserAccountService<ApplicationUser>>();
+            services.AddScoped<IUserAccountRepository<ApplicationUser>, RavenUserAccountRepository>();
+            services.AddScoped<AuthenticationService<ApplicationUser>>(provider => 
+                new AspNetAuthenticationService(
+                    provider.GetService<UserAccountService<ApplicationUser>>(),
+                    provider.GetService<IHttpContextAccessor>().HttpContext));
+        }
     }
+
+    public static class MembershipRebootAppBuilderExtensions
+    {
+        public static void UseMembershipReboot(this IApplicationBuilder app, CookieAuthenticationOptions cookieOptions)
+        {
+            app.UseCookieAuthentication(cookieOptions);
+            app.UseCookieAuthentication(new CookieAuthenticationOptions
+            {
+                AutomaticAuthenticate = true,
+                AutomaticChallenge = true,               
+                AuthenticationScheme = MembershipRebootApplicationConstants.AuthenticationType,
+                CookieSecure = cookieOptions.CookieSecure
+            });
+        }
+    }
+
+    /// <summary>
+    /// Replacement for the MembershipRebootOwinConstants (BrockAllen.MembershipReboot.Owin)
+    /// </summary>
+    public class MembershipRebootApplicationConstants
+    {
+        internal const string OwinAuthenticationService = "MembershipReboot.AuthenticationService";
+
+        public const string AuthenticationType = "MembershipReboot";
+        public const string AuthenticationTwoFactorType = AuthenticationType + ".2fa";
+    }    
 }

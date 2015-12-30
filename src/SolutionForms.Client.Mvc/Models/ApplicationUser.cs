@@ -1,10 +1,9 @@
-﻿using AspNet.Identity.RavenDB.Entities;
+﻿using BrockAllen.MembershipReboot.Hierarchical;
 
 namespace SolutionForms.Client.Mvc.Models
 {
     // Add profile data for application users by adding properties to the ApplicationUser class
-    public class ApplicationUser : RavenUser
+    public sealed class ApplicationUser : HierarchicalUserAccount
     {
-        public ApplicationUser(string userName, string email = null) : base(userName, email) { }
     }
 }

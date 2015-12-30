@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using Microsoft.AspNet.Http.Authentication;
-using Microsoft.AspNet.Identity;
+using SolutionForms.Client.Mvc.Models;
 
 namespace SolutionForms.Client.Mvc.ViewModels.Manage
 {

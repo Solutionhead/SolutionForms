@@ -4,6 +4,7 @@
   "compilationOptions": {
     "emitEntryPoint": true
   },
+  "webroot": "wwwroot",
 
   "dependencies": {
     "AspNet.Identity.RavenDB": "1.0.1",

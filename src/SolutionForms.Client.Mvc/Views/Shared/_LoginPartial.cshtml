@@ -1,6 +1,4 @@
-﻿@using System.Security.Claims
-
-@if (User.Identity.IsAuthenticated)
+﻿@if (User.Identity.IsAuthenticated)
 {
     <form asp-controller="Account" asp-action="LogOff" method="post" id="logoutForm" class="navbar-right">
         <ul class="nav navbar-nav navbar-right">
@@ -19,12 +17,4 @@ else
     <li><a asp-controller="Account" asp-action="Register">Register</a></li>
     <li><a asp-controller="Account" asp-action="Login">Log in</a></li>
   </ul>
-  <form asp-controller="Account" asp-action="LogOff" method="post" id="logoutForm" class="navbar-right">
-    <ul class="nav navbar-nav navbar-right">
-      <li>
-        <button type="submit" class="btn btn-link navbar-btn navbar-link">Log off anyways</button>
-      </li>
-    </ul>
-  </form>
-
 }
