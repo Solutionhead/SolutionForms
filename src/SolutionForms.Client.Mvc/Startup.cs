@@ -8,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.OptionsModel;
 using SolutionForms.Client.Mvc.Entities;
+using SolutionForms.Client.Mvc.Middleware.Multitenancy;
 using SolutionForms.Client.Mvc.Models;
 using SolutionForms.Client.Mvc.Services;
 
@@ -86,7 +87,7 @@ namespace SolutionForms.Client.Mvc
                 AutomaticChallenge = true,
             });
             
-            // To configure external authentication please see http://go.microsoft.com/fwlink/?LinkID=532715
+            app.UseTenantResolver();
 
             app.UseMvc(routes =>
             {

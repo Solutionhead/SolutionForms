@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using BrockAllen.MembershipReboot;
-using BrockAllen.MembershipReboot.Hierarchical;
 using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Mvc;
 using SolutionForms.Client.Mvc.Models;
@@ -18,7 +17,6 @@ namespace SolutionForms.Client.Mvc.Controllers
 
         private readonly UserAccountService<ApplicationUser> _userAccountService;
         private readonly AuthenticationService<ApplicationUser> _authenticationService;
-        private string _tenant = "Test";
 
         public ManageController(AuthenticationService<ApplicationUser> authenticationService, ISmsSender smsSender, IEmailSender emailSender)
         {
@@ -27,7 +25,7 @@ namespace SolutionForms.Client.Mvc.Controllers
             _smsSender = smsSender;
             _emailSender = emailSender;
         }
-
+        
         //
         // GET: /Manage/Index
         [HttpGet]

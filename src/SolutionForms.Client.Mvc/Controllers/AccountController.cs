@@ -8,13 +8,14 @@ using Microsoft.Extensions.Logging;
 using SolutionForms.Client.Mvc.Models;
 using SolutionForms.Client.Mvc.Services;
 using SolutionForms.Client.Mvc.ViewModels.Account;
+using Microsoft.AspNet.Http.Features;
+using SolutionForms.Client.Mvc.Middleware.Multitenancy;
 
 namespace SolutionForms.Client.Mvc.Controllers
 {
     [Authorize]
     public class AccountController : Controller
     {
-        private string tenant = "all";
         public AccountController(AuthenticationService<ApplicationUser> authService, IEmailSender emailSender, ISmsSender smsSender)
         {
             if (authService == null) { throw new ArgumentNullException(nameof(authService)); }
@@ -26,6 +27,8 @@ namespace SolutionForms.Client.Mvc.Controllers
             _emailSender = emailSender;
             _smsSender = smsSender;
         }
+
+        public string Tenant => HttpContext.Features.Get<ITenantFeature>().Tenant.Id;
 
         public AuthenticationService<ApplicationUser> SignInManager { get; }
 
@@ -58,7 +61,7 @@ namespace SolutionForms.Client.Mvc.Controllers
             {
                 SignInManager.SignOut();
                 ApplicationUser user;
-                UserManager.AuthenticateWithEmail(tenant, model.Email, model.Password, out user);
+                UserManager.AuthenticateWithEmail(Tenant, model.Email, model.Password, out user);
                 if (user == null)
                 {
                     ModelState.AddModelError("", "Invalid login attempt");
@@ -107,7 +110,7 @@ namespace SolutionForms.Client.Mvc.Controllers
             {
                 try
                 {
-                    UserManager.CreateAccount(tenant, model.Email, model.Password, model.Email);
+                    UserManager.CreateAccount(Tenant, model.Email, model.Password, model.Email);
                     model.Message = "User account has been registered successfully.";
 
                     // NOTE: until account owner/administrator is established in claims, we're enforcing closed registration
@@ -173,7 +176,7 @@ namespace SolutionForms.Client.Mvc.Controllers
         {
             if (ModelState.IsValid)
             {
-                var user = UserManager.GetByEmail(tenant, model.Email);
+                var user = UserManager.GetByEmail(Tenant, model.Email);
                 if (user == null || !user.IsAccountVerified)
                 {
                     // Don't reveal that the user does not exist or is not confirmed
@@ -225,13 +228,13 @@ namespace SolutionForms.Client.Mvc.Controllers
             {
                 return View(model);
             }
-            var user = UserManager.GetByEmail(tenant, model.Email);
+            var user = UserManager.GetByEmail(Tenant, model.Email);
             if (user == null)
             {
                 // Don't reveal that the user does not exist
                 return RedirectToAction(nameof(ResetPasswordConfirmation), "Account");
             }
-            UserManager.ResetPassword(tenant, user.Email);
+            UserManager.ResetPassword(Tenant, user.Email);
 
             return RedirectToAction("ResetPasswordConfirmation", "Account");
         }
