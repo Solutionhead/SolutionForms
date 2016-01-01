@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.Configuration;
+using System.Text.RegularExpressions;
 using BrockAllen.MembershipReboot;
 using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Mvc;
@@ -39,6 +40,13 @@ namespace SolutionForms.Client.Mvc.Controllers
         private readonly ISmsSender _smsSender;
         private readonly ILogger _logger;
 
+        //private ViewResult Login(LoginViewModel model = null)
+        //{
+        //    return string.IsNullOrWhiteSpace(Tenant)
+        //        ? View("LoginTenant")
+        //        : View("Login", model);
+        //}
+
         //
         // GET: /Account/Login
         [HttpGet]
@@ -46,7 +54,33 @@ namespace SolutionForms.Client.Mvc.Controllers
         public IActionResult Login(string returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
-            return View();
+            return string.IsNullOrWhiteSpace(Tenant)
+                ? View("LoginTenant")
+                : View("Login");
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [ValidateAntiForgeryToken]
+        public IActionResult LoginTenant(TenantLoginViewModel model, string returnUrl = null)
+        {
+            if (!ModelState.IsValid)
+            {
+                ViewData["ReturnUrl"] = returnUrl;
+                return View("LoginTenant");
+            }
+
+            //todo: lookup tenant by domain
+            
+            var url = Url.Link("default", new { action = "Login" });
+            return Redirect(InjectTenantSubdomainIntoUrl(url, model.TenantDomain));
+        }
+
+        private static string InjectTenantSubdomainIntoUrl(string url, string tenant)
+        {
+            var host = new Uri(url, UriKind.Absolute).Host;
+            var tenantHost = Regex.Replace(host, @"^(.*/.)?(solutionforms.*)", $"{tenant}.$2");
+            return url.Replace(host, tenantHost);
         }
 
         //

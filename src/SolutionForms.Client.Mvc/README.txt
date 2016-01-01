@@ -19,3 +19,5 @@
 3. If IIS is currently running, stop it by right-clicking the icon in the task tray and clicking Exit.
 
 > Final note: VS now has to be run as an Administrator otherwise the website won't start due to permissions errors.
+>	Another option, rather than running VS as an admin, is to add the relevant urls to HTTP.sys as follows:
+>	`netsh http add urlacl url=”http://test.localhost:52794/” user=everyone`
