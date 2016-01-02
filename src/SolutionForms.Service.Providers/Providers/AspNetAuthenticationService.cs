@@ -5,13 +5,23 @@ using System.Threading.Tasks;
 using BrockAllen.MembershipReboot;
 using Microsoft.AspNet.Http;
 using Microsoft.AspNet.Http.Authentication;
-using SolutionForms.Client.Mvc.Models;
+using SolutionForms.Service.Providers.Models;
 
-namespace SolutionForms.Client.Mvc.Entities
+namespace SolutionForms.Service.Providers.Providers
 {
+    public class UserAccountService : UserAccountService<ApplicationUser>
+{
+        public UserAccountService(IUserAccountRepository<ApplicationUser> userRepository) : base(userRepository)
+        {
+        }
+
+        public UserAccountService(MembershipRebootConfiguration<ApplicationUser> configuration, IUserAccountRepository<ApplicationUser> userRepository) : base(configuration, userRepository)
+        {
+        }
+}
     public class AspNetAuthenticationService : AuthenticationService<ApplicationUser>
     {
-        private HttpContext _context;
+        private readonly HttpContext _context;
         private readonly string _authenticationScheme;
 
         public AspNetAuthenticationService(UserAccountService<ApplicationUser> userService, HttpContext context) 

@@ -1,16 +1,15 @@
 using System;
-using System.Configuration;
 using Raven.Client;
 using Raven.Client.Document;
 using Raven.Client.Embedded;
 
-namespace SolutionForms.Client.Mvc.Entities
+namespace SolutionForms.Data.Contexts
 {
     public class RavenContext : IDisposable
     {
         internal const int EmbeddableStorePortNumber = 8088;
         public static IDocumentStore DocumentStore { get; private set; }
-        public static string DatabaseName { get; } = ConfigurationManager.AppSettings["databaseName"] ?? "SolutionForms";
+        public static string DatabaseName { get; } = "SolutionForms";
 
         public static IDocumentStore Init()
         {

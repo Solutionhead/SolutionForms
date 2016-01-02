@@ -7,8 +7,6 @@
   "webroot": "wwwroot",
 
   "dependencies": {
-    "AspNet.Identity.RavenDB": "1.0.1",
-    "BrockAllen.MembershipReboot.WebHost": "7.1.0",
     "Microsoft.AspNet.Authentication.Cookies": "1.0.0-rc1-final",
     "Microsoft.AspNet.Diagnostics.Entity": "7.0.0-rc1-final",
     "Microsoft.AspNet.IISPlatformHandler": "1.0.0-rc1-final",
@@ -34,8 +32,7 @@
   "frameworks": {
     "dnx451": {
       "dependencies": {
-        "AspNet.Identity.RavenDB": "1.0.0-*",
-        "RavenDB.Embedded": "3.0.30000"
+        "SolutionForms.Service.Providers": "",
       }
     }
   },

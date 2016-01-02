@@ -12,6 +12,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SolutionForms.Client.Mvc", "src\SolutionForms.Client.Mvc\SolutionForms.Client.Mvc.xproj", "{CD0C54A2-FA47-47E0-AECB-E9A2E367761C}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SolutionForms.Service.Providers", "src\SolutionForms.Service.Providers\SolutionForms.Service.Providers.xproj", "{902624C2-E108-4B4A-A8AB-A938D288C393}"
+EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "SolutionForms.Data", "src\SolutionForms.Data\SolutionForms.Data.xproj", "{AAE36ACF-0DB8-4C27-B7BE-3A4601E71369}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,11 +26,21 @@ Global
 		{CD0C54A2-FA47-47E0-AECB-E9A2E367761C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CD0C54A2-FA47-47E0-AECB-E9A2E367761C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CD0C54A2-FA47-47E0-AECB-E9A2E367761C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{902624C2-E108-4B4A-A8AB-A938D288C393}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{902624C2-E108-4B4A-A8AB-A938D288C393}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{902624C2-E108-4B4A-A8AB-A938D288C393}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{902624C2-E108-4B4A-A8AB-A938D288C393}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AAE36ACF-0DB8-4C27-B7BE-3A4601E71369}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AAE36ACF-0DB8-4C27-B7BE-3A4601E71369}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AAE36ACF-0DB8-4C27-B7BE-3A4601E71369}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AAE36ACF-0DB8-4C27-B7BE-3A4601E71369}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{CD0C54A2-FA47-47E0-AECB-E9A2E367761C} = {2ED05F63-61DF-442D-8832-8F13221F4012}
+		{902624C2-E108-4B4A-A8AB-A938D288C393} = {2ED05F63-61DF-442D-8832-8F13221F4012}
+		{AAE36ACF-0DB8-4C27-B7BE-3A4601E71369} = {2ED05F63-61DF-442D-8832-8F13221F4012}
 	EndGlobalSection
 EndGlobal

@@ -6,11 +6,9 @@ using Microsoft.AspNet.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.OptionsModel;
-using SolutionForms.Client.Mvc.Entities;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
-using SolutionForms.Client.Mvc.Models;
 using SolutionForms.Client.Mvc.Services;
+using SolutionForms.Service.Providers.Middleware;
 
 namespace SolutionForms.Client.Mvc
 {
@@ -31,8 +29,6 @@ namespace SolutionForms.Client.Mvc
 
             builder.AddEnvironmentVariables();
             Configuration = builder.Build();
-
-            RavenContext.Init();
         }
 
         public IConfigurationRoot Configuration { get; set; }
@@ -51,8 +47,9 @@ namespace SolutionForms.Client.Mvc
             #region RavenDB and RavenUserStore
 
             ConfigureMembershipReboot(services);
-            services.AddSingleton(p => RavenContext.DocumentStore);
-            
+            services.ConfigureSolutionFormsProviders();
+            //SolutionForms.Service.Providers.Middleware.ServiceConfigurationExtensions.ConfigureSolutionFormsProviders(services);
+
             #endregion
 
             services.AddTransient<IEmailSender, AuthMessageSender>();
@@ -80,7 +77,8 @@ namespace SolutionForms.Client.Mvc
 
             app.UseStaticFiles();
 
-            app.UseMembershipReboot(new CookieAuthenticationOptions {
+            app.UseSolutionFormsProviders(new CookieAuthenticationOptions
+            {
 
                 LoginPath = new PathString("/Account/Login"),
                 AutomaticAuthenticate = true,
@@ -104,39 +102,7 @@ namespace SolutionForms.Client.Mvc
         {
             var confg = Configuration.GetSection("membershipReboot");
             services.Configure<SecuritySettings>(confg);
-            services.AddSingleton(p => new MembershipRebootConfiguration<ApplicationUser>(p.GetService<IOptions<SecuritySettings>>().Value));
-            services.AddScoped<UserAccountService<ApplicationUser>>();
-            services.AddScoped<IUserAccountRepository<ApplicationUser>, RavenUserAccountRepository>();
-            services.AddScoped<AuthenticationService<ApplicationUser>>(provider => 
-                new AspNetAuthenticationService(
-                    provider.GetService<UserAccountService<ApplicationUser>>(),
-                    provider.GetService<IHttpContextAccessor>().HttpContext));
+            services.ConfigureSolutionFormsProviders();
         }
     }
-
-    public static class MembershipRebootAppBuilderExtensions
-    {
-        public static void UseMembershipReboot(this IApplicationBuilder app, CookieAuthenticationOptions cookieOptions)
-        {
-            app.UseCookieAuthentication(cookieOptions);
-            app.UseCookieAuthentication(new CookieAuthenticationOptions
-            {
-                AutomaticAuthenticate = true,
-                AutomaticChallenge = true,               
-                AuthenticationScheme = MembershipRebootApplicationConstants.AuthenticationType,
-                CookieSecure = cookieOptions.CookieSecure
-            });
-        }
-    }
-
-    /// <summary>
-    /// Replacement for the MembershipRebootOwinConstants (BrockAllen.MembershipReboot.Owin)
-    /// </summary>
-    public class MembershipRebootApplicationConstants
-    {
-        internal const string OwinAuthenticationService = "MembershipReboot.AuthenticationService";
-
-        public const string AuthenticationType = "MembershipReboot";
-        public const string AuthenticationTwoFactorType = AuthenticationType + ".2fa";
-    }    
 }

@@ -1,0 +1,16 @@
+﻿{
+  "version": "1.0.0-*",
+  "description": "SolutionForms.Data Class Library",
+  "authors": [ "Vinney" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "frameworks": {
+    "net451": {
+      "dependencies": {
+        "RavenDB.Embedded": "3.0.30000"
+      }
+    }
+  }
+}

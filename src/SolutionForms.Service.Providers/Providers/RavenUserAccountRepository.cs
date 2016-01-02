@@ -1,12 +1,12 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using BrockAllen.MembershipReboot;
 using Raven.Client;
 using Raven.Client.Linq;
-using SolutionForms.Client.Mvc.Models;
+using SolutionForms.Service.Providers.Models;
 
-namespace SolutionForms.Client.Mvc.Entities
+namespace SolutionForms.Service.Providers.Providers
 {
     public class RavenUserAccountRepository : IUserAccountRepository<ApplicationUser>, IUserAccountQuery, IDisposable
     {
@@ -108,8 +108,7 @@ namespace SolutionForms.Client.Mvc.Entities
         {
             return _items.SingleOrDefault(x =>
                 x.Tenant == tenant
-                && x.LinkedAccountClaimCollection
-                    .Any(acct => acct.ProviderName == provider && acct.ProviderAccountID == id));
+                && x.LinkedAccountClaimCollection.Any(acct => acct.ProviderName == provider && acct.ProviderAccountID == id));
 
         }
 
@@ -162,7 +161,7 @@ namespace SolutionForms.Client.Mvc.Entities
                 .Where(i => skipTenantFilter || tenant == i.Tenant)
                 .Select(i => i);
 
-            if (!String.IsNullOrWhiteSpace(filter) && QueryFilter != null)
+            if (!string.IsNullOrWhiteSpace(filter) && QueryFilter != null)
             {
                 query = QueryFilter(query, filter);
             }
@@ -182,15 +181,9 @@ namespace SolutionForms.Client.Mvc.Entities
             return result;
         }
 
-        protected StringComparison QueryComparison
-        {
-            get
-            {
-                return UseEqualsOrdinalIgnoreCaseForQueries
-                    ? StringComparison.OrdinalIgnoreCase
-                    : StringComparison.Ordinal;
-            }
-        }
+        protected StringComparison QueryComparison => UseEqualsOrdinalIgnoreCaseForQueries
+            ? StringComparison.OrdinalIgnoreCase
+            : StringComparison.Ordinal;
 
         protected IRavenQueryable<ApplicationUser> GetUserAccountsQuery()
         {

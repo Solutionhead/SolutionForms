@@ -6,11 +6,11 @@ using BrockAllen.MembershipReboot;
 using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Mvc;
 using Microsoft.Extensions.Logging;
-using SolutionForms.Client.Mvc.Models;
+using Microsoft.AspNet.Http.Features;
 using SolutionForms.Client.Mvc.Services;
 using SolutionForms.Client.Mvc.ViewModels.Account;
-using Microsoft.AspNet.Http.Features;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
+using SolutionForms.Service.Providers.Models;
 
 namespace SolutionForms.Client.Mvc.Controllers
 {
@@ -79,7 +79,7 @@ namespace SolutionForms.Client.Mvc.Controllers
         private static string InjectTenantSubdomainIntoUrl(string url, string tenant)
         {
             var host = new Uri(url, UriKind.Absolute).Host;
-            var tenantHost = Regex.Replace(host, @"^(.*/.)?(solutionforms.*)", $"{tenant}.$2");
+            var tenantHost = Regex.Replace(host, @"^(.*/.)?(solutionforms.*)", $"{tenant.ToLowerInvariant()}.$2");
             return url.Replace(host, tenantHost);
         }
 

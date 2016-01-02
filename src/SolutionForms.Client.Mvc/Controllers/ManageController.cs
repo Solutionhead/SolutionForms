@@ -5,6 +5,7 @@ using Microsoft.AspNet.Mvc;
 using SolutionForms.Client.Mvc.Models;
 using SolutionForms.Client.Mvc.Services;
 using SolutionForms.Client.Mvc.ViewModels.Manage;
+using SolutionForms.Service.Providers.Models;
 
 namespace SolutionForms.Client.Mvc.Controllers
 {
