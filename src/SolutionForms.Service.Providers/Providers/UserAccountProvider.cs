@@ -8,7 +8,7 @@ using SolutionForms.Service.Providers.Models;
 
 namespace SolutionForms.Service.Providers.Providers
 {
-    public class RavenUserAccountRepository : IUserAccountRepository<ApplicationUser>, IUserAccountQuery, IDisposable
+    public class UserAccountProvider : IUserAccountRepository<ApplicationUser>, IUserAccountQuery, IDisposable
     {
         public bool UseEqualsOrdinalIgnoreCaseForQueries { get; set; }
 
@@ -19,7 +19,7 @@ namespace SolutionForms.Service.Providers.Providers
         private readonly IDocumentSession _documentSession;
         private readonly IRavenQueryable<ApplicationUser> _items;
 
-        public RavenUserAccountRepository(IDocumentStore documentStore)
+        public UserAccountProvider(IDocumentStore documentStore)
         {
             _documentStore = documentStore;
             _documentSession = documentStore.OpenSession();

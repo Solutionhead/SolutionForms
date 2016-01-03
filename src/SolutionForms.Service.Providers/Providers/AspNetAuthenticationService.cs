@@ -9,16 +9,6 @@ using SolutionForms.Service.Providers.Models;
 
 namespace SolutionForms.Service.Providers.Providers
 {
-    public class UserAccountService : UserAccountService<ApplicationUser>
-{
-        public UserAccountService(IUserAccountRepository<ApplicationUser> userRepository) : base(userRepository)
-        {
-        }
-
-        public UserAccountService(MembershipRebootConfiguration<ApplicationUser> configuration, IUserAccountRepository<ApplicationUser> userRepository) : base(configuration, userRepository)
-        {
-        }
-}
     public class AspNetAuthenticationService : AuthenticationService<ApplicationUser>
     {
         private readonly HttpContext _context;

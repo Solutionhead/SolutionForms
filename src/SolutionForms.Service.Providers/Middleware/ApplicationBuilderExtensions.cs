@@ -33,11 +33,13 @@ namespace SolutionForms.Service.Providers.Middleware
             services.AddSingleton(p => RavenContext.DocumentStore);
             services.AddSingleton(p => new MembershipRebootConfiguration<ApplicationUser>(p.GetService<IOptions<SecuritySettings>>().Value));
             services.AddScoped<UserAccountService<ApplicationUser>>();
-            services.AddScoped<IUserAccountRepository<ApplicationUser>, RavenUserAccountRepository>();
+            services.AddScoped<IUserAccountRepository<ApplicationUser>, UserAccountProvider>();
             services.AddScoped<AuthenticationService<ApplicationUser>>(provider =>
                 new AspNetAuthenticationService(
                     provider.GetService<UserAccountService<ApplicationUser>>(),
                     provider.GetService<IHttpContextAccessor>().HttpContext));
+
+            services.AddScoped<TenantProvider>();
         }
     }
 }

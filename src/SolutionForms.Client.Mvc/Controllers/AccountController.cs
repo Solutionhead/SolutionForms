@@ -2,6 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Configuration;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using BrockAllen.MembershipReboot;
 using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Mvc;
@@ -11,6 +12,7 @@ using SolutionForms.Client.Mvc.Services;
 using SolutionForms.Client.Mvc.ViewModels.Account;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
 using SolutionForms.Service.Providers.Models;
+using SolutionForms.Service.Providers.Providers;
 
 namespace SolutionForms.Client.Mvc.Controllers
 {
@@ -62,16 +64,22 @@ namespace SolutionForms.Client.Mvc.Controllers
         [HttpPost]
         [AllowAnonymous]
         [ValidateAntiForgeryToken]
-        public IActionResult LoginTenant(TenantLoginViewModel model, string returnUrl = null)
+        public async Task<IActionResult> LoginTenant(TenantLoginViewModel model, string returnUrl = null)
         {
             if (!ModelState.IsValid)
             {
                 ViewData["ReturnUrl"] = returnUrl;
                 return View("LoginTenant");
             }
-
-            //todo: lookup tenant by domain
             
+            var tenantProvider = HttpContext.ApplicationServices.GetService(typeof(TenantProvider)) as TenantProvider;
+            var tenantExists = await tenantProvider.LookupTenantByDomain(model.TenantDomain);
+            if (!tenantExists)
+            {
+                ModelState.AddModelError("", "We couldn't find your organization.");
+                return Login();
+            }
+
             var url = Url.Link("default", new { action = "Login" });
             return Redirect(InjectTenantSubdomainIntoUrl(url, model.TenantDomain));
         }
