@@ -8,27 +8,30 @@ using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNet.Http.Features;
-using SolutionForms.Client.Mvc.Services;
+using SolutionForms.Client.Mvc.Helpers;
 using SolutionForms.Client.Mvc.ViewModels.Account;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
-using SolutionForms.Service.Providers.Models;
 using SolutionForms.Service.Providers.Providers;
+using SolutionForms.Service.Providers.Enums;
+using SolutionForms.Service.Providers.Parameters;
+using SolutionForms.Service.Providers.Models;
 
 namespace SolutionForms.Client.Mvc.Controllers
 {
     [Authorize]
     public class AccountController : Controller
     {
-        public AccountController(AuthenticationService<ApplicationUser> authService, IEmailSender emailSender, ISmsSender smsSender)
+        public AccountController(AuthenticationService<ApplicationUser> authService)
         {
-            if (authService == null) { throw new ArgumentNullException(nameof(authService)); }
+            if (authService == null)
+            {
+                throw new ArgumentNullException(nameof(authService));
+            }
 
             UserManager = authService.UserAccountService;
             SignInManager = authService;
 
             //_logger = logger;
-            _emailSender = emailSender;
-            _smsSender = smsSender;
         }
 
         public string Tenant => HttpContext.Features.Get<ITenantFeature>().Tenant.Id;
@@ -37,10 +40,57 @@ namespace SolutionForms.Client.Mvc.Controllers
 
         public UserAccountService<ApplicationUser> UserManager { get; }
 
-
-        private readonly IEmailSender _emailSender;
-        private readonly ISmsSender _smsSender;
         private readonly ILogger _logger;
+
+        [HttpGet, AllowAnonymous]
+        public IActionResult RegisterTenant()
+        {
+            return View();
+        }
+
+        [HttpPost, AllowAnonymous]
+        public async Task<IActionResult> RegisterTenant(RegisterTenantViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return View();
+            }
+
+            var tenantProvider = HttpContext.ApplicationServices.GetService(typeof (TenantProvider)) as TenantProvider;
+            var result = await tenantProvider.CreateTenantAsync(new CreateTenantParameters
+            {
+                OrganizationName = model.OrganizationName,
+                OrganizationDomain = model.OrganizationDomain
+            });
+
+            if (result != CreateTenantResult.TenantCreated)
+            {
+                return UnsuccessfulTenantCreation(result);
+            }
+
+            var account = UserManager.CreateAccount(model.OrganizationDomain, model.Email, null, model.Email);
+            SignInManager.SignIn(account, true);
+
+            return View();
+
+            //todo: user invites with option to accept all users from root user's email domain
+            //todo: create activation view where users create the password
+        }
+
+        private IActionResult UnsuccessfulTenantCreation(CreateTenantResult result)
+        {
+            switch (result)
+            {
+                case CreateTenantResult.DuplicateTenantDomainExists:
+                    ModelState.AddModelError("", "Sorry, this URL is not available.");
+                    break;
+                default:
+                    ModelState.AddModelError("",
+                        "An error has occurred while attempting to create your organization. Please try again later.");
+                    break;
+            }
+            return View();
+        }
 
         //private ViewResult Login(LoginViewModel model = null)
         //{
@@ -71,16 +121,16 @@ namespace SolutionForms.Client.Mvc.Controllers
                 ViewData["ReturnUrl"] = returnUrl;
                 return View("LoginTenant");
             }
-            
-            var tenantProvider = HttpContext.ApplicationServices.GetService(typeof(TenantProvider)) as TenantProvider;
-            var tenantExists = await tenantProvider.LookupTenantByDomain(model.TenantDomain);
+
+            var tenantProvider = HttpContext.ApplicationServices.GetService(typeof (TenantProvider)) as TenantProvider;
+            var tenantExists = await tenantProvider.LookupTenantByDomainAsync(model.TenantDomain);
             if (!tenantExists)
             {
                 ModelState.AddModelError("", "We couldn't find your organization.");
                 return Login();
             }
 
-            var url = Url.Link("default", new { action = "Login" });
+            var url = Url.Link("default", new {action = "Login"});
             return Redirect(InjectTenantSubdomainIntoUrl(url, model.TenantDomain));
         }
 
@@ -107,20 +157,20 @@ namespace SolutionForms.Client.Mvc.Controllers
                 if (user == null)
                 {
                     ModelState.AddModelError("", "Invalid login attempt");
-                } 
+                }
                 //else if (user.RequiresTwoFactorAuthToSignIn())
                 //{
                 //    return RedirectToAction(nameof(SendCode), new {ReturnUrl = returnUrl, RememberMe = model.RememberMe});
                 //}
                 else if (!user.IsLoginAllowed)
                 {
-                //    _logger.LogWarning(2, "User account locked out.");
+                    //    _logger.LogWarning(2, "User account locked out.");
                     return View("Lockout");
                 }
                 else
                 {
                     SignInManager.SignIn(user, model.RememberMe);
-                //    _logger.LogInformation(1, "User logged in.");
+                    //    _logger.LogInformation(1, "User logged in.");
 
                     return Url.IsLocalUrl(returnUrl)
                         ? RedirectToLocal(returnUrl)
@@ -131,7 +181,7 @@ namespace SolutionForms.Client.Mvc.Controllers
             // If we got this far, something failed, redisplay form
             return View(model);
         }
-        
+
         //
         // GET: /Account/Register
         [HttpGet]
@@ -186,20 +236,50 @@ namespace SolutionForms.Client.Mvc.Controllers
             //_logger.LogInformation(4, "User logged out.");
             return RedirectToAction(nameof(HomeController.Index), "Home");
         }
-        
-        // GET: /Account/ConfirmEmail
+
         [HttpGet]
         [AllowAnonymous]
-        public IActionResult ConfirmEmail(Guid userId, string code)
+        [Route("account/activate/{code}")]
+        public IActionResult ActivateAccount(string code)
         {
-            if (code == null)
+            if (code == null || UserManager.GetByVerificationKey(code) == null)
             {
                 return View("Error");
             }
-            UserManager.SetConfirmedEmail(userId, code);
-            return View("ConfirmEmail");
+
+            var model = new ActivateAccountViewModel
+            {
+                VerificationCode = code
+            };
+            return View(model);
         }
 
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("account/activate")]
+        public IActionResult ActivateAccount(ActivateAccountViewModel values)
+        {
+            if (!ModelState.IsValid)
+            {
+                ModelState.AddModelError("", "Please check validation errors and try again.");
+                return View();
+            }
+
+            if (string.IsNullOrWhiteSpace(values.VerificationCode))
+            {
+                //todo: enable resending activation email
+                ModelState.AddModelError("", "Activation code was not found. Please check your email for your activation email.");
+                return View();
+            }
+
+            ApplicationUser user;
+            UserManager.VerifyEmailFromKey(values.VerificationCode, out user);
+            UserManager.SetPassword(user.ID, values.Password);
+
+            var tenant = user.Tenant;
+            return TenantRedirectHelper.RedirectToTenantDomain(tenant, HttpContext.Request);
+        }
+        
         //
         // GET: /Account/ForgotPassword
         [HttpGet]
@@ -227,7 +307,7 @@ namespace SolutionForms.Client.Mvc.Controllers
 
                 UserManager.ResetPassword(user.ID);
                 RedirectToAction("ForgotPasswordConfirmation", "Account");
-                
+
                 //// For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=532713
                 //// Send an email with this link
                 //var code = await UserManager.GeneratePasswordResetTokenAsync(user.Id);
@@ -290,7 +370,14 @@ namespace SolutionForms.Client.Mvc.Controllers
             return View();
         }
 
-        #region External Login (commented out)
+        [HttpGet, AllowAnonymous]
+        public IActionResult CancelAccountVerification(string verificationKey)
+        {
+            UserManager.CancelVerification(verificationKey);
+            return RedirectToAction("Index", "Home");
+        }
+
+    #region External Login (commented out)
 
         //// Used for XSRF protection when adding external logins
         //private const string XsrfKey = "XsrfId";

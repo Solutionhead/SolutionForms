@@ -5,7 +5,6 @@
     "emitEntryPoint": true
   },
   "webroot": "wwwroot",
-
   "dependencies": {
     "Microsoft.AspNet.Authentication.Cookies": "1.0.0-rc1-final",
     "Microsoft.AspNet.Diagnostics.Entity": "7.0.0-rc1-final",
@@ -22,21 +21,20 @@
     "Microsoft.Extensions.Logging": "1.0.0-rc1-final",
     "Microsoft.Extensions.Logging.Console": "1.0.0-rc1-final",
     "Microsoft.Extensions.Logging.Debug": "1.0.0-rc1-final",
-    "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0-rc1-final"
+    "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0-rc1-final",
+    "SecretManager": "1.0.0-beta5",
+    "Microsoft.Extensions.SecretManager": "1.0.0-rc1-final"
   },
-
   "commands": {
     "web": "Microsoft.AspNet.Server.Kestrel"
   },
-
   "frameworks": {
     "dnx451": {
       "dependencies": {
-        "SolutionForms.Service.Providers": "",
+        "SolutionForms.Service.Providers": ""
       }
     }
   },
-
   "exclude": [
     "wwwroot",
     "node_modules"
@@ -46,6 +44,11 @@
     "**.vspscc"
   ],
   "scripts": {
-    "prepublish": [ "npm install", "bower install", "gulp clean", "gulp min" ]
+    "prepublish": [
+      "npm install",
+      "bower install",
+      "gulp clean",
+      "gulp min"
+    ]
   }
 }

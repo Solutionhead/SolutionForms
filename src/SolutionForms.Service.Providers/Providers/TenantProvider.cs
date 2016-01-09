@@ -1,8 +1,8 @@
 using System;
 using System.Threading.Tasks;
 using Raven.Client;
-using Raven.Client.Linq;
 using SolutionForms.Data.Models;
+using SolutionForms.Service.Providers.Enums;
 using SolutionForms.Service.Providers.Parameters;
 
 namespace SolutionForms.Service.Providers.Providers
@@ -17,15 +17,13 @@ namespace SolutionForms.Service.Providers.Providers
             _documentStore = documentStore;
         }
 
-        public async Task<bool> LookupTenantByDomain(string tenantDomain)
+        public async Task<bool> LookupTenantByDomainAsync(string tenantDomain)
         {
-            var search = tenantDomain.ToLowerInvariant();
             using (var session = _documentStore.OpenAsyncSession())
             {
                 try
                 {
-                    return await session.Query<Organization>()
-                        .AnyAsync(org => org.OrganizationDomain == search);
+                    return await LookupTenantByDomainAsync(tenantDomain, session);
                 }
                 catch (Exception)
                 {
@@ -34,16 +32,17 @@ namespace SolutionForms.Service.Providers.Providers
                 }
             }
         }
-
-        public async Task CreateTenantAsync(CreateTenantParameters values)
+        
+        public async Task<CreateTenantResult> CreateTenantAsync(CreateTenantParameters values)
         {
             using (var session = _documentStore.OpenAsyncSession())
             {
                 try
                 {
-//todo: prevent duplication of organization domain
-                    //await session.Query<Organization>()
-                    //    .FirstOrDefaultAsync(org => org.O)
+                    if (await LookupTenantByDomainAsync(values.OrganizationDomain, session))
+                    {
+                        return CreateTenantResult.DuplicateTenantDomainExists;
+                    }
 
                     await session.StoreAsync(new Organization
                     {
@@ -51,6 +50,7 @@ namespace SolutionForms.Service.Providers.Providers
                         OrganizationName = values.OrganizationName
                     });
                     await session.SaveChangesAsync();
+                    return CreateTenantResult.TenantCreated;
                 }
                 catch (Exception) { 
                     session.Dispose();
@@ -58,5 +58,16 @@ namespace SolutionForms.Service.Providers.Providers
                 }
             }
         }
+
+        #region private helpers
+
+        private static async Task<bool> LookupTenantByDomainAsync(string tenantDomain, IAsyncDocumentSession session)
+        {
+            var search = tenantDomain.ToLowerInvariant();
+            return await session.Query<Organization>().AnyAsync(org => org.OrganizationDomain == search);
+        }
+
+        #endregion
+
     }
 }

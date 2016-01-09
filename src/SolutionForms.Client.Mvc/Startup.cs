@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
 using SolutionForms.Client.Mvc.Services;
 using SolutionForms.Service.Providers.Middleware;
+using SolutionForms.Service.Providers.Models;
 
 namespace SolutionForms.Client.Mvc
 {
@@ -23,7 +24,6 @@ namespace SolutionForms.Client.Mvc
 
             if (env.IsDevelopment())
             {
-                // For more details on using the user secret store see http://go.microsoft.com/fwlink/?LinkID=532709
                 builder.AddUserSecrets();
             }
 
@@ -47,8 +47,6 @@ namespace SolutionForms.Client.Mvc
             #region RavenDB and RavenUserStore
 
             ConfigureMembershipReboot(services);
-            services.ConfigureSolutionFormsProviders();
-            //SolutionForms.Service.Providers.Middleware.ServiceConfigurationExtensions.ConfigureSolutionFormsProviders(services);
 
             #endregion
 
@@ -102,7 +100,21 @@ namespace SolutionForms.Client.Mvc
         {
             var confg = Configuration.GetSection("membershipReboot");
             services.Configure<SecuritySettings>(confg);
-            services.ConfigureSolutionFormsProviders();
+            
+            services.ConfigureSolutionFormsProviders(new ApplicationAccountInformation(
+                new PathString("/Account/Login/"),
+                new PathString("/Account/ActivateAccount/"),
+                new PathString("/Account/CancelAccountVerification/"),
+                new PathString("/Account/ResetPasswordConfirmation/")
+                ), new StmpDeliveryConfig
+                {
+                    Host = Configuration["smtp-host"],
+                    Port = int.Parse(Configuration["smtp-port"]),
+                    EnableSsl = bool.Parse(Configuration["smtp-enableSsl"]),
+                    UserName = Configuration["smtp-username"],
+                    Password = Configuration["smtp-password"],
+                    FromEmailAddress = Configuration["smtp-fromEmail"]
+                });
         }
     }
 }
