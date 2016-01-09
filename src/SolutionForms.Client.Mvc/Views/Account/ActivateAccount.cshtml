@@ -1,0 +1,31 @@
+﻿@model ActivateAccountViewModel
+@{
+    ViewData["Title"] = "Activate your account";
+}
+
+<h2>@ViewData["Title"].</h2>
+<div>
+  <p class="alert-success">
+    Welcome to Solution Forms! Your account has been verified. Now, let's set up your password.
+  </p>
+
+  <form asp-controller="Account" asp-action="ActivateAccount" method="post" role="form" class="form-horizontal">
+    <div class="form-group">
+      <label asp-for="Password" class="col-md-2 control-label"></label>
+      <div class="col-md-10">
+        <input asp-for="Password" class="form-control" />
+        <span asp-validation-for="Password" class="text-danger"></span>
+      </div>
+    </div>
+    <div class="form-group">
+      <label asp-for="ConfirmPassword" class="col-md-2 control-label"></label>
+      <div class="col-md-10">
+        <input asp-for="ConfirmPassword" class="form-control"/>
+        <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+      </div>
+    </div>
+    <input type="hidden" asp-for="VerificationCode"/>
+    <input type="submit" class="btn btn-primary" value="Set Password"/>
+  </form>
+
+</div>
