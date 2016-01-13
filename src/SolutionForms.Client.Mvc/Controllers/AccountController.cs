@@ -8,6 +8,7 @@ using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNet.Http.Features;
+using Microsoft.AspNet.Mvc.Routing;
 using SolutionForms.Client.Mvc.Helpers;
 using SolutionForms.Client.Mvc.ViewModels.Account;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
@@ -56,7 +57,7 @@ namespace SolutionForms.Client.Mvc.Controllers
                 return View();
             }
 
-            var tenantProvider = HttpContext.ApplicationServices.GetService(typeof (TenantProvider)) as TenantProvider;
+            var tenantProvider = HttpContext.ApplicationServices.GetService(typeof(TenantProvider)) as TenantProvider;
             var result = await tenantProvider.CreateTenantAsync(new CreateTenantParameters
             {
                 OrganizationName = model.OrganizationName,
@@ -71,10 +72,8 @@ namespace SolutionForms.Client.Mvc.Controllers
             var account = UserManager.CreateAccount(model.OrganizationDomain, model.Email, null, model.Email);
             SignInManager.SignIn(account, true);
 
-            return View();
-
             //todo: user invites with option to accept all users from root user's email domain
-            //todo: create activation view where users create the password
+            return TenantRedirectHelper.RedirectToTenantDomain(model.OrganizationDomain, HttpContext.Request);
         }
 
         private IActionResult UnsuccessfulTenantCreation(CreateTenantResult result)
@@ -122,25 +121,17 @@ namespace SolutionForms.Client.Mvc.Controllers
                 return View("LoginTenant");
             }
 
-            var tenantProvider = HttpContext.ApplicationServices.GetService(typeof (TenantProvider)) as TenantProvider;
+            var tenantProvider = HttpContext.ApplicationServices.GetService(typeof(TenantProvider)) as TenantProvider;
             var tenantExists = await tenantProvider.LookupTenantByDomainAsync(model.TenantDomain);
             if (!tenantExists)
             {
                 ModelState.AddModelError("", "We couldn't find your organization.");
                 return Login();
             }
-
-            var url = Url.Link("default", new {action = "Login"});
-            return Redirect(InjectTenantSubdomainIntoUrl(url, model.TenantDomain));
+            
+            return TenantRedirectHelper.RedirectToTenantDomain(model.TenantDomain, "default", new { action = "Login" }, HttpContext.Request, Url);
         }
-
-        private static string InjectTenantSubdomainIntoUrl(string url, string tenant)
-        {
-            var host = new Uri(url, UriKind.Absolute).Host;
-            var tenantHost = Regex.Replace(host, @"^(.*/.)?(solutionforms.*)", $"{tenant.ToLowerInvariant()}.$2");
-            return url.Replace(host, tenantHost);
-        }
-
+        
         //
         // POST: /Account/Login
         [HttpPost]
@@ -279,7 +270,7 @@ namespace SolutionForms.Client.Mvc.Controllers
             var tenant = user.Tenant;
             return TenantRedirectHelper.RedirectToTenantDomain(tenant, HttpContext.Request);
         }
-        
+
         //
         // GET: /Account/ForgotPassword
         [HttpGet]
@@ -377,7 +368,7 @@ namespace SolutionForms.Client.Mvc.Controllers
             return RedirectToAction("Index", "Home");
         }
 
-    #region External Login (commented out)
+        #region External Login (commented out)
 
         //// Used for XSRF protection when adding external logins
         //private const string XsrfKey = "XsrfId";
@@ -409,7 +400,7 @@ namespace SolutionForms.Client.Mvc.Controllers
         //        return base.ExecuteResultAsync(context);
         //    }
         //}
-        
+
 
         ////
         //// POST: /Account/ExternalLogin
@@ -640,7 +631,7 @@ namespace SolutionForms.Client.Mvc.Controllers
             ModelState.AddModelError(nameof(RegisterViewModel.SecurityCode), "Invalid access code");
             return false;
         }
-        
+
         private IActionResult RedirectToLocal(string returnUrl)
         {
             if (Url.IsLocalUrl(returnUrl))
@@ -652,7 +643,7 @@ namespace SolutionForms.Client.Mvc.Controllers
                 return RedirectToAction(nameof(HomeController.Index), "Home");
             }
         }
-        
+
         #endregion
     }
 }

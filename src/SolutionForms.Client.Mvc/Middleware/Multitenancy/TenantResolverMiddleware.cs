@@ -49,17 +49,7 @@ namespace SolutionForms.Client.Mvc.Middleware.Multitenancy
             var subdomain = requestHost.Substring(0, index);
             string[] blacklist = { "www", "solutionforms" };
 
-            if (blacklist.Contains(subdomain))
-            {
-                return null;
-            }
-
-            if (requestHost.Contains(":"))
-            {
-                requestHost = requestHost.Substring(0, requestHost.IndexOf(":", StringComparison.Ordinal));
-            }
-
-            return subdomain;
+            return blacklist.Contains(subdomain) ? null : subdomain;
         }
     }
 }

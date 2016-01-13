@@ -25,6 +25,7 @@ namespace SolutionForms.Service.Providers.MembershipRebootUtilities
         }
     }
 
+    //todo: enable async message delivery
     [MembershipRebootReplacementNote(typeof(BrockAllen.MembershipReboot.SmtpMessageDelivery), "Dependency of ConfigurationManager for retrieval of SmtpSection values")]
     public class SmtpMessageDelivery : IMessageDelivery
     {

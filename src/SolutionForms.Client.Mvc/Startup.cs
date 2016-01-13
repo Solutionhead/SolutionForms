@@ -103,7 +103,7 @@ namespace SolutionForms.Client.Mvc
             
             services.ConfigureSolutionFormsProviders(new ApplicationAccountInformation(
                 new PathString("/Account/Login/"),
-                new PathString("/Account/ActivateAccount/"),
+                new PathString("/Account/Activate/"),
                 new PathString("/Account/CancelAccountVerification/"),
                 new PathString("/Account/ResetPasswordConfirmation/")
                 ), new StmpDeliveryConfig
