@@ -105,7 +105,7 @@ namespace SolutionForms.Client.Mvc
                 new PathString("/Account/Login/"),
                 new PathString("/Account/Activate/"),
                 new PathString("/Account/CancelAccountVerification/"),
-                new PathString("/Account/ResetPasswordConfirmation/")
+                new PathString("/Account/ResetPassword/")
                 ), new StmpDeliveryConfig
                 {
                     Host = Configuration["smtp-host"],

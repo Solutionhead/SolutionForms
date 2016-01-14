@@ -174,50 +174,6 @@ namespace SolutionForms.Client.Mvc.Controllers
         }
 
         //
-        // GET: /Account/Register
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult Register()
-        {
-            return View();
-        }
-
-        //
-        // POST: /Account/Register
-        [HttpPost]
-        [AllowAnonymous]
-        [ValidateAntiForgeryToken]
-        public IActionResult Register(RegisterViewModel model)
-        {
-            if (ModelState.IsValid && VerifyAdministratorAccessCode(model))
-            {
-                try
-                {
-                    UserManager.CreateAccount(Tenant, model.Email, model.Password, model.Email);
-                    model.Message = "User account has been registered successfully.";
-
-                    // NOTE: until account owner/administrator is established in claims, we're enforcing closed registration
-                    // by requiring an administrator access code. After claims authorization, we can reinstate the following:
-
-                    //_authenticationService.SignIn(account, persistent: false);
-                    //ViewData["RequireAccountVerification"] = _userAccountService.Configuration.RequireAccountVerification;
-                    //return RedirectToAction(nameof(HomeController.Index), "Home");
-                }
-                catch (ValidationException ex)
-                {
-                    ModelState.AddModelError("", ex.Message);
-                }
-                catch (Exception)
-                {
-                    ModelState.AddModelError("", "An error occurred while attempting to complete registration.");
-                }
-            }
-
-            // If we got this far, something failed, redisplay form
-            return View(model);
-        }
-
-        //
         // POST: /Account/LogOff
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -297,7 +253,7 @@ namespace SolutionForms.Client.Mvc.Controllers
                 }
 
                 UserManager.ResetPassword(user.ID);
-                RedirectToAction("ForgotPasswordConfirmation", "Account");
+                return RedirectToAction("ForgotPasswordConfirmation", "Account");
 
                 //// For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=532713
                 //// Send an email with this link
@@ -323,11 +279,17 @@ namespace SolutionForms.Client.Mvc.Controllers
 
         //
         // GET: /Account/ResetPassword
-        [HttpGet]
+        [HttpGet, Route("/account/resetpassword/{code}")]
         [AllowAnonymous]
         public IActionResult ResetPassword(string code = null)
         {
-            return code == null ? View("Error") : View();
+            if (code == null) return View("Error");
+
+            var model = new ResetPasswordViewModel
+            {
+                Code = code
+            };
+            return View(model);
         }
 
         //
@@ -341,14 +303,8 @@ namespace SolutionForms.Client.Mvc.Controllers
             {
                 return View(model);
             }
-            var user = UserManager.GetByEmail(Tenant, model.Email);
-            if (user == null)
-            {
-                // Don't reveal that the user does not exist
-                return RedirectToAction(nameof(ResetPasswordConfirmation), "Account");
-            }
-            UserManager.ResetPassword(Tenant, user.Email);
 
+            UserManager.ChangePasswordFromResetKey(model.Code, model.Password);
             return RedirectToAction("ResetPasswordConfirmation", "Account");
         }
 
