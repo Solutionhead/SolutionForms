@@ -1,6 +1,5 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using System.Configuration;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BrockAllen.MembershipReboot;
@@ -574,19 +573,6 @@ namespace SolutionForms.Client.Mvc.Controllers
         #endregion
 
         #region Helpers
-
-        private bool VerifyAdministratorAccessCode(RegisterViewModel model)
-        {
-            return true;
-            var securityCode = ConfigurationManager.AppSettings["AdministratorAccessCode"];
-            if (model.SecurityCode == securityCode)
-            {
-                return true;
-            }
-
-            ModelState.AddModelError(nameof(RegisterViewModel.SecurityCode), "Invalid access code");
-            return false;
-        }
 
         private IActionResult RedirectToLocal(string returnUrl)
         {
