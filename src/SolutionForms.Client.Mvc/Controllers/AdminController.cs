@@ -53,6 +53,7 @@ namespace SolutionForms.Client.Mvc.Controllers
 
             if (!ModelState.IsValid)
             {
+                ModelState.AddModelError("", "Please correct validation errors");
                 return View(values);
             }
 

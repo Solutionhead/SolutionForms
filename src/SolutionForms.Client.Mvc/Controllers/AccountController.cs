@@ -188,7 +188,8 @@ namespace SolutionForms.Client.Mvc.Controllers
         [Route("account/activate/{code}")]
         public IActionResult ActivateAccount(string code)
         {
-            if (code == null || UserManager.GetByVerificationKey(code) == null)
+            var user = UserManager.GetByVerificationKey(code);
+            if (code == null || user == null)
             {
                 return View("Error");
             }
@@ -221,9 +222,9 @@ namespace SolutionForms.Client.Mvc.Controllers
             ApplicationUser user;
             UserManager.VerifyEmailFromKey(values.VerificationCode, out user);
             UserManager.SetPassword(user.ID, values.Password);
-
-            var tenant = user.Tenant;
-            return TenantRedirectHelper.RedirectToTenantDomain(tenant, HttpContext.Request);
+            SignInManager.SignIn(user);
+            
+            return RedirectToAction("Index", "Home");
         }
 
         //
