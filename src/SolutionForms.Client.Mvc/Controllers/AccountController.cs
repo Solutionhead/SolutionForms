@@ -69,6 +69,7 @@ namespace SolutionForms.Client.Mvc.Controllers
             }
 
             var account = UserManager.CreateAccount(model.OrganizationDomain, model.Email, null, model.Email);
+            UserManager.AddClaim(account.ID, "AppOwner", "true"); // perhaps this should be a role instead
             SignInManager.SignIn(account, true);
 
             //todo: user invites with option to accept all users from root user's email domain
@@ -194,6 +195,13 @@ namespace SolutionForms.Client.Mvc.Controllers
                 return View("Error");
             }
 
+            if (user.IsAccountVerified)
+            {
+                return User.Identity.IsAuthenticated 
+                    ? RedirectToAction("Login")
+                    : RedirectToAction("Index", "Home");
+            }
+
             var model = new ActivateAccountViewModel
             {
                 VerificationCode = code
@@ -218,8 +226,15 @@ namespace SolutionForms.Client.Mvc.Controllers
                 ModelState.AddModelError("", "Activation code was not found. Please check your email for your activation email.");
                 return View();
             }
+            
+            var user = UserManager.GetByVerificationKey(values.VerificationCode);
+            if (user.IsAccountVerified)
+            {
+                return User.Identity.IsAuthenticated
+                    ? RedirectToAction("Login")
+                    : RedirectToAction("Index", "Home");
+            }
 
-            ApplicationUser user;
             UserManager.VerifyEmailFromKey(values.VerificationCode, out user);
             UserManager.SetPassword(user.ID, values.Password);
             SignInManager.SignIn(user);
@@ -322,6 +337,12 @@ namespace SolutionForms.Client.Mvc.Controllers
         {
             UserManager.CancelVerification(verificationKey);
             return RedirectToAction("Index", "Home");
+        }
+
+        [AllowAnonymous]
+        public IActionResult AccessDenied()
+        {
+            return View();
         }
 
         #region External Login (commented out)

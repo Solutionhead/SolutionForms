@@ -6,6 +6,7 @@ using Microsoft.AspNet.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SolutionForms.Client.Mvc.Authorization;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
 using SolutionForms.Client.Mvc.Services;
 using SolutionForms.Service.Providers.Middleware;
@@ -41,6 +42,13 @@ namespace SolutionForms.Client.Mvc
             services.AddAuthorization();
 
             services.AddMvc();
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AppOwner", policy => policy.RequireClaim("AppOwner"));
+                options.AddTenantPolicy("AppAdmin");
+                options.AddTenantPolicy("InviteUsers", "InviteUsers");
+            });
 
             // Add application services.
 

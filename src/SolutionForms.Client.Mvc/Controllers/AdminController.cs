@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using BrockAllen.MembershipReboot;
+using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Http.Features;
 using Microsoft.AspNet.Mvc;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
@@ -14,8 +15,7 @@ using SolutionForms.Service.Providers.Models;
 
 namespace SolutionForms.Client.Mvc.Controllers
 {
-    //todo: restrict access (is owner or has claims)
-
+    [Authorize(Policy = "AppAdmin")]
     public class AdminController : Controller
     {
         private readonly UserAccountService<ApplicationUser> _userAccountService;
@@ -37,13 +37,13 @@ namespace SolutionForms.Client.Mvc.Controllers
             return View();
         }
 
-        [Route("/admin/invite")]
+        [Route("/admin/invite"), Authorize(Policy = "InviteUsers")]
         public IActionResult InviteUsers()
         {
             return View();
         }
 
-        [Route("/admin/invite"), HttpPost]
+        [Route("/admin/invite"), HttpPost, Authorize(Policy = "InviteUsers")]
         public IActionResult InviteUsers(InviteUsersViewModel values)
         {
             if (string.IsNullOrWhiteSpace(Tenant))
