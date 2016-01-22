@@ -1,13 +1,10 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BrockAllen.MembershipReboot;
 using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNet.Http.Features;
-using Microsoft.AspNet.Mvc.Routing;
 using SolutionForms.Client.Mvc.Helpers;
 using SolutionForms.Client.Mvc.ViewModels.Account;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
