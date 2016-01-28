@@ -1,0 +1,22 @@
+﻿<div class="table-responsive">
+    <table class="table table-striped table-navigation">
+        <thead>
+            <tr>
+                <th></th>
+                <!-- ko foreach: formFields -->
+                <th data-bind="text: displayName"></th>
+                <!-- /ko -->
+            </tr>
+        </thead>
+        <tbody data-bind="foreach: { data: records, as: 'record' }">
+            <tr data-bind="click: $parent.navigateToDetails">
+                <td><i class="fa fa-link"></i></td>
+                <!-- ko foreach: { data: $parent.formFields, as: 'field' } -->
+                <td data-bind="text: record[field.exportName] | fit:75"></td>
+                <!-- /ko -->
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!--<div data-bind="kendoGrid: formFields"> </div>-->

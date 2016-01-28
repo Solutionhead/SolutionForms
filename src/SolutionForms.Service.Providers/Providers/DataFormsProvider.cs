@@ -7,6 +7,10 @@ using SolutionForms.Service.Providers.Helpers;
 using SolutionForms.Service.Providers.Parameters;
 using SolutionForms.Service.Providers.Returns;
 using System.Linq;
+using Raven.Abstractions.Data;
+using Raven.Client.Connection;
+using Raven.Imports.Newtonsoft.Json;
+using Raven.Imports.Newtonsoft.Json.Linq;
 
 namespace SolutionForms.Service.Providers.Providers
 {
@@ -16,20 +20,20 @@ namespace SolutionForms.Service.Providers.Providers
 
         public DataFormsProvider(IDocumentStore documentStore)
         {
-            if(documentStore == null) throw new ArgumentNullException(nameof(documentStore));
+            if (documentStore == null) throw new ArgumentNullException(nameof(documentStore));
             _documentStore = documentStore;
         }
 
-        public IEnumerable<DataFormResponse> GetDataForms()
+        public IEnumerable<DataFormReturn> GetDataForms()
         {
             using (var session = _documentStore.OpenAsyncSession())
             {
                 return session.Query<DataForm>()
-                    .Project().To<DataFormResponse>();
+                    .Project().To<DataFormReturn>();
             }
         }
 
-        public async Task<DataFormResponse> GetDataFormAsync(string id)
+        public async Task<DataFormReturn> GetDataFormAsync(string id)
         {
             using (var session = _documentStore.OpenAsyncSession())
             {
@@ -37,9 +41,9 @@ namespace SolutionForms.Service.Providers.Providers
                     .Include<DataSource>(m => m.Id)
                     .LoadAsync<DataForm>(id);
 
-                var response = dataform.Map().To<DataFormResponse>();
+                var response = dataform.Map().To<DataFormReturn>();
                 response.DataSource = (await session.LoadAsync<DataSource>(dataform.DataSourceId))
-                    .Map().To<DataSourceResponse>();
+                    .Map().To<DataSourceReturn>();
 
                 return response;
             }
@@ -72,7 +76,7 @@ namespace SolutionForms.Service.Providers.Providers
             }
         }
 
-        public async Task<CreateDataFormResponse> CreateDataFormAsync(CreateDataformRequest dataform)
+        public async Task<CreateDataFormReturn> CreateDataFormAsync(CreateDataformRequest dataform)
         {
             var entity = new DataForm
             {
@@ -97,7 +101,7 @@ namespace SolutionForms.Service.Providers.Providers
                     await session.StoreAsync(entity);
                     await session.SaveChangesAsync();
 
-                    return entity.Map().To<CreateDataFormResponse>();
+                    return entity.Map().To<CreateDataFormReturn>();
                 }
                 catch (Exception)
                 {
@@ -112,7 +116,10 @@ namespace SolutionForms.Service.Providers.Providers
             using (var session = _documentStore.OpenAsyncSession())
             {
                 var dataform = await session.LoadAsync<DataForm>(id);
-                if (dataform == null) { return; }
+                if (dataform == null)
+                {
+                    return;
+                }
 
                 try
                 {
@@ -124,6 +131,27 @@ namespace SolutionForms.Service.Providers.Providers
                     session.Dispose();
                     throw;
                 }
+            }
+        }
+
+        public async Task<IEnumerable<JObject>> GetDataEntriesByEntityName(string entityName, IEnumerable<KeyValuePair<string, string>> queryParams)
+        {
+            using (var session = _documentStore.OpenAsyncSession())
+            {
+                //var form = await session.LoadAsync<DataForm>(entityName);
+                //AuthorizationHelper.EnsureUserIsAuthorized(form, User, HttpVerbs.Get);
+
+                var query = session.Advanced.AsyncDocumentQuery<dynamic>()
+                    .WhereEquals("@metadata.Raven-Entity-Name", entityName)
+                    .UsingDefaultOperator(QueryOperator.And);
+
+                queryParams
+                    .Where(param => string.Equals(param.Key, "$filter", StringComparison.OrdinalIgnoreCase))
+                        .ToList()
+                        .ForEach(filterParam => { query.Where(filterParam.Value); });
+
+                var queryResult = await query.QueryResultAsync();
+                return queryResult.Results.Select(r => JObject.Parse(r.ToJsonDocument().DataAsJson.ToString()));
             }
         }
     }

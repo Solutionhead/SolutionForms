@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using BrockAllen.MembershipReboot;
 using BrockAllen.MembershipReboot.Hierarchical;
 using Microsoft.AspNet.Mvc;
+using SolutionForms.Client.Mvc.Attributes;
 using SolutionForms.Client.Mvc.Helpers;
 using SolutionForms.Core;
 using SolutionForms.Service.Providers.Parameters;
@@ -15,25 +16,23 @@ namespace SolutionForms.Client.Mvc.Controllers
     [MigrateToOss]
     public class DataFormsController : Controller
     {
-        private readonly UserAccountService<HierarchicalUserAccount> _userAccountService;
         private readonly DataFormsProvider _dataFormsProvider;
 
-        public DataFormsController(AuthenticationService<HierarchicalUserAccount> authService, DataFormsProvider dataFormsProvider)
+        public DataFormsController(DataFormsProvider dataFormsProvider)
         {
-            if (authService == null) { throw new ArgumentNullException(nameof(authService)); }
-            _userAccountService = authService.UserAccountService;
-
             if(dataFormsProvider == null) {  throw new ArgumentNullException(nameof(dataFormsProvider));}
             _dataFormsProvider = dataFormsProvider;
         }
 
         // GET: api/Dataforms
-        public IEnumerable<DataFormResponse> Get()
+        [ApiRoute]
+        public IEnumerable<DataFormReturn> Get()
         {
             return _dataFormsProvider.GetDataForms();
         }
 
         // GET: api/Dataforms/5
+        [ApiRoute]
         public async Task<IActionResult> Get(string id)
         {
             var dataForm = await _dataFormsProvider.GetDataFormAsync(id);
@@ -43,6 +42,7 @@ namespace SolutionForms.Client.Mvc.Controllers
         }
 
         // PUT: api/Dataforms/5
+        [ApiRoute, HttpPut]
         public async Task<IActionResult> Put(string id, UpdateDataformRequest dataform)
         {
             if (!ModelState.IsValid)
@@ -61,6 +61,7 @@ namespace SolutionForms.Client.Mvc.Controllers
         }
 
         // POST: api/Dataforms
+        [ApiRoute, HttpPost]
         public async Task<IActionResult> PostDataform([FromBody]CreateDataformRequest dataform)
         {
             if (!ModelState.IsValid)
@@ -75,13 +76,33 @@ namespace SolutionForms.Client.Mvc.Controllers
 
             var entity = await _dataFormsProvider.CreateDataFormAsync(dataform);
 
-            return CreatedAtRoute("DefaultApi", new { id = entity.Id }, entity);
+            return CreatedAtRoute("default", new { id = entity.Id }, entity);
         }
 
         // DELETE: api/Dataforms/5
+        [ApiRoute, HttpDelete]
         public async void Delete(int id)
         {
             await _dataFormsProvider.DeleteDataFormAsync(id);
+        }
+
+        // GET: Dataforms
+        [Route("~/forms/New")]
+        public ActionResult New()
+        {
+            return View("Designer");
+        }
+
+        [Route("~/forms/{id}/Designer", Name = "DataFormDesigner")]
+        public ActionResult Designer(string id)
+        {
+            return View("Designer");
+        }
+
+        [Route("~/forms/{formId}/{recordKey?}", Name = "DataFormLive")]
+        public ActionResult Live(string formId, string recordKey)
+        {
+            return View();
         }
     }
 }
