@@ -12,7 +12,7 @@ using SolutionForms.Service.Providers.Providers;
 
 namespace SolutionForms.Client.Mvc.Controllers
 {
-    [ApiRoute("d")]
+    [ApiRoute(controllerNameOverride: "d")]
     [MigrateToOss]
     public class DataEntriesController : Controller
     {

@@ -8,7 +8,8 @@ require('ko.sortable');
 //require('kendoui-styles/kendo.bootstrap.min.css');
 //require('kendoui-styles/kendo.common-bootstrap.min.css');
 
-var base = require('viewModels/dataformFieldsDesigner');
+var base = require('viewModels/dataformFieldsDesigner'),
+  toastr = require('toastr');
 function split(val) {
     return val.split(/,\s*/);
 }

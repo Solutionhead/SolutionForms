@@ -6,6 +6,7 @@ using Microsoft.AspNet.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json.Serialization;
 using SolutionForms.Client.Mvc.Authorization;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
 using SolutionForms.Client.Mvc.Services;
@@ -41,8 +42,9 @@ namespace SolutionForms.Client.Mvc
             services.AddAuthentication();
             services.AddAuthorization();
 
-            services.AddMvc();
-
+            services.AddMvc()
+                .AddJsonOptions(opt => opt.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver());
+            
             services.AddAuthorization(options =>
             {
                 options.AddPolicy("AppOwner", policy => policy.RequireClaim("AppOwner"));

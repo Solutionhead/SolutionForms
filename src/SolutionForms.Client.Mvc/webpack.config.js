@@ -56,7 +56,7 @@ module.exports = {
       'kendoui-styles': lib('kendo-ui-core/styles/'),
       'underscore': lib('underscore/underscore-min'),
       momentjs: lib('moment/min/moment.min'),
-      toastr: lib('toastr/toastr.min')
+      toastr: lib('toastr/toastr')
     }
   },
   plugins: [

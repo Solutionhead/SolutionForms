@@ -1,11 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BrockAllen.MembershipReboot;
-using BrockAllen.MembershipReboot.Hierarchical;
 using Microsoft.AspNet.Mvc;
 using SolutionForms.Client.Mvc.Attributes;
-using SolutionForms.Client.Mvc.Helpers;
 using SolutionForms.Core;
 using SolutionForms.Service.Providers.Parameters;
 using SolutionForms.Service.Providers.Providers;
@@ -32,13 +29,14 @@ namespace SolutionForms.Client.Mvc.Controllers
         }
 
         // GET: api/Dataforms/5
-        [ApiRoute]
+        [ApiRoute("{id}")]
+        //[Route("~/api/dataforms/{id}")]
         public async Task<IActionResult> Get(string id)
         {
             var dataForm = await _dataFormsProvider.GetDataFormAsync(id);
             if (dataForm == null) { return HttpNotFound(); }
 
-            return Ok(dataForm);
+            return Json(dataForm);
         }
 
         // PUT: api/Dataforms/5
