@@ -23,6 +23,8 @@ namespace SolutionForms.Service.Providers.Parameters
         /// </summary>
         public string NewDataSourceName { get; set; }
 
+        public bool RestrictDataAccessByOwner { get; set; }
+
         public ICollection<SetFieldConfigurationRequest> Fields { get; set; }
 
         public ICollection<string> AuthorizedClaims { get; set; }

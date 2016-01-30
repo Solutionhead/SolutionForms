@@ -9,7 +9,8 @@ require('ko.sortable');
 //require('kendoui-styles/kendo.common-bootstrap.min.css');
 
 var base = require('viewModels/dataformFieldsDesigner'),
-  toastr = require('toastr');
+  toastr = require('toastr'),
+  page = require('page');
 function split(val) {
   return val.split(/,\s*/);
 }
@@ -34,6 +35,7 @@ function DataformDesignerViewModel(params) {
   self.formTitle = ko.observable(values.title);
   self.authorizedClaims = ko.observable();
   self.claimsOptions = ko.observableArray(values.authorizedClaims || []);
+  self.restrictDataAccessByOwner = ko.observable(false);
 
   self.dataSourceId = ko.computed({
     read: function () { return dataSourceId(); },
@@ -103,12 +105,17 @@ function DataformDesignerViewModel(params) {
         }
 
         if (isNew) {
-          var id = arguments[0].dataSourceId;
+          var id = arguments[0].id;
           self.formId = id;
-          page.replace('/Forms/' + id);
+
+          //Note: The response header includes the created at route in the `Location` property. 
+          //  It is an absolute route but perhaps we could consider grabing the route from there rather than duplicating the information here.
+          page.replace('/Forms/' + id + '/Designer');
         }
 
         toastr.success('Your changes were saved successfully!', 'Save Completed');
+      }).fail(function() {
+        toastr.error('', 'Save failed');
       }).always(complete);
     },
     canExecute: function (isExecuting) {
@@ -153,7 +160,8 @@ DataformDesignerViewModel.prototype.buildConfig = function () {
     description: self.formDescription(),
     fields: self.buildFieldsConfigExport(),
     plugins: self.plugins(),
-  };
+    restrictDataAccessByOwner: self.restrictDataAccessByOwner()
+};
   return config;
 }
 DataformDesignerViewModel.prototype.dispose = function () {

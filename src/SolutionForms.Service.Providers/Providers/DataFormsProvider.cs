@@ -55,16 +55,14 @@ namespace SolutionForms.Service.Providers.Providers
             {
                 var doc = await session.LoadAsync<DataForm>(id);
                 if (doc == null) return;
-
-                //var user = _userAccountService.GetByUsername(User.Identity.Name);
-                //AuthorizationHelper.EnsureUserIsAuthorized(doc, user);
-
+                
                 doc.Description = dataform.Description;
                 doc.Title = dataform.Title;
                 doc.Fields = new List<FieldConfiguration>(dataform.Fields.Project().To<FieldConfiguration>());
                 doc.Plugins = dataform.Plugins;
                 doc.AuthorizedClaims = dataform.AuthorizedClaims?.ToArray() ?? new string[0];
                 doc.DataSourceId = dataform.DataSourceId;
+                doc.RestrictDataAccessByOwner = dataform.RestrictDataAccessByOwner;
 
                 if (!string.IsNullOrWhiteSpace(dataform.NewDataSourceName))
                 {
@@ -86,6 +84,7 @@ namespace SolutionForms.Service.Providers.Providers
                 Plugins = dataform.Plugins,
                 AuthorizedClaims = dataform.AuthorizedClaims as string[],
                 DataSourceId = dataform.DataSourceId,
+                RestrictDataAccessByOwner = dataform.RestrictDataAccessByOwner
             };
 
             using (var session = _documentStore.OpenAsyncSession())

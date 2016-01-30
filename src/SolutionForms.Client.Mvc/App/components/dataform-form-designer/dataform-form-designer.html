@@ -37,6 +37,23 @@
     </div>
   </div>
 
+  <div class="row dataform-designer-container">
+    <div class="form-horizontal form-fieldset">
+      <div class="form-group">
+        <div class="col-sm-10 col-sm-push-2">
+          <div class="checkbox-inline">
+            <label>
+              <input type="checkbox" data-bind="checked: restrictDataAccessByOwner"/>
+              Only show users the records they entered.
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Fields</h3>
+
   <section data-bind="sortable: fields()" class="designer-fields-container">
     <div data-bind="css: { 'active': isActive, 'preview': !isActive() }" class="row dataform-designer-container dataform-designer-container-editor">
       <div class="col-sm-2 col-sm-push-10 col-lg-1 col-lg-push-11 field-controls">

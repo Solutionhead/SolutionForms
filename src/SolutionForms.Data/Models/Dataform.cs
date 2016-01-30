@@ -17,6 +17,8 @@ namespace SolutionForms.Data.Models
 
         public string PlaceholderText { get; set; }
 
+        public bool RestrictDataAccessByOwner { get; set; }
+
         public ICollection<string> Plugins { get; set; }
 
         public ICollection<FieldConfiguration> Fields { get; set; }

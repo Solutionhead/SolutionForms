@@ -21,16 +21,13 @@ namespace SolutionForms.Client.Mvc.Controllers
             _dataFormsProvider = dataFormsProvider;
         }
 
-        // GET: api/Dataforms
         [ApiRoute]
         public IEnumerable<DataFormReturn> Get()
         {
             return _dataFormsProvider.GetDataForms();
         }
-
-        // GET: api/Dataforms/5
+        
         [ApiRoute("{id}")]
-        //[Route("~/api/dataforms/{id}")]
         public async Task<IActionResult> Get(string id)
         {
             var dataForm = await _dataFormsProvider.GetDataFormAsync(id);
@@ -38,10 +35,9 @@ namespace SolutionForms.Client.Mvc.Controllers
 
             return Json(dataForm);
         }
-
-        // PUT: api/Dataforms/5
-        [ApiRoute, HttpPut]
-        public async Task<IActionResult> Put(string id, UpdateDataformRequest dataform)
+        
+        [ApiRoute("{id}"), HttpPut]
+        public async Task<IActionResult> Put(string id, [FromBody]UpdateDataformRequest dataform)
         {
             if (!ModelState.IsValid)
             {
@@ -58,9 +54,8 @@ namespace SolutionForms.Client.Mvc.Controllers
             return new NoContentResult();
         }
 
-        // POST: api/Dataforms
         [ApiRoute, HttpPost]
-        public async Task<IActionResult> PostDataform([FromBody]CreateDataformRequest dataform)
+        public async Task<IActionResult> Post([FromBody]CreateDataformRequest dataform)
         {
             if (!ModelState.IsValid)
             {
@@ -74,7 +69,7 @@ namespace SolutionForms.Client.Mvc.Controllers
 
             var entity = await _dataFormsProvider.CreateDataFormAsync(dataform);
 
-            return CreatedAtRoute("default", new { id = entity.Id }, entity);
+            return CreatedAtRoute("DataFormDesigner", new { id = entity.Id }, entity);
         }
 
         // DELETE: api/Dataforms/5
