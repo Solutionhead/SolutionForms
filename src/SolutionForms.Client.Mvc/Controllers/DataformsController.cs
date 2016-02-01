@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Http.Features;
 using Microsoft.AspNet.Mvc;
 using SolutionForms.Client.Mvc.Attributes;
+using SolutionForms.Client.Mvc.Middleware.Multitenancy;
 using SolutionForms.Core;
 using SolutionForms.Service.Providers.Parameters;
 using SolutionForms.Service.Providers.Providers;
@@ -14,6 +16,7 @@ namespace SolutionForms.Client.Mvc.Controllers
     public class DataFormsController : Controller
     {
         private readonly DataFormsProvider _dataFormsProvider;
+        public string Tenant => HttpContext.Features.Get<ITenantFeature>().Tenant.Id;
 
         public DataFormsController(DataFormsProvider dataFormsProvider)
         {
@@ -24,13 +27,13 @@ namespace SolutionForms.Client.Mvc.Controllers
         [ApiRoute]
         public IEnumerable<DataFormReturn> Get()
         {
-            return _dataFormsProvider.GetDataForms();
+            return _dataFormsProvider.GetDataForms(Tenant);
         }
         
         [ApiRoute("{id}")]
         public async Task<IActionResult> Get(string id)
         {
-            var dataForm = await _dataFormsProvider.GetDataFormAsync(id);
+            var dataForm = await _dataFormsProvider.GetDataFormAsync(Tenant, id);
             if (dataForm == null) { return HttpNotFound(); }
 
             return Json(dataForm);
@@ -49,7 +52,7 @@ namespace SolutionForms.Client.Mvc.Controllers
                 return HttpBadRequest("Expected dataSourceId value or newDataSourceName.");
             }
 
-            await _dataFormsProvider.UpdateDataFormAsync(id, dataform);
+            await _dataFormsProvider.UpdateDataFormAsync(Tenant, id, dataform);
             
             return new NoContentResult();
         }
@@ -67,19 +70,17 @@ namespace SolutionForms.Client.Mvc.Controllers
                 return HttpBadRequest("Expected entityName value or newDataSourceName.");
             }
 
-            var entity = await _dataFormsProvider.CreateDataFormAsync(dataform);
+            var entity = await _dataFormsProvider.CreateDataFormAsync(Tenant, dataform);
 
             return CreatedAtRoute("DataFormDesigner", new { id = entity.Id }, entity);
         }
-
-        // DELETE: api/Dataforms/5
+        
         [ApiRoute, HttpDelete]
         public async void Delete(int id)
         {
-            await _dataFormsProvider.DeleteDataFormAsync(id);
+            await _dataFormsProvider.DeleteDataFormAsync(Tenant, id);
         }
-
-        // GET: Dataforms
+        
         [Route("~/forms/New")]
         public ActionResult New()
         {
@@ -97,5 +98,13 @@ namespace SolutionForms.Client.Mvc.Controllers
         {
             return View();
         }
+
+        [Route("~/forms")]
+        public ActionResult Index()
+        {
+            var vm = _dataFormsProvider.GetDataForms(Tenant);
+            return View(vm);
+        }
+        
     }
 }

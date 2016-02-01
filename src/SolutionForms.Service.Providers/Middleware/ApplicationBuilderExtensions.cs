@@ -56,7 +56,7 @@ namespace SolutionForms.Service.Providers.Middleware
             services.AddScoped<UserAccountService<ApplicationUser>>();
             services.AddScoped<DataFormsProvider>();
             services.AddScoped<DataSourcesProvider>();
-            services.AddScoped<IUserAccountRepository<ApplicationUser>, UserAccountProvider>();
+            services.AddScoped<IUserAccountRepository<ApplicationUser>, MembershipProvider>();
             services.AddScoped<AuthenticationService<ApplicationUser>>(provider =>
                 new AspNetAuthenticationService(
                     provider.GetService<UserAccountService<ApplicationUser>>(),
@@ -79,7 +79,7 @@ namespace SolutionForms.Service.Providers.Middleware
             this.RelativeLoginUrl = relativeLoginUrl;
             this.RelativeConfirmChangeEmailUrl = relativeConfirmChangeEmailUrl;
             this.RelativeCancelVerificationUrl = relativeCancelVerificationUrl;
-            this.RelativeConfirmPasswordResetUrl = relativeConfirmPasswordResetUrl;
+            this.RelativeConfirmPasswordResetUrl = relativeConfirmPasswordResetUrl;           
         }
 
         protected override string GetApplicationBaseUrl()

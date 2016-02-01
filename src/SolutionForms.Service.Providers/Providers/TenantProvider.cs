@@ -35,6 +35,10 @@ namespace SolutionForms.Service.Providers.Providers
         
         public async Task<CreateTenantResult> CreateTenantAsync(CreateTenantParameters values)
         {
+            var tenant = values.OrganizationDomain.ToLowerInvariant();
+            _documentStore.DatabaseCommands.GlobalAdmin.EnsureDatabaseExists(tenant);
+
+            //Note: Organization records are stored in the main db
             using (var session = _documentStore.OpenAsyncSession())
             {
                 try
@@ -46,7 +50,7 @@ namespace SolutionForms.Service.Providers.Providers
 
                     await session.StoreAsync(new Organization
                     {
-                        OrganizationDomain = values.OrganizationDomain.ToLowerInvariant(),
+                        OrganizationDomain = tenant,
                         OrganizationName = values.OrganizationName
                     });
                     await session.SaveChangesAsync();

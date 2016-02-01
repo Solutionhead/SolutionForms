@@ -18,9 +18,9 @@ namespace SolutionForms.Service.Providers.Providers
             _documentStore = documentStore;
         }
 
-        public async Task<IEnumerable<DataSourceReturn>> GetDataSources()
+        public async Task<IEnumerable<DataSourceReturn>> GetDataSources(string tenant)
         {
-            using (var session = _documentStore.OpenAsyncSession())
+            using (var session = _documentStore.OpenAsyncSession(tenant))
             {
                 return (await session.Query<DataSource>().ToListAsync())
                     .Project().To<DataSourceReturn>();

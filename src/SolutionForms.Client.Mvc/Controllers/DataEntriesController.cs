@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Http.Features;
 using Microsoft.AspNet.Mvc;
 using Newtonsoft.Json.Linq;
 using Raven.Json.Linq;
 using SolutionForms.Client.Mvc.Attributes;
+using SolutionForms.Client.Mvc.Middleware.Multitenancy;
 using SolutionForms.Core;
 using SolutionForms.Service.Providers.Providers;
 
@@ -16,13 +18,9 @@ namespace SolutionForms.Client.Mvc.Controllers
     [MigrateToOss]
     public class DataEntriesController : Controller
     {
-        public const string GetByIdRouteName = "GetDynamicEntityByIdRoute";
-        public const string GetQueryRouteName = "GetDynamicEntityQueryRoute";
-        public const string PostRouteName = "PostDynamicEntityQueryRoute";
-        public const string PutRouteName = "PutDynamicEntityQueryRoute";
-        protected const string IdPropertyName = "Id";
         protected const string UserNamePropertyName = "Last-Modified-By";
         private readonly DataFormsProvider _dataFormsProvider;
+        public string Tenant => HttpContext.Features.Get<ITenantFeature>().Tenant.Id;
 
         public DataEntriesController(DataFormsProvider dataFormsProvider)
         {
@@ -34,7 +32,7 @@ namespace SolutionForms.Client.Mvc.Controllers
         public async Task<ActionResult> GetDataEntries(string entityName)
         {
             var queryParams = HttpContext.Request.Query.Select(q => new KeyValuePair<string, string>(q.Key, q.Value));
-            return Json(await _dataFormsProvider.GetDataEntriesByEntityName(entityName, queryParams));
+            return Json(await _dataFormsProvider.GetDataEntriesByEntityName(Tenant, entityName, queryParams));
         }
         
         ///// <summary>

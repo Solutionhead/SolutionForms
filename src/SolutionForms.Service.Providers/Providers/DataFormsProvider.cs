@@ -9,7 +9,6 @@ using SolutionForms.Service.Providers.Returns;
 using System.Linq;
 using Raven.Abstractions.Data;
 using Raven.Client.Connection;
-using Raven.Imports.Newtonsoft.Json;
 using Raven.Imports.Newtonsoft.Json.Linq;
 
 namespace SolutionForms.Service.Providers.Providers
@@ -24,18 +23,18 @@ namespace SolutionForms.Service.Providers.Providers
             _documentStore = documentStore;
         }
 
-        public IEnumerable<DataFormReturn> GetDataForms()
+        public IEnumerable<DataFormReturn> GetDataForms(string tenant)
         {
-            using (var session = _documentStore.OpenAsyncSession())
+            using (var session = _documentStore.OpenAsyncSession(tenant))
             {
                 return session.Query<DataForm>()
                     .Project().To<DataFormReturn>();
             }
         }
 
-        public async Task<DataFormReturn> GetDataFormAsync(string id)
+        public async Task<DataFormReturn> GetDataFormAsync(string tenant, string id)
         {
-            using (var session = _documentStore.OpenAsyncSession())
+            using (var session = _documentStore.OpenAsyncSession(tenant))
             {
                 var dataform = await session
                     .Include<DataSource>(m => m.Id)
@@ -49,9 +48,9 @@ namespace SolutionForms.Service.Providers.Providers
             }
         }
 
-        public async Task UpdateDataFormAsync(string id, UpdateDataformRequest dataform)
+        public async Task UpdateDataFormAsync(string tenant, string id, UpdateDataformRequest dataform)
         {
-            using (var session = _documentStore.OpenAsyncSession())
+            using (var session = _documentStore.OpenAsyncSession(tenant))
             {
                 var doc = await session.LoadAsync<DataForm>(id);
                 if (doc == null) return;
@@ -74,7 +73,7 @@ namespace SolutionForms.Service.Providers.Providers
             }
         }
 
-        public async Task<CreateDataFormReturn> CreateDataFormAsync(CreateDataformRequest dataform)
+        public async Task<CreateDataFormReturn> CreateDataFormAsync(string tenant, CreateDataformRequest dataform)
         {
             var entity = new DataForm
             {
@@ -87,7 +86,7 @@ namespace SolutionForms.Service.Providers.Providers
                 RestrictDataAccessByOwner = dataform.RestrictDataAccessByOwner
             };
 
-            using (var session = _documentStore.OpenAsyncSession())
+            using (var session = _documentStore.OpenAsyncSession(tenant))
             {
                 try
                 {
@@ -110,9 +109,9 @@ namespace SolutionForms.Service.Providers.Providers
             }
         }
 
-        public async Task DeleteDataFormAsync(int id)
+        public async Task DeleteDataFormAsync(string tenant, int id)
         {
-            using (var session = _documentStore.OpenAsyncSession())
+            using (var session = _documentStore.OpenAsyncSession(tenant))
             {
                 var dataform = await session.LoadAsync<DataForm>(id);
                 if (dataform == null)
@@ -133,13 +132,10 @@ namespace SolutionForms.Service.Providers.Providers
             }
         }
 
-        public async Task<IEnumerable<JObject>> GetDataEntriesByEntityName(string entityName, IEnumerable<KeyValuePair<string, string>> queryParams)
+        public async Task<IEnumerable<JObject>> GetDataEntriesByEntityName(string tenant, string entityName, IEnumerable<KeyValuePair<string, string>> queryParams)
         {
-            using (var session = _documentStore.OpenAsyncSession())
+            using (var session = _documentStore.OpenAsyncSession(tenant))
             {
-                //var form = await session.LoadAsync<DataForm>(entityName);
-                //AuthorizationHelper.EnsureUserIsAuthorized(form, User, HttpVerbs.Get);
-
                 var query = session.Advanced.AsyncDocumentQuery<dynamic>()
                     .WhereEquals("@metadata.Raven-Entity-Name", entityName)
                     .UsingDefaultOperator(QueryOperator.And);
