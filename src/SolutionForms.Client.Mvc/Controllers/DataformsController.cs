@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Http.Features;
 using Microsoft.AspNet.Mvc;
+using Raven.Database.Linq.PrivateExtensions;
 using SolutionForms.Client.Mvc.Attributes;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
+using SolutionForms.Client.Mvc.ViewModels.DataForms;
 using SolutionForms.Core;
 using SolutionForms.Service.Providers.Parameters;
 using SolutionForms.Service.Providers.Providers;
@@ -24,63 +27,74 @@ namespace SolutionForms.Client.Mvc.Controllers
             _dataFormsProvider = dataFormsProvider;
         }
 
+        #region API actions
+
         [ApiRoute]
-        public IEnumerable<DataFormReturn> Get()
+        public async Task<IEnumerable<DataFormReturn>> Get()
         {
-            return _dataFormsProvider.GetDataForms(Tenant);
+            return await _dataFormsProvider.GetDataForms(Tenant);
         }
-        
+
         [ApiRoute("{id}")]
         public async Task<IActionResult> Get(string id)
         {
             var dataForm = await _dataFormsProvider.GetDataFormAsync(Tenant, id);
-            if (dataForm == null) { return HttpNotFound(); }
+            if (dataForm == null)
+            {
+                return HttpNotFound();
+            }
 
             return Json(dataForm);
         }
-        
+
         [ApiRoute("{id}"), HttpPut]
-        public async Task<IActionResult> Put(string id, [FromBody]UpdateDataformRequest dataform)
+        public async Task<IActionResult> Put(string id, [FromBody] UpdateDataformRequest dataform)
         {
             if (!ModelState.IsValid)
             {
                 return HttpBadRequest(ModelState);
             }
 
-            if (string.IsNullOrWhiteSpace(dataform.DataSourceId) && string.IsNullOrWhiteSpace(dataform.NewDataSourceName))
+            if (string.IsNullOrWhiteSpace(dataform.DataSourceId) &&
+                string.IsNullOrWhiteSpace(dataform.NewDataSourceName))
             {
                 return HttpBadRequest("Expected dataSourceId value or newDataSourceName.");
             }
 
             await _dataFormsProvider.UpdateDataFormAsync(Tenant, id, dataform);
-            
+
             return new NoContentResult();
         }
 
         [ApiRoute, HttpPost]
-        public async Task<IActionResult> Post([FromBody]CreateDataformRequest dataform)
+        public async Task<IActionResult> Post([FromBody] CreateDataformRequest dataform)
         {
             if (!ModelState.IsValid)
             {
                 return HttpBadRequest(ModelState);
             }
 
-            if (string.IsNullOrWhiteSpace(dataform.DataSourceId) && string.IsNullOrWhiteSpace(dataform.NewDataSourceName))
+            if (string.IsNullOrWhiteSpace(dataform.DataSourceId) &&
+                string.IsNullOrWhiteSpace(dataform.NewDataSourceName))
             {
                 return HttpBadRequest("Expected entityName value or newDataSourceName.");
             }
 
             var entity = await _dataFormsProvider.CreateDataFormAsync(Tenant, dataform);
 
-            return CreatedAtRoute("DataFormDesigner", new { id = entity.Id }, entity);
+            return CreatedAtRoute("DataFormDesigner", new {id = entity.Id}, entity);
         }
-        
+
         [ApiRoute, HttpDelete]
         public async void Delete(int id)
         {
             await _dataFormsProvider.DeleteDataFormAsync(Tenant, id);
         }
-        
+
+        #endregion
+
+        #region MVC actions
+
         [Route("~/forms/New")]
         public ActionResult New()
         {
@@ -100,11 +114,24 @@ namespace SolutionForms.Client.Mvc.Controllers
         }
 
         [Route("~/forms")]
-        public ActionResult Index()
+        public async Task<ViewResult> Index()
         {
-            var vm = _dataFormsProvider.GetDataForms(Tenant);
+            var vm = new DataFormsIndexViewModel
+            {
+                Forms = (await _dataFormsProvider.GetDataForms(Tenant)).Select(f => new DataFormSummaryViewModel
+                {
+                    Url = Url.Action("Live", new { formId = f.Id }),
+                    AuthorizationClaims = f.AuthorizedClaims,
+                    Description = f.Description,
+                    KeyValue = f.Id,
+                    Title = f.Title
+                })
+            };
             return View(vm);
         }
+
+        #endregion
+
         
     }
 }

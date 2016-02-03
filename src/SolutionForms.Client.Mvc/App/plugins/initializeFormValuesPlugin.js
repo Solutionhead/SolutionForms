@@ -11,7 +11,7 @@ function InitializeFormValuesPlugin() {
         .then(function (data) {
           var vals = data || {};
           if (typeof vals === "string") { vals = ko.utils.parseJson(vals) || {}; }
-          _.each(sender.fields(), function (f) {
+          ko.utils.arrayForEach(sender.fields(), function (f) {
             f.context().setValue(vals[f.exportName]);
           });
         });

@@ -18,9 +18,6 @@ var page = require('page');
         }
     };
 
-    page('/Forms/*', function(opt) {
-        currentFormId = opt.params.formId;
-    });
     page('/Forms/:formId/new', function (opt) {
         currentFormId = opt.params.formId;
         loadComponent(editorComponentName, opt.params.formId);

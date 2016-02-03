@@ -19,7 +19,7 @@ namespace SolutionForms.Client.Mvc.ViewModels.Account
         public string OrganizationDomain { get; set; }
 
         [Required]
-        [Display(Name = "Username")]
+        [Display(Name = "Display Name")]
         public string UserName { get; set; }
     }
 }

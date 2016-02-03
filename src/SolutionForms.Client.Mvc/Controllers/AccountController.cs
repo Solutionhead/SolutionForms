@@ -67,9 +67,11 @@ namespace SolutionForms.Client.Mvc.Controllers
 
             var account = UserManager.CreateAccount(model.OrganizationDomain, model.Email, null, model.Email);
             UserManager.AddClaim(account.ID, "AppOwner", "true"); // perhaps this should be a role instead
-            SignInManager.SignIn(account, true);
 
-            //todo: user invites with option to accept all users from root user's email domain
+            // NOTE: In order to sign users in automatically while still requiring account/email validation, we need to enable 
+            // a temporary bypass of the verification check in MR.
+            SignInManager.SignIn(account, true);
+            
             return TenantRedirectHelper.RedirectToTenantDomain(model.OrganizationDomain, HttpContext.Request);
         }
 
@@ -231,7 +233,6 @@ namespace SolutionForms.Client.Mvc.Controllers
                     ? RedirectToAction("Login")
                     : RedirectToAction("Index", "Home");
             }
-
             UserManager.VerifyEmailFromKey(values.VerificationCode, out user);
             UserManager.SetPassword(user.ID, values.Password);
             SignInManager.SignIn(user);

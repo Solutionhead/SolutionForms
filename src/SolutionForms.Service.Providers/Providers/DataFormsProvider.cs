@@ -7,9 +7,12 @@ using SolutionForms.Service.Providers.Helpers;
 using SolutionForms.Service.Providers.Parameters;
 using SolutionForms.Service.Providers.Returns;
 using System.Linq;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Raven.Abstractions.Data;
 using Raven.Client.Connection;
-using Raven.Imports.Newtonsoft.Json.Linq;
+using Raven.Json.Linq;
+using SolutionForms.Service.Providers.Models;
 
 namespace SolutionForms.Service.Providers.Providers
 {
@@ -23,11 +26,11 @@ namespace SolutionForms.Service.Providers.Providers
             _documentStore = documentStore;
         }
 
-        public IEnumerable<DataFormReturn> GetDataForms(string tenant)
+        public async Task<IEnumerable<DataFormReturn>> GetDataForms(string tenant)
         {
             using (var session = _documentStore.OpenAsyncSession(tenant))
             {
-                return session.Query<DataForm>()
+                return (await session.Query<DataForm>().ToListAsync())
                     .Project().To<DataFormReturn>();
             }
         }
@@ -149,5 +152,82 @@ namespace SolutionForms.Service.Providers.Providers
                 return queryResult.Results.Select(r => JObject.Parse(r.ToJsonDocument().DataAsJson.ToString()));
             }
         }
+
+        public async Task<DataEntryCreatedReturn> CreateDataEntryAsync(string tenant, string entityName, object values, ApplicationUser ownerUser)
+        {
+            var jobject = JObject.FromObject(values);
+            var id = $"{entityName}{_documentStore.Conventions.IdentityPartsSeparator}{_documentStore.DatabaseCommands.NextIdentityFor(entityName)}";
+            jobject.Add(DatabaseConstants.IdPropertyName, id);
+            await SaveEntryAsync(tenant, entityName, ownerUser, jobject, id);
+
+            return new DataEntryCreatedReturn
+            {
+                Key = id,
+                Entity = jobject
+            };
+        }
+
+        private async Task SaveEntryAsync(string tenant, string entityName, ApplicationUser ownerUser, JObject jobject, string id)
+        {
+            UserIdentityHelper.SetUserIdentity(jobject, ownerUser);
+
+            var dataEntry = JsonConvert.SerializeObject(jobject);
+            var commands = _documentStore.AsyncDatabaseCommands.ForDatabase(tenant);
+
+            // NOTE: The PutAsync database command allows us to set the `Raven-Entity-Name` metadata which tells RavenDB to put this entity in it's own entity collection.
+            //  Using the `session.Store` or `asyncSession.StoreAsync` methods will cause RavenDB to reflect on the parameter object causing all entites to be stored in
+            //  a single entity collection of `JObject` which is not what we want.
+            await commands.PutAsync(
+                id,
+                null,
+                RavenJObject.Parse(dataEntry),
+                new RavenJObject
+                {
+                    {"Raven-Entity-Name", entityName},
+                });
+        }
+
+        public async Task<JObject> GetDataEntryByKeyAsync(string tenant, string id)
+        {
+            var commands = _documentStore.AsyncDatabaseCommands.ForDatabase(tenant);
+            var result = await commands.GetAsync(id);
+            return result == null
+                ? null
+                : JObject.Parse(result.DataAsJson.ToString());
+        }
+
+        public async Task<JObject> UpdateDataEntryAsync(string tenant, string entityName, string id, object values, ApplicationUser userAccount)
+        {
+            if (await GetDataEntryByKeyAsync(tenant, id) == null)
+            {
+                return null;
+            }
+            var jobject = JObject.FromObject(values);
+            await SaveEntryAsync(tenant, entityName, userAccount, jobject, id);
+            return jobject;
+        }
     }
+    
+    public class DataEntryCreatedReturn
+    {
+        public string Key { get; set; }
+        public object Entity { get; set; }
+    }
+    public static class DatabaseConstants
+    {
+        public const string GetByIdRouteName = "GetDynamicEntityByIdRoute";
+        public const string GetQueryRouteName = "GetDynamicEntityQueryRoute";
+        public const string PostRouteName = "PostDynamicEntityQueryRoute";
+        public const string PutRouteName = "PutDynamicEntityQueryRoute";
+        public const string IdPropertyName = "Id";
+        public const string UserNamePropertyName = "Last-Modified-By";
+    }
+    public static class UserIdentityHelper
+    {
+        public static void SetUserIdentity(JObject target, ApplicationUser user)
+        {
+            target.Add(DatabaseConstants.UserNamePropertyName, user.ID);
+        }
+    }
+
 }

@@ -24,22 +24,28 @@ function SaveToLocalDocumentStorePlugin() {
                 return;
             }
 
-            var isNew = document.documentId == undefined;
-            return $.ajax("/api/d/" + entityName + "/" + (isNew ? '' : document.documentId), {
+            var isNew = document.documentId == undefined,
+                dfd = $.Deferred();
+
+            $.ajax("/api/d/" + entityName + "/" + (isNew ? '' : document.documentId), {
                 data: ko.toJSON(data),
                 dataType: 'json',
                 contentType: 'application/json',
                 method: isNew ? 'POST' : 'PUT'
             }).then(success)
             .fail(failure);
+
+            return dfd;
             
             function success() {
                 plugin.isResolved = true;
                 plugin.isExecuting = false;
+                dfd.resolve(arguments[0]);
             }
             function failure() {
                 plugin.isResolved = false;
                 plugin.isExecuting = false;
+                dfd.reject.apply(null, arguments);
             }
     };
     plugin.submitCompleted = function(doucment) {

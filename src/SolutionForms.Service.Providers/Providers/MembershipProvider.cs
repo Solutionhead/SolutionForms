@@ -52,7 +52,7 @@ namespace SolutionForms.Service.Providers.Providers
         {
             using (var session = _documentStore.OpenAsyncSession())
             {
-                await session.StoreAsync(item);
+                await session.StoreAsync(item, item.ID);
                 await session.SaveChangesAsync();
             }
         }

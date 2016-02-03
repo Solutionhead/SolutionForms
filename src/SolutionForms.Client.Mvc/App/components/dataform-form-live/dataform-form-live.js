@@ -1,7 +1,9 @@
 ﻿require('App/fieldTypes'); //register field type components
 require('koValidation');
 var Field = require('models/formFieldLive'),
-  toastr = require('toastr');
+  toastr = require('toastr'),
+  _ = require('underscore'),
+  page = require('page');
 
 var plugins = {
   //todo: dynamically load plugins
@@ -16,8 +18,8 @@ ko.validation.init({
     errorElementClass: 'has-error'
 });
 
-function Dataform(params) {
-    if (!(this instanceof Dataform)) { return new Dataform(params); }
+function DataFormLive(params) {
+    if (!(this instanceof DataFormLive)) { return new DataFormLive(params); }
     var self = this;
     var subscriptions = [];
     
@@ -30,7 +32,7 @@ function Dataform(params) {
             self.notifyListenersAsync('submit', self).then(function () {
                     if (self.documentId == undefined) {
                         //assumes that the arguments[0] is the results of the ajax call
-                        self.documentId = arguments[0][0].Id;
+                        self.documentId = arguments[0].Id;
                         page.replace('/Forms/' + self.formId + '/' + self.documentId);
                     }
                     self.notifyListenersAsync('submitCompleted', self);
@@ -67,7 +69,7 @@ function Dataform(params) {
         function fetchData() {
             self.notifyListenersAsync('fetch', {
                 id: params.documentId,
-                entityName: ko.unwrap(self.entityName),
+                entityName: ko.unwrap(self.formId),
                 form: self
             }).then(function() {
                 self.notifyListenersAsync('loaded', self);
@@ -89,7 +91,7 @@ function Dataform(params) {
     }
 }
 
-Dataform.prototype.parseConfig = function(jsonConfig) {
+DataFormLive.prototype.parseConfig = function(jsonConfig) {
     var form = (typeof jsonConfig === "string" ? ko.utils.parseJson(jsonConfig) : jsonConfig) || {};
     if (form.dataSource == undefined || form.dataSource.documentName == undefined) {
         throw new Error("Invalid configuration: Missing or invalid dataSource property.");
@@ -139,18 +141,20 @@ Dataform.prototype.parseConfig = function(jsonConfig) {
         }
     }
 }
-Dataform.prototype.notifyListenersAsync = function (event, args) {
-    return $.when.apply(ko.utils.arrayMap(this.listeners[event], function(l) {
-        return l[event](args);
-    }));
+DataFormLive.prototype.notifyListenersAsync = function (event, args) {
+  return $.when.apply(this, ko.utils.arrayMap(this.listeners[event], raiseEventOnListener));
+
+  function raiseEventOnListener(listener) {
+        return listener[event](args);
+    }
 }
-Dataform.prototype.setOrCreateObservable = function(name, value) {
+DataFormLive.prototype.setOrCreateObservable = function(name, value) {
     if (ko.isObservable(this[name])) this[name](value);
     else this[name] = ko.observable(value);
 }
 
 module.exports = {
-    viewModel: Dataform,
+    viewModel: DataFormLive,
     template: require('./dataform-form-live.html'),
     synchronous: true
 }

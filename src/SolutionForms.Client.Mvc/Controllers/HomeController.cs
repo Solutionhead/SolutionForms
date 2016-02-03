@@ -2,15 +2,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNet.Http.Features;
 using Microsoft.AspNet.Mvc;
+using SolutionForms.Client.Mvc.Middleware.Multitenancy;
 
 namespace SolutionForms.Client.Mvc.Controllers
 {
     public class HomeController : Controller
     {
+        public string Tenant => HttpContext.Features.Get<ITenantFeature>().Tenant.Id;
+
         public IActionResult Index()
         {
-            return View();
+            return string.IsNullOrWhiteSpace(Tenant) ? View() as IActionResult 
+                : RedirectToAction("Index", "DataForms");
         }
 
         public IActionResult About()
