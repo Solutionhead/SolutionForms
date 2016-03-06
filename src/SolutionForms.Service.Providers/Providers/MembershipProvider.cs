@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using BrockAllen.MembershipReboot;
 using Raven.Client;
 using Raven.Client.Linq;
@@ -52,7 +53,7 @@ namespace SolutionForms.Service.Providers.Providers
         {
             using (var session = _documentStore.OpenAsyncSession())
             {
-                await session.StoreAsync(item, item.ID);
+                await session.StoreAsync(item);
                 await session.SaveChangesAsync();
             }
         }
@@ -116,8 +117,9 @@ namespace SolutionForms.Service.Providers.Providers
         {
             using (var session = _documentStore.OpenSession())
             {
-                return GetUserAccountsQuery(session)
+                var byVerificationKey = GetUserAccountsQuery(session)
                     .SingleOrDefault(i => i.VerificationKey == key);
+                return byVerificationKey;
             }
         }
 

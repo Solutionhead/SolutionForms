@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using BrockAllen.MembershipReboot;
 using Microsoft.AspNet.Authorization;
@@ -42,17 +45,19 @@ namespace SolutionForms.Client.Mvc.Controllers
         [HttpGet, AllowAnonymous]
         public IActionResult RegisterTenant()
         {
+            if (!string.IsNullOrWhiteSpace(Tenant))
+            {
+                return TenantRedirectHelper.RedirectToRootDomain(RouteData.Values, Request, Url);
+            }
+            
             return View();
         }
 
         [HttpPost, AllowAnonymous]
         public async Task<IActionResult> RegisterTenant(RegisterTenantViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return View();
-            }
-
+            if (!ModelState.IsValid) { return View(); }
+            
             var tenantProvider = HttpContext.ApplicationServices.GetService(typeof(TenantProvider)) as TenantProvider;
             var result = await tenantProvider.CreateTenantAsync(new CreateTenantParameters
             {
@@ -64,15 +69,12 @@ namespace SolutionForms.Client.Mvc.Controllers
             {
                 return UnsuccessfulTenantCreation(result);
             }
-
-            var account = UserManager.CreateAccount(model.OrganizationDomain, model.Email, null, model.Email);
-            UserManager.AddClaim(account.ID, "AppOwner", "true"); // perhaps this should be a role instead
-
-            // NOTE: In order to sign users in automatically while still requiring account/email validation, we need to enable 
-            // a temporary bypass of the verification check in MR.
-            SignInManager.SignIn(account, true);
+            UserManager.CreateAccount(model.OrganizationDomain, model.Email, model.Password, model.Email, null, null, null, new List<Claim>
+            {
+                new Claim("AppOwner", "true")
+            });
             
-            return TenantRedirectHelper.RedirectToTenantDomain(model.OrganizationDomain, HttpContext.Request);
+            return TenantRedirectHelper.RedirectToTenantDomain(model.OrganizationDomain, "Login", HttpContext.Request, Url);
         }
 
         private IActionResult UnsuccessfulTenantCreation(CreateTenantResult result)
@@ -128,7 +130,7 @@ namespace SolutionForms.Client.Mvc.Controllers
                 return Login();
             }
             
-            return TenantRedirectHelper.RedirectToTenantDomain(model.TenantDomain, "default", new { action = "Login" }, HttpContext.Request, Url);
+            return TenantRedirectHelper.RedirectToTenantDomain(model.TenantDomain, "Login", HttpContext.Request, Url);
         }
         
         //
@@ -188,56 +190,41 @@ namespace SolutionForms.Client.Mvc.Controllers
         [Route("account/activate/{code}")]
         public IActionResult ActivateAccount(string code)
         {
-            var user = UserManager.GetByVerificationKey(code);
-            if (code == null || user == null)
+            return View(new ActivateAccountViewModel
+            {
+                VerificationCode = code
+            });
+        }
+
+        [HttpPost]
+        [AllowAnonymous]
+        [Route("account/activate/{code}")]
+        public IActionResult ActivateAccount(ActivateAccountViewModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return string.IsNullOrWhiteSpace(model.VerificationCode) 
+                    ? View("Error") 
+                    : View(model);
+            }
+
+            var user = UserManager.GetByVerificationKey(model.VerificationCode);
+            if (user == null)
             {
                 return View("Error");
             }
 
             if (user.IsAccountVerified)
             {
-                return User.Identity.IsAuthenticated 
-                    ? RedirectToAction("Login")
-                    : RedirectToAction("Index", "Home");
-            }
-
-            var model = new ActivateAccountViewModel
-            {
-                VerificationCode = code
-            };
-            return View(model);
-        }
-
-        [HttpPost]
-        [AllowAnonymous]
-        [Route("account/activate")]
-        public IActionResult ActivateAccount(ActivateAccountViewModel values)
-        {
-            if (!ModelState.IsValid)
-            {
-                ModelState.AddModelError("", "Please check validation errors and try again.");
-                return View();
-            }
-
-            if (string.IsNullOrWhiteSpace(values.VerificationCode))
-            {
-                //todo: enable resending activation email
-                ModelState.AddModelError("", "Activation code was not found. Please check your email for your activation email.");
-                return View();
-            }
-            
-            var user = UserManager.GetByVerificationKey(values.VerificationCode);
-            if (user.IsAccountVerified)
-            {
                 return User.Identity.IsAuthenticated
-                    ? RedirectToAction("Login")
-                    : RedirectToAction("Index", "Home");
+                    ? TenantRedirectHelper.RedirectToTenantDomain(user.Tenant, "Index", "Home", Request, Url)
+                    : TenantRedirectHelper.RedirectToTenantDomain(user.Tenant, "Login", Request, Url);
             }
-            UserManager.VerifyEmailFromKey(values.VerificationCode, out user);
-            UserManager.SetPassword(user.ID, values.Password);
-            SignInManager.SignIn(user);
             
-            return RedirectToAction("Index", "Home");
+            UserManager.VerifyEmailFromKey(model.VerificationCode, model.Password, out user);
+            SignInManager.SignIn(user);
+
+            return TenantRedirectHelper.RedirectToTenantDomain(user.Tenant, "Index", "Home", Request, Url);
         }
 
         //
