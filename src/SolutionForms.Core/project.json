@@ -1,13 +1,16 @@
-﻿{
+{
   "version": "1.0.0-*",
   "description": "SolutionForms.Core Class Library",
-  "authors": [ "vinne" ],
+  "authors": [ "Vinney" ],
   "tags": [ "" ],
   "projectUrl": "",
   "licenseUrl": "",
 
   "frameworks": {
-    "net451": { },
+    "net451": {
+      "dependencies": {
+      }
+    },
     "dotnet5.4": {
       "dependencies": {
         "Microsoft.CSharp": "4.0.1-beta-23516",
