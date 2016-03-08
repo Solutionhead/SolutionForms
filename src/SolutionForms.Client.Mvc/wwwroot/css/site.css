@@ -10,6 +10,7 @@
     padding-right: 15px;
 }
 
+
 /* Carousel */
 .carousel-caption {
     z-index: 10 !important;
@@ -26,10 +27,13 @@
     }
 }
 
+
 /* Bootstrap Overrides */
 .form-horizontal .control-label {
     text-align: left;
 }
+
+/* Site Styles */
 .table .form-group {
     margin-bottom: 0;
 }
@@ -69,6 +73,9 @@
     box-shadow: 1px 0 10px 1px rgba(0, 0, 0, 0.3);
     margin-bottom: 10px;
     background-color: #fbfbfb;
+    -ms-border-radius: 3px;
+    border-radius: 3px;
+    border: 1px dashed #ccc;
 }
 
 .dataform-desiger-field-widget {
@@ -84,13 +91,19 @@
     zoom: 1;
 }
 
-.clickable {
-    cursor: pointer;
+.designer-fields-container .field-controls {
+    padding: 5px;
+}
+.designer-fields-container .active > .field-controls {
+    visibility: visible;
+}
+.designer-fields-container .preview > .field-controls {
+    visibility: hidden;
+}
+.designer-fields-container .preview:hover > .field-controls {
+    visibility: visible;
 }
 
-@media only screen and (max-width: 767px) {
-    .nofloat {
-        float: none;
-        padding: 10px 15px;
-    }
+.clickable {
+    cursor: pointer;
 }

@@ -13,7 +13,7 @@ module.exports = {
     //'home': 'viewModels/homeViewModel',
     'core': ['ko',
       lib('knockout-postbox/build/knockout-postbox'),
-      lib('knockout-punches-local/knockout.punches'),
+      lib('knockout.punches/knockout.punches'),
       lib('kolite-local/knockout.command'),
       lib('bootstrap/dist/js/bootstrap'),
       'toastr',
@@ -44,6 +44,7 @@ module.exports = {
       // framework assets
       ko: 'knockout',
       jquery: lib('jquery/dist/jquery'),
+      'jquery-ui': lib('jquery-ui/ui'),
       knockout: lib('knockout/dist/knockout.debug'),
 
       // other 3rd party utilities
