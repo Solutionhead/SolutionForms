@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using AutoMapper;
-using Raven.Imports.Newtonsoft.Json;
+using Newtonsoft.Json;
 using SolutionForms.Data.Models;
 using SolutionForms.Service.Providers.Parameters;
 using SolutionForms.Service.Providers.Returns;

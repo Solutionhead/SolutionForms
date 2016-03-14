@@ -57,7 +57,8 @@ module.exports = {
       'kendoui-styles': lib('kendo-ui-core/styles/'),
       'underscore': lib('underscore/underscore-min'),
       momentjs: lib('moment/min/moment.min'),
-      toastr: lib('toastr/toastr')
+      toastr: lib('toastr/toastr'),
+      lodash: nodeModules('lodash')
     }
   },
   plugins: [
@@ -102,3 +103,4 @@ function localPath(loc) { return path.join(__dirname, loc || ''); }
 function appDir(loc) { return path.join(localPath('App'), loc || ''); }
 function lib(loc) { return path.join(localPath('wwwroot/lib'), loc || ''); }
 function cssDir(loc) { return path.join(localPath('wwwroot/css'), loc || ''); }
+function nodeModules(loc) { return path.join(localPath('node_modules'), loc || ''); }

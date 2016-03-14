@@ -89,12 +89,37 @@ function parseInputConfig(configValues) {
     return $.extend({}, DataformFieldsDesigner.prototype.defaultValues, input);
 }
 function buildInputTypeOptions() {
-    var opts = [];
+  var opts = [];
+
+  // native types
     for (var prop in inputTypes) {
         if (inputTypes.hasOwnProperty(prop)) {
             opts.push(inputTypes[prop]);
         }
     }
+
+  // plugins
+  //todo: dynamically load modules from tenant's plugin directory
+  var pluginsSourceTemp = ['green_cleaners/recurrence-scheduler/recurrence-scheduler-config'];
+  var plugins = ko.utils.arrayForEach(pluginsSourceTemp, function(src) {
+    var plugin = require('plugins/tenant_customizations/' + src);
+    plugin.synchronous = true;
+    plugin.config.template = plugin.config.template || '<div></div>';
+
+    ko.components.register(
+      plugin.componentName + '-config',
+      plugin.config);
+
+    ko.components.register(
+      plugin.componentName,
+      plugin);
+
+    opts.push({
+      name: plugin.name,
+      componentName: plugin.componentName
+    });
+  });
+
     return opts;
 }
 

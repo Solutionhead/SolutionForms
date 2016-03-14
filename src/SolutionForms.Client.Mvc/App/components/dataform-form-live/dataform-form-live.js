@@ -5,12 +5,12 @@ var Field = require('models/formFieldLive'),
   _ = require('underscore'),
   page = require('page');
 
-var plugins = {
-  //todo: dynamically load plugins
-  // --> See this discussion on plugins with webpack https://github.com/webpack/webpack/issues/118 
-  "plugins/saveToLocalDocumentStorePlugin": require('plugins/saveToLocalDocumentStorePlugin')(),
-  "plugins/initializeFormValuesPlugin": require('plugins/initializeFormValuesPlugin')(),
-};
+//var plugins = {
+//  //todo: dynamically load plugins
+//  // --> See this discussion on plugins with webpack https://github.com/webpack/webpack/issues/118 
+//  "plugins/saveToLocalDocumentStorePlugin": require('plugins/saveToLocalDocumentStorePlugin')(),
+//  "plugins/initializeFormValuesPlugin": require('plugins/initializeFormValuesPlugin')(),
+//};
 
 ko.validation.init({
     insertMessages: false,
@@ -97,6 +97,17 @@ DataFormLive.prototype.parseConfig = function(jsonConfig) {
         throw new Error("Invalid configuration: Missing or invalid dataSource property.");
     }
 
+  //dynamically load plugins
+  form.plugins = ko.utils.arrayMap(form.plugins || [], function(pluginPath) {
+    // todo: store plugins in memory to prevent duplicate loading
+    var plugin = require('plugins/' + pluginPath);
+    if (plugin && plugin.componentName) {
+      plugin.synchronous = true;
+      ko.components.register(plugin.componentName, plugin);
+    }
+    return plugin;
+  });
+
     buildDataObject.call(this);
     
     this.listeners = parseListeners();
@@ -125,7 +136,7 @@ DataFormLive.prototype.parseConfig = function(jsonConfig) {
 
         ko.utils.arrayForEach(form.plugins || [], function (pname) {
             _.each(listeners, function (l, lname) {
-                wireListenerIfRegistered(plugins[pname], lname);
+                wireListenerIfRegistered(form.plugins[pname], lname);
             });
         });
 

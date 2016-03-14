@@ -1,4 +1,5 @@
-﻿var base = require('controls/basicEntryField');
+﻿var base = require('controls/basicEntryField'),
+  _toArray = require('lodash/fp/toArray');
 
 function SelectFieldViewModel(params) {
     if (params == undefined || params.context == undefined) throw new Error('Requires argument params.context');
@@ -42,7 +43,7 @@ SelectFieldViewModel.prototype.setSelectedOptionsForDataSource = function (value
     //#region private functions
 
     // Because all entities are created with the Id property, 
-    // we can use the Id member when searching for a matting options
+    // we can use the Id member when searching for matching options
     // from the local data source.
     function findOptionByKey(opts, key) {
         var match = ko.utils.arrayFirst(opts, function (o) {
@@ -93,7 +94,7 @@ SelectFieldViewModel.prototype.initOptions = function(settings) {
     }
 }
 SelectFieldViewModel.prototype.getSourceOptions = function () {
-    return window['__option_sources__'] || (window['__option_sources__'] = ko.utils.arrayMap(SelectFieldViewModel.prototype.OPTION_SOURCES, function(o) {
+    return window['__option_sources__'] || (window['__option_sources__'] = ko.utils.arrayMap(_toArray(SelectFieldViewModel.prototype.OPTION_SOURCES), function(o) {
         return o;
     }));
 }

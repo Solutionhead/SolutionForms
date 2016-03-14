@@ -14,7 +14,7 @@ namespace SolutionForms.Service.Providers.Parameters
         public string ExportName { get; set; }
 
         public string HelpText { get; set; }
-
+        
         public IDictionary<string, object> Settings { get; set; }
     }
 }
