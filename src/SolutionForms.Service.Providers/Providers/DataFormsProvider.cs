@@ -62,6 +62,7 @@ namespace SolutionForms.Service.Providers.Providers
                 doc.Title = dataform.Title;
                 doc.Fields = new List<FieldConfiguration>(dataform.Fields.Project().To<FieldConfiguration>());
                 doc.Plugins = dataform.Plugins;
+                doc.Components = dataform.Components?.ToArray() ?? new string[0];
                 doc.AuthorizedClaims = dataform.AuthorizedClaims?.ToArray() ?? new string[0];
                 doc.DataSourceId = dataform.DataSourceId;
                 doc.RestrictDataAccessByOwner = dataform.RestrictDataAccessByOwner;

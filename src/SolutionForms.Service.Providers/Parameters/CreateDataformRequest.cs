@@ -30,5 +30,7 @@ namespace SolutionForms.Service.Providers.Parameters
         public ICollection<string> AuthorizedClaims { get; set; }
 
         public ICollection<string> Plugins { get; set; }
+
+        public ICollection<string> Components { get; set; }
     }
 }

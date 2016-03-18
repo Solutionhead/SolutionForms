@@ -30,5 +30,7 @@ namespace SolutionForms.Data.Models
         public string DataSourceId { get; set; }
 
         public string[] AuthorizedClaims { get; set; }
+
+        public string[] Components { get; set; }
     }
 }

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNet.Http.Features;
 using Microsoft.AspNet.Mvc;
-using Raven.Database.Linq.PrivateExtensions;
 using SolutionForms.Client.Mvc.Attributes;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
 using SolutionForms.Client.Mvc.ViewModels.DataForms;

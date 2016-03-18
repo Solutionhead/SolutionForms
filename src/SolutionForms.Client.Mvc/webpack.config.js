@@ -35,11 +35,13 @@ module.exports = {
       models: appDir('models'),
       components: appDir('components'),
       plugins: appDir('plugins'),
+      customizations: appDir('tenant_customizations'),
       App: appDir('.'),
       app: appDir('.'),
       controls: appDir('components/entryFieldControls'),
       styles: localPath('css'),
       bindings: appDir('bindings'),
+      koExtenders: js('ko-extenders'),
 
       // framework assets
       ko: 'knockout',
@@ -56,9 +58,10 @@ module.exports = {
       'kendoui-core': lib('kendo-ui-core/js/kendo.core.min'),
       'kendoui-styles': lib('kendo-ui-core/styles/'),
       'underscore': lib('underscore/underscore-min'),
-      momentjs: lib('moment/min/moment.min'),
+      moment: lib('moment/min/moment.min'),
       toastr: lib('toastr/toastr'),
-      lodash: nodeModules('lodash')
+      lodash: nodeModules('lodash'),
+      lib: lib(),
     }
   },
   plugins: [
@@ -103,4 +106,5 @@ function localPath(loc) { return path.join(__dirname, loc || ''); }
 function appDir(loc) { return path.join(localPath('App'), loc || ''); }
 function lib(loc) { return path.join(localPath('wwwroot/lib'), loc || ''); }
 function cssDir(loc) { return path.join(localPath('wwwroot/css'), loc || ''); }
+function js(loc) { return path.join(localPath('wwwroot/js'), loc || ''); }
 function nodeModules(loc) { return path.join(localPath('node_modules'), loc || ''); }

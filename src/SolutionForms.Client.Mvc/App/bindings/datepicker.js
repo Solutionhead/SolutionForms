@@ -1,38 +1,33 @@
 ﻿require('jquery-ui/datepicker');
-var moment = require('momentjs');
+var moment = require('moment');
 
 ko.bindingHandlers.datepicker = {
     init: function(element, valueAccessor, allBindingsAccessor) {
-        var $el = $(element),
-            options = $.extend({}, ko.bindingHandlers.datepicker.DEFAULT_OPTIONS, allBindingsAccessor().datepickerOptions || {});
+      var $el = $(element),
+        valueTarget = valueAccessor(),
+        bindings = allBindingsAccessor && allBindingsAccessor() || { datepickerOptions: {} },
+        options = $.extend({}, ko.bindingHandlers.datepicker.DEFAULT_OPTIONS, bindings.datepickerOptions);
 
-        var selectDateHandler = function() {
-            var observable = valueAccessor();
+      var selectDateHandler = function (newValue) {
+        valueTarget(newValue);
+      }
 
-            // support for ko.validation
-            if (typeof observable.isValid === "function") {
-                if (observable.isValid()) {
-                    observable(ko.bindingHandlers.datepicker.getFormattedDateValue($el.datepicker("getDate")));
-                    $el.blur();
-                }
-            } else {
-                observable(ko.bindingHandlers.datepicker.getFormattedDateValue($el.datepicker("getDate")));
-            }
-        }
         options.onSelect = selectDateHandler;
+        //handle the field changing by registering datepicker's changeDate event
+        ko.utils.registerEventHandler(element, "change", selectDateHandler);
 
         $el.wrap('<div class="input-group"></div>');
         $el.datepicker(options).next(".ui-datepicker-trigger")
             .addClass("btn btn-default")
             .wrap('<span class="input-group-btn"></span>');
 
-        //handle the field changing by registering datepicker's changeDate event
-        ko.utils.registerEventHandler(element, "change", selectDateHandler);
-
-        ko.bindingHandlers.validationCore && ko.bindingHandlers.validationCore.init(element, valueAccessor, allBindingsAccessor);
-
+        if (ko.isObservable(valueTarget)) {
+          ko.bindingHandlers.value.init(element, valueAccessor, allBindingsAccessor);
+          ko.bindingHandlers.validationCore && ko.bindingHandlers.validationCore.init(element, valueAccessor, allBindingsAccessor);
+        }
+      
         ko.utils.domNodeDisposal.addDisposeCallback(element, function() {
-            //todo: cleanup wrapper element
+            $el.unwrap();
             $el.datepicker('destroy');
         });
     },

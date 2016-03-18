@@ -210,3 +210,5 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
+/src/SolutionForms.Client.Mvc/wwwroot/lib/jquery/src
+/src/SolutionForms.Client.Mvc/wwwroot/lib/kendo-ui-core

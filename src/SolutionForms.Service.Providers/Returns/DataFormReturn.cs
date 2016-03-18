@@ -15,6 +15,8 @@ namespace SolutionForms.Service.Providers.Returns
 
         public IEnumerable<string> Plugins { get; set; }
 
+        public IEnumerable<string> Components { get; set; }
+
         public IEnumerable<FieldConfigurationResponse> Fields { get; set; }
 
         /// <summary>

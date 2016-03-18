@@ -5,7 +5,7 @@
         <div class="form-horizontal">
             <div class="form-group" data-bind="validationElement: validationElement()">
                 <label class="col-sm-2 control-label" data-bind="text: displayName"></label>
-                <div class="col-sm-10" data-bind="component: { name: inputType, params: { input: $data, context: context } }"></div>
+                <div class="col-sm-10" data-bind="component: { name: inputType, params: { input: $data, context: context, parentContext: $parent } }"></div>
                 <div data-bind="if: helpText" class="col-sm-10 col-sm-offset-2"><span class="help-block" data-bind="text: helpText"></span></div>
                 <div class="sr-only" data-bind="validationMessage: validationElement()"></div>
             </div>

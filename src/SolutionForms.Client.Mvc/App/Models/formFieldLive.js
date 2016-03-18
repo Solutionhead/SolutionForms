@@ -10,7 +10,8 @@
         var context = self.context();
         //HACK: in order to prevent the validationElement and validationMessage bindings from throwing an error, return the unbound observable as a fallback.
         //Consider replacing this hack with a binding - vk 2015-06-19
-        return context && context.userResponse || ko.observable();
+        return context && ko.isObservable(context.userResponse)
+          ? context.userResponse : ko.observable();
     });
     
     self.setValue = Field.prototype.setValue.bind(self);
