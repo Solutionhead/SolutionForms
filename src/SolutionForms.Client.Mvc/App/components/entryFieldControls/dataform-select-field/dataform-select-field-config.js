@@ -32,19 +32,22 @@ function SelectFieldConfigViewModel(params) {
     self.displayDefaultSelection = ko.observable(settings.displayDefaultSelection || false);
     self.defaultSelectionText = ko.observable(settings.defaultSelectionText);
     
+
+    // NOTE: duplicate calls to the datasources api will be made for every select list element (issue #5 on GitHub)
     if (window['__dataSources__'] == undefined || !window['__dataSources__'].length) {
-        $.ajax('/api/datasources')
-            .then(function(data) {
-                window['__dataSources__'] = ko.utils.arrayMap(data, function(item) {
-                    return {
-                        displayName: item.name,
-                        value: item.documentName
-                    }
-                });
-                self.dataSourceOptions(window['__dataSources__']);
-                self.optionDataSourceEntityName(settings.optionDataSourceEntityName);
+      var selectedDataSourceOption = settings.optionDataSourceEntityName;
+      $.ajax('/api/datasources')
+          .then(function (data) {
+            window['__dataSources__'] = ko.utils.arrayMap(data, function (item) {
+              return {
+                displayName: item.name,
+                value: item.documentName
+              }
             });
-            }
+            self.dataSourceOptions(window['__dataSources__']);
+            self.optionDataSourceEntityName(selectedDataSourceOption);
+          });
+    }
 
     self.addNewOptionCommand = ko.command({
         execute: function () {
