@@ -58,9 +58,10 @@ function RecurrenceSchedulerViewModel(params) {
     }
   });
 
-  //todo: move field access into configuration?
-  var startDateField = ko.pureComputed(function() {
+  var startDateField = ko.pureComputed(function () {
+    if(params.parentContext == null) { return null; }
     var field = ko.utils.arrayFirst(params.parentContext.fields(), function (f) {
+      //todo: move field identification into configuration?
       return f.exportName === 'Start Date';
     });
     var context = field && field.context();
@@ -86,13 +87,24 @@ function RecurrenceSchedulerViewModel(params) {
     var selectedDays = self.weeklyRecurrenceDays();
     if (!selectedDays || !selectedDays.length) {
       var startDate = startDateField();
-      startDate() && self.weeklyRecurrenceDays.push(startDate.format('dddd'));
+      startDate && startDate() && startDate.format
+        && self.weeklyRecurrenceDays.push(startDate.format('dddd'));
     }
   });
 
-  var baseSetValue = self.setValue.bind(self);
+  //var baseSetValue = self.setValue.bind(self);
   self.setValue = function (value) {
-    //todo: parse value (if JSON) and set individual parts
+    var init = value || {};
+
+    self.recurrence(init.recurrenceType);
+    self.interval(init.interval);
+    self.index(init.index);
+    self.weeklyRecurrenceDays(self.isWeekly() && init.daysOfWeek || []);
+    self.recurrenceEndDate(init.endDate);
+    self.monthlyRecurrenceOption(null); // todo: this
+    self.monthlyByDay(self.isMonthly() && init.daysOfWeek);
+    self.monthlyByDate(init.dayOfMonth);
+
     //return baseSetValue(value);
   }
 
@@ -100,9 +112,10 @@ function RecurrenceSchedulerViewModel(params) {
   function buildWeeklyRecurrenceSummary() {
     var text = 'Every ';
     var interval = self.interval();
-    var days = self.weeklyRecurrenceDays();
+    var days = self.weeklyRecurrenceDays(),
+      startDate = startDateField();
 
-    if (interval < 1 || !days.length) {
+    if (interval < 1 || !days.length || !startDate) {
       return '';
     }
 
@@ -121,7 +134,7 @@ function RecurrenceSchedulerViewModel(params) {
       text += day;
     });
 
-    text += ', effective <strong>' + startDateField()() + '</strong>';
+    text += ', effective <strong>' + startDate() + '</strong>';
 
     if (self.recurrenceEndDate()) {
       text += ' until <strong>' + self.recurrenceEndDate() + "</strong>";

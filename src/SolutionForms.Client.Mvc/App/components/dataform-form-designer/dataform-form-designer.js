@@ -50,6 +50,7 @@ function DataformDesignerViewModel(params) {
   self.formDescription = ko.observable(values.description);
 
   self.plugins = ko.observableArray(values.plugins);
+  self.customizations = ko.observableArray(values.components);
 
   //setup
   var loadDataSourceOptionsPromise = self.loadDataSourceOptions();
@@ -57,22 +58,29 @@ function DataformDesignerViewModel(params) {
 
   if (ko.isObservable(params.input)) {
     self.__subscriptions.push(params.input.subscribe(function (value) {
-      var parsed = self.parseInputConfig(value);
-      self.formId = parsed.id;
-      self.formTitle(parsed.title);
-      self.formDescription(parsed.description);
-      self.fields(parsed.fields);
-      self.authorizedClaims(parsed.authorizedClaims || []);
+      var formConfig = self.parseInputConfig(value);
+      self.formId = formConfig.id;
+      self.formTitle(formConfig.title);
+      self.formDescription(formConfig.description);
+      self.loadCustomizations(formConfig); // must be lodaded before fields are set or the selected option will not be set
+      self.plugins(formConfig.plugins);
+      self.customizations(formConfig.components);
+      
+      self.fields(formConfig.fields);
 
       loadDataSourceOptionsPromise.then(function () {
-        if (parsed.dataSourceId == undefined) console.warn('dataSourceId is undefined');
-        dataSourceId(parsed.dataSourceId);
+        if (formConfig.dataSourceId == undefined) console.warn('dataSourceId is undefined');
+        dataSourceId(formConfig.dataSourceId);
       });
       loadClaimsPromise.then(function () {
-        self.authorizedClaims(parsed.authorizedClaims || []);
+        self.authorizedClaims(formConfig.authorizedClaims || []);
       });
     }));
   } else {
+    //when is params.input not an observable
+    console.log('params.input is not an observable!');
+
+    self.loadCustomizations(values);
     loadDataSourceOptionsPromise.then(function () {
       values.dataSourceId && dataSourceId(values.dataSourceId);
     });
@@ -132,7 +140,8 @@ DataformDesignerViewModel.prototype = base.prototype;
 DataformDesignerViewModel.prototype.defaultValues = {
   title: "Untitled form",
   fields: [],
-  plugins: ['plugins/initializeFormValuesPlugin', 'plugins/saveToLocalDocumentStorePlugin']
+  plugins: ['initializeFormValuesPlugin', 'saveToLocalDocumentStorePlugin'],
+  components: []
 };
 DataformDesignerViewModel.prototype.parseInputConfig = function (configValues) {
   var input = ko.unwrap(configValues) || {};
@@ -160,6 +169,7 @@ DataformDesignerViewModel.prototype.buildConfig = function () {
     description: self.formDescription(),
     fields: self.buildFieldsConfigExport(),
     plugins: self.plugins(),
+    components: self.customizations(),
     restrictDataAccessByOwner: self.restrictDataAccessByOwner()
 };
   return config;
@@ -190,7 +200,34 @@ DataformDesignerViewModel.prototype.loadClaimOptions = function () {
     self.claimsOptions(ko.utils.arrayMap(data, function (claim) { return claim.Name; }));
   });
 }
+DataformDesignerViewModel.prototype.loadCustomizations = function (config) {
+  // plugins
+  var me = this;
+  var pluginsSourceTemp = config.components || [],
+    typeOptionsToAdd = [];
 
+  ko.utils.arrayForEach(pluginsSourceTemp, function (src) {
+    var plugin = require('customizations/' + src + '-config');
+    plugin.synchronous = true;
+    plugin.config.template = plugin.config.template || '<div></div>';
+
+    ko.components.register(
+      plugin.componentName + '-config',
+      plugin.config);
+
+    ko.components.register(
+      plugin.componentName,
+      plugin);
+
+    typeOptionsToAdd.push({
+      name: plugin.name,
+      componentName: plugin.componentName
+    });
+  });
+
+  ko.utils.arrayPushAll(me.inputTypeOptions(), typeOptionsToAdd);
+  me.inputTypeOptions.notifySubscribers();
+}
 module.exports = {
   viewModel: DataformDesignerViewModel,
   template: require('./dataform-form-designer.html')

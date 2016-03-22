@@ -1,10 +1,9 @@
 ﻿var FieldContext = require('models/formFieldDesigner'),
-    inputTypes = require('App/fieldTypes'),
-    inputTypeOptions = buildInputTypeOptions();
+    inputTypes = require('App/fieldTypes');
 
 function DataformFieldsDesigner(params) {
     var self = this,
-        values = parseInputConfig(params.input),
+        config = parseInputConfig(params.input),
         DesignerField = require('viewModels/dataformFieldConfigViewModel'),
         activeField;
 
@@ -21,7 +20,7 @@ function DataformFieldsDesigner(params) {
     self.fields.splice = function(val, index) {
         _fields.splice(new FieldContext(val, index));
     }
-    self.inputTypeOptions = inputTypeOptions;
+    self.inputTypeOptions = ko.observableArray(buildInputInternalTypeOptions());
 
     self.addItemCommand = ko.command({
         execute: function (type) {
@@ -35,10 +34,9 @@ function DataformFieldsDesigner(params) {
         }
     });
 
-    values.fields.length
-        ? self.fields(values.fields)
+    config.fields.length
+        ? self.fields(config.fields)
         : insertField(self);
-
 
     // functions
     self.activateField = activateFieldPublic;
@@ -88,37 +86,14 @@ function parseInputConfig(configValues) {
 
     return $.extend({}, DataformFieldsDesigner.prototype.defaultValues, input);
 }
-function buildInputTypeOptions() {
+function buildInputInternalTypeOptions() {
   var opts = [];
 
-  // native types
     for (var prop in inputTypes) {
         if (inputTypes.hasOwnProperty(prop)) {
             opts.push(inputTypes[prop]);
         }
     }
-
-  // plugins
-  //todo: dynamically load modules from tenant's plugin directory
-  var pluginsSourceTemp = ['green_cleaners/recurrence-scheduler/recurrence-scheduler-config'];
-  var plugins = ko.utils.arrayForEach(pluginsSourceTemp, function(src) {
-    var plugin = require('plugins/tenant_customizations/' + src);
-    plugin.synchronous = true;
-    plugin.config.template = plugin.config.template || '<div></div>';
-
-    ko.components.register(
-      plugin.componentName + '-config',
-      plugin.config);
-
-    ko.components.register(
-      plugin.componentName,
-      plugin);
-
-    opts.push({
-      name: plugin.name,
-      componentName: plugin.componentName
-    });
-  });
 
     return opts;
 }

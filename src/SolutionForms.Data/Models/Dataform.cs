@@ -21,6 +21,8 @@ namespace SolutionForms.Data.Models
 
         public ICollection<string> Plugins { get; set; }
 
+        public ICollection<string> Components { get; set; }
+
         public ICollection<FieldConfiguration> Fields { get; set; }
 
         /// <summary>
@@ -31,6 +33,5 @@ namespace SolutionForms.Data.Models
 
         public string[] AuthorizedClaims { get; set; }
 
-        public string[] Components { get; set; }
     }
 }

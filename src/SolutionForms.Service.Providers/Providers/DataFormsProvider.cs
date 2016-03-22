@@ -62,7 +62,7 @@ namespace SolutionForms.Service.Providers.Providers
                 doc.Title = dataform.Title;
                 doc.Fields = new List<FieldConfiguration>(dataform.Fields.Project().To<FieldConfiguration>());
                 doc.Plugins = dataform.Plugins;
-                doc.Components = dataform.Components?.ToArray() ?? new string[0];
+                doc.Components = dataform.Components;
                 doc.AuthorizedClaims = dataform.AuthorizedClaims?.ToArray() ?? new string[0];
                 doc.DataSourceId = dataform.DataSourceId;
                 doc.RestrictDataAccessByOwner = dataform.RestrictDataAccessByOwner;
@@ -204,6 +204,7 @@ namespace SolutionForms.Service.Providers.Providers
                 return null;
             }
             var jobject = JObject.FromObject(values);
+            jobject.Add(DatabaseConstants.IdPropertyName, id);
             await SaveEntryAsync(tenant, entityName, userAccount, jobject, id);
             return jobject;
         }

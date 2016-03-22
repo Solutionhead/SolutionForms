@@ -76,7 +76,7 @@ namespace SolutionForms.Client.Mvc.Controllers
             {
                 return HttpNotFound();
             }
-            return Ok();
+            return Ok(new {});
         }
     }
 }

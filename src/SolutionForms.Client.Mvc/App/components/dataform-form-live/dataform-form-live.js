@@ -21,7 +21,8 @@ ko.validation.init({
 function DataFormLive(params) {
     if (!(this instanceof DataFormLive)) { return new DataFormLive(params); }
     var self = this;
-    var subscriptions = [];
+    var subscriptions = [],
+      components_loaded = [];
     
     self.documentId = params.documentId;
     self.fields = ko.observableArray([]);
@@ -116,19 +117,8 @@ DataFormLive.prototype.parseConfig = function(jsonConfig) {
         throw new Error("Invalid configuration: Missing or invalid dataSource property.");
     }
 
-  //form.plugins = [];
-
-  // load components
-    ko.utils.arrayMap(form.components || [], function (path) {
-      //note: This require call will cause all client customizations to be bundled into a single bundle. At a minimum, we need to 
-      //   create client-specific bundles.
-      var componentFactory = require('customizations/' + path);
-      if (componentFactory && componentFactory.componentName) {
-        componentFactory.synchronous = true; // enforce all components to be rendered synchronously to ensure proper order
-        ko.components.register(componentFactory.componentName, componentFactory);
-      }
-      return componentFactory;
-    });
+    // load components
+    ko.utils.arrayMap(form.components || [], loadComponent);
 
     form.plugins = ko.utils.arrayMap(form.plugins || [], function (path) {
       try {
@@ -179,6 +169,14 @@ DataFormLive.prototype.parseConfig = function(jsonConfig) {
       return typeof this[eventName] === "function";
     }
   }).call(this);
+
+  function loadComponent(path) {
+    var componentFactory = require('customizations/' + path);
+    if (componentFactory && componentFactory.componentName && !ko.components.isRegistered(componentFactory.componentName)) {
+      componentFactory.synchronous = true; // enforce all components to be rendered synchronously to ensure proper order
+      ko.components.register(componentFactory.componentName, componentFactory);
+    }
+  }
 }
 DataFormLive.prototype.notifyListenersAsync = function (event, args) {
   return $.when.apply(this, ko.utils.arrayMap(this.listeners[event], raiseEventOnListener));
