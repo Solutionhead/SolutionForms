@@ -1,0 +1,27 @@
+{
+  "name": "knockout-kendo",
+  "version": "0.9.6",
+  "main": "build/knockout-kendo.min.js",
+  "dependencies": {
+    "knockout": ">= 2.0"
+  },
+  "ignore": [
+    "ext",
+    "reports",
+    "spec",
+    "src",
+    "Gruntfile.js",
+    "package.json",
+    ".gitignore"
+  ],
+  "homepage": "https://github.com/kendo-labs/knockout-kendo",
+  "_release": "0.9.6",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.9.6",
+    "commit": "8935de0427f8b7f48c879edd6b85b7df5195ed82"
+  },
+  "_source": "git://github.com/kendo-labs/knockout-kendo.git",
+  "_target": "^0.9.6",
+  "_originalSource": "knockout-kendo"
+}

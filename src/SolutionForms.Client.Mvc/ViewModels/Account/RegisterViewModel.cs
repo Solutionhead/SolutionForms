@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -25,12 +24,6 @@ namespace SolutionForms.Client.Mvc.ViewModels.Account
         [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string ConfirmPassword { get; set; }
         
-        [Display(Name = "Site Access Code")]
-        [Required]
-        [DataType(DataType.Password)]
-        [UIHint("To be provided by the site administrator")]
-        public string SecurityCode { get; set; }
-
         public string Message { get; internal set; }
     }
 }

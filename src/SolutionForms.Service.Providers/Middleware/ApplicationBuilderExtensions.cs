@@ -8,6 +8,7 @@ using Microsoft.AspNet.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.OptionsModel;
 using SolutionForms.Data.Contexts;
+using SolutionForms.Service.Providers.Configuration;
 using SolutionForms.Service.Providers.MembershipRebootUtilities;
 using SolutionForms.Service.Providers.Models;
 using SolutionForms.Service.Providers.Providers;
@@ -28,6 +29,7 @@ namespace SolutionForms.Service.Providers.Middleware
                 AuthenticationScheme = MembershipRebootApplicationConstants.AuthenticationType,
                 CookieSecure = cookieOptions?.CookieSecure ?? CookieSecureOption.SameAsRequest
             });
+            AutoMapperConfiguration.ConfigureMappings();
         }
     }
 
@@ -52,7 +54,9 @@ namespace SolutionForms.Service.Providers.Middleware
                 return config;
             });
             services.AddScoped<UserAccountService<ApplicationUser>>();
-            services.AddScoped<IUserAccountRepository<ApplicationUser>, UserAccountProvider>();
+            services.AddScoped<DataFormsProvider>();
+            services.AddScoped<DataSourcesProvider>();
+            services.AddScoped<IUserAccountRepository<ApplicationUser>, MembershipProvider>();
             services.AddScoped<AuthenticationService<ApplicationUser>>(provider =>
                 new AspNetAuthenticationService(
                     provider.GetService<UserAccountService<ApplicationUser>>(),
@@ -75,7 +79,7 @@ namespace SolutionForms.Service.Providers.Middleware
             this.RelativeLoginUrl = relativeLoginUrl;
             this.RelativeConfirmChangeEmailUrl = relativeConfirmChangeEmailUrl;
             this.RelativeCancelVerificationUrl = relativeCancelVerificationUrl;
-            this.RelativeConfirmPasswordResetUrl = relativeConfirmPasswordResetUrl;
+            this.RelativeConfirmPasswordResetUrl = relativeConfirmPasswordResetUrl;           
         }
 
         protected override string GetApplicationBaseUrl()

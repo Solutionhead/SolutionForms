@@ -6,27 +6,10 @@ using SolutionForms.Service.Providers.Models;
 
 namespace SolutionForms.Service.Providers.MembershipRebootUtilities
 {
-    public class MembershipRebootNoteAttribute : Attribute
-    {
-        public MembershipRebootNoteAttribute(string note)
-        {
-            
-        }
-    }
-
-    public class MembershipRebootReplacementNoteAttribute : MembershipRebootNoteAttribute
-    {
-        public MembershipRebootReplacementNoteAttribute(Type typeReplaced, string comments = null)
-            : base(BuildNote(typeReplaced, comments)) { }
-
-        private static string BuildNote(Type typeReplaced, string comments)
-        {
-            return $"Replacement type for MembershipReboot library class: {typeReplaced.Name} ({typeReplaced.FullName}). {comments}";
-        }
-    }
-
     //todo: enable async message delivery
-    [MembershipRebootReplacementNote(typeof(BrockAllen.MembershipReboot.SmtpMessageDelivery), "Dependency of ConfigurationManager for retrieval of SmtpSection values")]
+    [MembershipRebootReplacementNote(
+        typeof(BrockAllen.MembershipReboot.SmtpMessageDelivery), 
+        "Dependency of ConfigurationManager for retrieval of SmtpSection values")]
     public class SmtpMessageDelivery : IMessageDelivery
     {
         private readonly StmpDeliveryConfig _config;

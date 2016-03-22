@@ -10,12 +10,6 @@
     padding-right: 15px;
 }
 
-/* Set widths on the form inputs since otherwise they're 100% wide */
-input,
-select,
-textarea {
-    max-width: 280px;
-}
 
 /* Carousel */
 .carousel-caption {
@@ -31,4 +25,85 @@ textarea {
     .carousel-caption {
         z-index: 10 !important;
     }
+}
+
+
+/* Bootstrap Overrides */
+.form-horizontal .control-label {
+    text-align: left;
+}
+
+/* Site Styles */
+.table .form-group {
+    margin-bottom: 0;
+}
+
+.table-navigation i {
+    visibility: hidden;
+}
+    .table-navigation tbody tr:hover {
+        cursor: pointer;
+    }
+    .table-navigation tr:hover i {
+        visibility: visible;
+    }
+    
+.title-container {
+    padding: .5em 2em 0;
+}
+.desc-container {
+    padding: 0 2em .5em;
+}
+.dataform-designer-container {
+    overflow: hidden;
+    zoom: 1;
+}
+.dataform-designer-container:hover {
+    background-color: #f5f5f5;
+    -webkit-transition: background-color linear .15s;
+    -moz-transition: background-color linear .15s;
+    -ms-transition: background-color linear .15s;
+    -o-transition: background-color linear .15s;
+    transition: background-color linear .15s;
+}
+
+.dataform-designer-container-editor.active {
+    -webkit-box-shadow: 1px 0 10px 1px rgba(0, 0, 0, 0.3);
+    -ms-box-shadow: 1px 0 10px 1px rgba(0, 0, 0, 0.3);
+    box-shadow: 1px 0 10px 1px rgba(0, 0, 0, 0.3);
+    margin-bottom: 10px;
+    background-color: #fbfbfb;
+    -ms-border-radius: 3px;
+    border-radius: 3px;
+    border: 1px dashed #ccc;
+}
+
+.dataform-desiger-field-widget {
+    padding: .5em 2em 1.5em;
+    position: relative;
+    zoom: 1;
+    z-index: 1;
+}
+
+.dataform-designer-container .form-fieldset {
+    padding: 2px 2em;
+    margin: 0;
+    zoom: 1;
+}
+
+.designer-fields-container .field-controls {
+    padding: 5px;
+}
+.designer-fields-container .active > .field-controls {
+    visibility: visible;
+}
+.designer-fields-container .preview > .field-controls {
+    visibility: hidden;
+}
+.designer-fields-container .preview:hover > .field-controls {
+    visibility: visible;
+}
+
+.clickable {
+    cursor: pointer;
 }

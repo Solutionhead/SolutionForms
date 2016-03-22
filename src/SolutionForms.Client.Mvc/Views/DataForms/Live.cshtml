@@ -1,0 +1,13 @@
+﻿
+<div class="panel" style="margin-top: 10px;">
+    <button data-bind="click: createNewEntry" class="btn btn-default">Create New</button>
+
+    <!-- ko if: activeComponent -->
+    <section data-bind="component: activeComponent"></section>
+    <!-- /ko -->
+</div>
+
+@section Scripts
+{
+    <script src="~/js/build/dataform-live.bundle.js"></script>
+}

@@ -1,0 +1,51 @@
+﻿<!-- NOTE: this duplicates the markup from the Dataform Designer component template -->
+
+<div class="panel panel-default">
+    <div class="panel-heading"><h3>Sub-Form Fields</h3></div>
+    <div class="panel-body">
+        <section data-bind="sortable: fields()">
+            <div class="row">
+                <div data-bind="visible: isActive" class="dataform-designer-container dataform-designer-container-editor">
+                    <div class="dataform-desiger-field-widget">
+                        <div data-bind="template: { name: 'field-config-template', data: config }"></div>
+                        <button class="btn btn-primary" data-bind="click: $parent.finishEditingField">Done</button>
+
+                        <div class="checkbox-inline">
+                            <label>
+                                <input type="checkbox" data-bind="checked: config().isRequired" />
+                                Required
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ko if: config().inputType() -->
+                <!-- the below with binding causes live element to be rebuilt when the config value is changed -->
+                <div data-bind="visible: !isActive(), click: $parent.activateField" class="dataform-designer-container">
+                    <div class="form-fieldset" data-bind="with: config">
+                        <div class="form-horizontal">
+                            <div class="form-group">
+                                <label class="col-sm-2 control-label" data-bind="text: displayName"></label>
+                                <div class="col-sm-10" data-bind="component: { name: inputType, params: { input: $data, context: ko.observable() } }"></div>
+                                <div data-bind="if: helpText" class="col-sm-10 col-sm-offset-2"><span class="help-block" data-bind="text: helpText"></span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /ko -->
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="btn-group">
+    <button class="btn btn-default" data-bind="command: addItemCommand">Add item</button>
+    <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+        <span class="caret"></span>
+        <span class="sr-only">Toggle Dropdown</span>
+    </button>
+    <ul class="dropdown-menu" role="menu">
+        <li><a href="command: addItemCommand">Text</a></li>
+        <li><a href="command: addItemCommand">Paragraph Text</a></li>
+    </ul>
+</div>

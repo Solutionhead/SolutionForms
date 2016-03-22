@@ -1,7 +1,8 @@
-﻿@model RegisterTenantViewModel
+﻿
+@model RegisterTenantViewModel
 
 @{
-  ViewBag.Title = "Create an Organizatoin";
+  ViewBag.Title = "Create an Organization";
   Layout = "_Layout";
 }
 
@@ -10,14 +11,6 @@
     <section>
       <div asp-validation-summary="ValidationSummary.All" class="text-danger"></div>
       <form method="POST" class="form-horizontal" asp-controller="Account" asp-action="RegisterTenant">
-        <div class="form-group">
-          <label asp-for="Email" class="col-md-2 control-label"></label>
-          <div class="col-md-10">
-            <input asp-for="Email" class="form-control"/>
-            <span asp-validation-for="Email" class="text-danger"></span>
-          </div>
-        </div>
-
         <div class="form-group">
           <label asp-for="OrganizationName" class="col-md-2 control-label"></label>
           <div class="col-md-10">
@@ -29,8 +22,16 @@
         <div class="form-group">
           <label asp-for="OrganizationDomain" class="col-md-2 control-label"></label>
           <div class="col-md-10">
-            <input asp-for="OrganizationDomain" class="form-control" />
+            <input asp-for="OrganizationDomain" class="form-control" />.solutionforms.com
             <span asp-validation-for="OrganizationDomain" class="text-danger"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label asp-for="Email" class="col-md-2 control-label"></label>
+          <div class="col-md-10">
+            <input asp-for="Email" class="form-control"/>
+            <span asp-validation-for="Email" class="text-danger"></span>
           </div>
         </div>
 
@@ -40,6 +41,22 @@
             <input asp-for="UserName" class="form-control"/>
             <span asp-uihint-for="UserName"></span>
             <span asp-validation-for="UserName" class="text-danger"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label asp-for="Password" class="col-md-2 control-label"></label>
+          <div class="col-md-10">
+            <input asp-for="Password" class="form-control"/>
+            <span asp-validation-for="Password" class="text-danger"></span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label asp-for="ConfirmPassword" class="col-md-2 control-label"></label>
+          <div class="col-md-10">
+            <input asp-for="ConfirmPassword" class="form-control" />
+            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
           </div>
         </div>
 

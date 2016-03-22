@@ -1,4 +1,4 @@
-{
+﻿{
   "userSecretsId": "aspnet5-SolutionForms.Client.Mvc-64f3f333-0d20-44d5-bbb0-3ea737af4135",
   "version": "1.0.0-*",
   "compilationOptions": {
@@ -23,18 +23,19 @@
     "Microsoft.Extensions.Logging.Debug": "1.0.0-rc1-final",
     "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0-rc1-final",
     "SecretManager": "1.0.0-beta5",
-    "Microsoft.Extensions.SecretManager": "1.0.0-rc1-final"
+    "Microsoft.Extensions.SecretManager": "1.0.0-rc1-final",
+    "SolutionForms.Service.Providers": "1.0.0-*",
+    "SolutionForms.Core": "1.0.0-*"
   },
+
   "commands": {
     "web": "Microsoft.AspNet.Server.Kestrel"
   },
+
   "frameworks": {
-    "dnx451": {
-      "dependencies": {
-        "SolutionForms.Service.Providers": ""
-      }
-    }
+    "dnx451": { }
   },
+
   "exclude": [
     "wwwroot",
     "node_modules"
@@ -44,11 +45,6 @@
     "**.vspscc"
   ],
   "scripts": {
-    "prepublish": [
-      "npm install",
-      "bower install",
-      "gulp clean",
-      "gulp min"
-    ]
+    "prepublish": [ "npm install", "bower install", "gulp clean", "gulp min" ]
   }
 }
