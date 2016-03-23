@@ -7,13 +7,21 @@
     factory(ko, moment);
   }
 }(function (ko, moment) {
-  ko.extenders.moment = function (target, formatString) {
-    var result = ko.pureComputed({
+  ko.extenders.moment = function (target, defaultFormatString) {
+    var wrapper = ko.pureComputed({
       read: target,
-      write: function (value) {
-        //force to a valid date
-        var date = forceDate(value);
-        target(date && date.format(formatString));
+      write: function (newValue) {
+        var current = target(),
+          date = forceDate(newValue),
+          valueToWrite = date && date.format(defaultFormatString);
+        
+        if (valueToWrite !== current) {
+          target(valueToWrite);
+        } else {
+          if (newValue !== current) {
+            target.notifySubscribers(valueToWrite);
+          }
+        }
       }
     }).extend({ notify: 'always' });
 
@@ -23,22 +31,15 @@
       }
     }
 
-    target.equalityComparer = function (a, b) {
-      //only trigger change event if date _really_ changed
-      if (!a && !b) return true;
-      if (!a || !b) return false;
-      return a.valueOf() === b.valueOf();
-    };
-
-    target.format = format;
-    target.moment = moment;
+    wrapper.format = format;
+    wrapper.moment = moment;
 
     function format(formatString) {
-      var date = forceDate(result());
-      return date && date.format(formatString);
+      var date = forceDate(wrapper());
+      return date && date.format(formatString || defaultFormatString);
     }
 
-    result(target());
-    return result;
+    wrapper(target());
+    return wrapper;
   };
 }));

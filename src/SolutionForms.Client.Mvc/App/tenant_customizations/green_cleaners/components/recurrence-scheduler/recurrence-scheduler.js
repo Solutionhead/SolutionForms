@@ -23,7 +23,7 @@ function RecurrenceSchedulerViewModel(params) {
   self.index = ko.observable();
   self.weeklyRecurrenceDays = ko.observableArray([]);
   self.recurrenceEndDate = ko.observable().extend({ moment: 'M/D/YYYY' });
-  self.monthlyRecurrenceOption = ko.observable();
+  self.monthlyRecurrenceOption = ko.observable('bydate');
   self.monthlyByDay = ko.observable();
   self.monthlyByDate = ko.observable();
 
@@ -64,12 +64,15 @@ function RecurrenceSchedulerViewModel(params) {
       //todo: move field identification into configuration?
       return f.exportName === 'Start Date';
     });
+
     var context = field && field.context();
-    if (context) {
-      context.userResponse.extend({ moment: 'M/D/YYYY' });
+    if (context) { 
+      var startDate = context.userResponse.extend({ moment: 'M/D/YYYY' });
+      if (startDate() == undefined) startDate(Date.now());
+      return startDate;
     }
 
-    return context && context.userResponse;
+    return null;
   });
 
   self.userResponse = function() {
@@ -84,15 +87,23 @@ function RecurrenceSchedulerViewModel(params) {
   };
 
   startDateField.subscribe(function (val) {
+    var startDate = startDateField();
+    if (!startDate) return;
+
     var selectedDays = self.weeklyRecurrenceDays();
     if (!selectedDays || !selectedDays.length) {
-      var startDate = startDateField();
-      startDate && startDate() && startDate.format
+      startDate() && startDate.format
         && self.weeklyRecurrenceDays.push(startDate.format('dddd'));
     }
+
+    self.monthlyByDate(startDate.format('D'));
+    self.monthlyByDay(startDate.format('dddd'));
+
+    var indexOptions = ['First', 'Second', 'Third', 'Fourth', 'Last'];
+    var weekIndex = startDate.format('D') / 7;
+    self.index(indexOptions[0 | weekIndex]);
   });
 
-  //var baseSetValue = self.setValue.bind(self);
   self.setValue = function (value) {
     var init = value || {};
 
@@ -101,21 +112,18 @@ function RecurrenceSchedulerViewModel(params) {
     self.index(init.index);
     self.weeklyRecurrenceDays(self.isWeekly() && init.daysOfWeek || []);
     self.recurrenceEndDate(init.endDate);
-    self.monthlyRecurrenceOption(null); // todo: this
+    //self.monthlyRecurrenceOption(null); // todo: this
     self.monthlyByDay(self.isMonthly() && init.daysOfWeek);
     self.monthlyByDate(init.dayOfMonth);
-
-    //return baseSetValue(value);
   }
 
 
   function buildWeeklyRecurrenceSummary() {
     var text = 'Every ';
     var interval = self.interval();
-    var days = self.weeklyRecurrenceDays(),
-      startDate = startDateField();
+    var days = self.weeklyRecurrenceDays();
 
-    if (interval < 1 || !days.length || !startDate) {
+    if (interval < 1 || !days.length) {
       return '';
     }
 
@@ -134,16 +142,26 @@ function RecurrenceSchedulerViewModel(params) {
       text += day;
     });
 
+    appendRecurrenceSummary(text);
+    return appendRecurrenceSummary(text);
+  }
+  function buildMonthlyRecurrenceSummary() {
+    var text = '';
+    if (self.monthlyRecurrenceOption() === 'bydate') {
+      text += 'Day ' + self.monthlyByDate();
+    } else {
+      text += 'The ' + self.index() + ' ' + self.monthlyByDay();
+    }
+    text += ' of every month';
+    return appendRecurrenceSummary(text);
+  }
+  function appendRecurrenceSummary(text) {
+    var startDate = startDateField();
     text += ', effective <strong>' + startDate() + '</strong>';
-
     if (self.recurrenceEndDate()) {
       text += ' until <strong>' + self.recurrenceEndDate() + "</strong>";
     }
-
     return text;
-  }
-  function buildMonthlyRecurrenceSummary() {
-    
   }
 
   params.context(self);
