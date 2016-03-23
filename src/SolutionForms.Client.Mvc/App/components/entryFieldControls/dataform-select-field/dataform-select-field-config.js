@@ -1,4 +1,5 @@
 ﻿var selectFieldComponentFactory = require('controls/dataform-select-field/dataform-select-field');
+var loadDataSourceOptions = $.ajax('/api/datasources');
 
 function SelectFieldConfigViewModel(params) {
     if (!(this instanceof SelectFieldConfigViewModel)) return new SelectFieldConfigViewModel(params);
@@ -33,21 +34,16 @@ function SelectFieldConfigViewModel(params) {
     self.defaultSelectionText = ko.observable(settings.defaultSelectionText);
     
 
-    // NOTE: duplicate calls to the datasources api will be made for every select list element (issue #5 on GitHub)
-    if (window['__dataSources__'] == undefined || !window['__dataSources__'].length) {
-      var selectedDataSourceOption = settings.optionDataSourceEntityName;
-      $.ajax('/api/datasources')
-          .then(function (data) {
-            window['__dataSources__'] = ko.utils.arrayMap(data, function (item) {
-              return {
-                displayName: item.name,
-                value: item.documentName
-              }
-            });
-            self.dataSourceOptions(window['__dataSources__']);
-            self.optionDataSourceEntityName(selectedDataSourceOption);
-          });
-    }
+    var selectedDataSourceOption = settings.optionDataSourceEntityName;
+    loadDataSourceOptions.then(function(data) {
+      self.dataSourceOptions(ko.utils.arrayMap(data, function (item) {
+        return {
+          displayName: item.name,
+          value: item.documentName
+        }
+      }));
+      self.optionDataSourceEntityName(selectedDataSourceOption);
+    });
 
     self.addNewOptionCommand = ko.command({
         execute: function () {
