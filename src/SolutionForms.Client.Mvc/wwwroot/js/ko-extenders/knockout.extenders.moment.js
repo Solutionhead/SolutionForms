@@ -11,7 +11,7 @@
     var wrapper = ko.pureComputed({
       read: target,
       write: function (newValue) {
-        var current = target(),
+        var current = target.peek(),
           date = forceDate(newValue),
           valueToWrite = date && date.format(defaultFormatString);
         
@@ -26,7 +26,15 @@
     }).extend({ notify: 'always' });
 
     function forceDate(date) {
-      if (date) {
+      if (date != undefined) {
+        if (date instanceof Date) {
+
+        } else if (typeof(date) === 'number') {
+          
+        }
+        else {
+          date = Date.parse(date);
+        }
         return moment(date);
       }
     }
@@ -39,7 +47,7 @@
       return date && date.format(formatString || defaultFormatString);
     }
 
-    wrapper(target());
+    wrapper(target.peek());
     return wrapper;
   };
 }));

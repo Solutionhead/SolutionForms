@@ -68,7 +68,6 @@ function RecurrenceSchedulerViewModel(params) {
     var context = field && field.context();
     if (context) { 
       var startDate = context.userResponse.extend({ moment: 'M/D/YYYY' });
-      if (startDate() == undefined) startDate(Date.now());
       return startDate;
     }
 
@@ -83,6 +82,7 @@ function RecurrenceSchedulerViewModel(params) {
       endDate: self.recurrenceEndDate,
       dayOfMonth: self.monthlyByDate,
       index: self.index,
+      monthlyRecurrenceOption: self.isMonthly() ? self.monthlyRecurrenceOption : null
     });
   };
 
@@ -90,6 +90,7 @@ function RecurrenceSchedulerViewModel(params) {
     var startDate = startDateField();
     if (!startDate) return;
 
+    if (startDate() == undefined) startDate(Date.now());
     var selectedDays = self.weeklyRecurrenceDays();
     if (!selectedDays || !selectedDays.length) {
       startDate() && startDate.format
@@ -105,16 +106,16 @@ function RecurrenceSchedulerViewModel(params) {
   });
 
   self.setValue = function (value) {
-    var init = value || {};
+    var initialValues = value || {};
 
-    self.recurrence(init.recurrenceType);
-    self.interval(init.interval);
-    self.index(init.index);
-    self.weeklyRecurrenceDays(self.isWeekly() && init.daysOfWeek || []);
-    self.recurrenceEndDate(init.endDate);
-    //self.monthlyRecurrenceOption(null); // todo: this
-    self.monthlyByDay(self.isMonthly() && init.daysOfWeek);
-    self.monthlyByDate(init.dayOfMonth);
+    self.recurrence(initialValues.recurrenceType);
+    self.interval(initialValues.interval);
+    self.index(initialValues.index);
+    self.weeklyRecurrenceDays(self.isWeekly() && initialValues.daysOfWeek || []);
+    self.recurrenceEndDate(initialValues.endDate);
+    self.monthlyRecurrenceOption(initialValues.monthlyRecurrenceOption);
+    self.monthlyByDay(self.isMonthly() && initialValues.daysOfWeek);
+    self.monthlyByDate(initialValues.dayOfMonth);
   }
 
 
@@ -148,11 +149,15 @@ function RecurrenceSchedulerViewModel(params) {
   function buildMonthlyRecurrenceSummary() {
     var text = '';
     if (self.monthlyRecurrenceOption() === 'bydate') {
-      text += 'Day ' + self.monthlyByDate();
+      text += 'Day <strong>' + self.monthlyByDate() + '</strong>';
     } else {
-      text += 'The ' + self.index() + ' ' + self.monthlyByDay();
+      text += 'The <strong>' + self.index().toLowerCase() + ' ' + self.monthlyByDay() + '</strong>';
     }
-    text += ' of every month';
+    if (self.interval() === 1) {
+      text += ' of every month';
+    } else {
+      text += ' every <strong>' + self.interval() + ' months</strong>';
+    }
     return appendRecurrenceSummary(text);
   }
   function appendRecurrenceSummary(text) {
