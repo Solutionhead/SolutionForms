@@ -25,29 +25,26 @@ function DataformDesignerViewModel(params) {
   if (!(this instanceof DataformDesignerViewModel)) { return new DataformDesignerViewModel(params); }
 
   var self = this,
-      values = self.parseInputConfig(params.input),
-      dataSourceId = ko.observable();
+      values = self.parseInputConfig(params.input);
 
   base.call(this, params);
 
   self.__subscriptions = [];
   self.formId = values.id;
   self.formTitle = ko.observable(values.title);
+  self.dataSourceId = ko.observable();
+  self.newDataSourceName = ko.observable();
+  self.formDescription = ko.observable(values.description);
   self.authorizedClaims = ko.observable();
   self.claimsOptions = ko.observableArray(values.authorizedClaims || []);
   self.restrictDataAccessByOwner = ko.observable(false);
 
-  self.dataSourceId = ko.computed({
-    read: function () { return dataSourceId(); },
-  });
   self.isNewDataSource = ko.computed(function () {
-    return dataSourceId() == undefined;
+    return self.dataSourceId() == undefined;
   }, self);
 
 
-  self.newDataSourceName = ko.observable();
   self.dataSourceOptions = ko.observableArray([]);
-  self.formDescription = ko.observable(values.description);
 
   self.plugins = ko.observableArray(values.plugins);
   self.customizations = ko.observableArray(values.components);
@@ -70,7 +67,7 @@ function DataformDesignerViewModel(params) {
 
       loadDataSourceOptionsPromise.then(function () {
         if (formConfig.dataSourceId == undefined) console.warn('dataSourceId is undefined');
-        dataSourceId(formConfig.dataSourceId);
+        self.dataSourceId(formConfig.dataSourceId);
       });
       loadClaimsPromise.then(function () {
         self.authorizedClaims(formConfig.authorizedClaims || []);
@@ -82,7 +79,7 @@ function DataformDesignerViewModel(params) {
 
     self.loadCustomizations(values);
     loadDataSourceOptionsPromise.then(function () {
-      values.dataSourceId && dataSourceId(values.dataSourceId);
+      values.dataSourceId && self.dataSourceId(values.dataSourceId);
     });
     loadClaimsPromise.then(function () {
       values.authorizedClaims && self.authorizedClaims(values.authorizedClaims);
@@ -108,7 +105,7 @@ function DataformDesignerViewModel(params) {
             var selected = ko.utils.arrayFirst(self.dataSourceOptions(), function (item) {
               return item.name === data.newDataSourceName;
             });
-            dataSourceId(selected ? selected.id : null);
+            self.dataSourceId(selected ? selected.id : null);
           });
         }
 
