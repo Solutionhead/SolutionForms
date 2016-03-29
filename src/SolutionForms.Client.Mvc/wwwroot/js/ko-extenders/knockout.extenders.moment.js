@@ -39,9 +39,12 @@
       }
     }
 
+    wrapper.toAbsoluteDateISOString = function() {
+      var mDate = forceDate(wrapper());
+      return mDate && mDate.format("YYYY-MM-DDT00:00:00.0000000Z");
+    }
     wrapper.format = format;
-    wrapper.moment = moment;
-
+    
     function format(formatString) {
       var date = forceDate(wrapper());
       return date && date.format(formatString || defaultFormatString);
