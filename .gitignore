@@ -213,3 +213,4 @@ ModelManifest.xml
 /src/SolutionForms.Client.Mvc/wwwroot/lib/jquery/src
 /src/SolutionForms.Client.Mvc/wwwroot/lib/kendo-ui-core
 /src/SolutionForms.Client.Mvc/wwwroot/css/site.min.css
+/src/SolutionForms.Client.Mvc/wwwroot/_references.js
