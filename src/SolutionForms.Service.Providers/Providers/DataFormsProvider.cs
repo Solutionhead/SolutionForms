@@ -153,6 +153,19 @@ namespace SolutionForms.Service.Providers.Providers
                 return queryResult.Results.Select(r => JObject.Parse(r.ToJsonDocument().DataAsJson.ToString()));
             }
         }
+        
+        public async Task<IEnumerable<JObject>> GetDataEntriesByIndexName(string tenant, string indexName, IDictionary<string, string> queryParams)
+        {
+            var query = await _documentStore.AsyncDatabaseCommands.ForDatabase(tenant).QueryAsync(
+                indexName,
+                new IndexQuery
+                {
+                    Query = queryParams.ContainsKey("$query") ? queryParams["$query"] : null
+                });
+
+            return query.Results.Select(r => JObject.Parse(r.ToJsonDocument().DataAsJson.ToString()));
+        }
+
 
         public async Task<DataEntryCreatedReturn> CreateDataEntryAsync(string tenant, string entityName, object values, ApplicationUser ownerUser)
         {

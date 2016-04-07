@@ -16,7 +16,7 @@ using SolutionForms.Service.Providers.Providers;
 
 namespace SolutionForms.Client.Mvc.Controllers
 {
-    [ApiRoute(controllerNameOverride: "d", route: "{entityName}")]
+    [ApiRoute(controllerNameOverride: "d")]
     [MigrateToOss]
     public class DataEntriesController : Controller
     {
@@ -34,30 +34,36 @@ namespace SolutionForms.Client.Mvc.Controllers
             _userAccountService = userAccountService;
         }
 
+        [Route("index/{indexName?}", Order = 0)]
+        public async Task<ActionResult> GetByIndex(string id = null)
+        {
+            var queryParams = HttpContext.Request.Query.ToDictionary(q => q.Key, q => q.Value.ToString());
+            return Json(await _dataFormsProvider.GetDataEntriesByIndexName(Tenant, id, queryParams));
+        }
+
+        [Route("{entityName}", Order = 1)]
         public async Task<ActionResult> Get(string entityName)
         {
             var queryParams = HttpContext.Request.Query.Select(q => new KeyValuePair<string, string>(q.Key, q.Value));
             return Json(await _dataFormsProvider.GetDataEntriesByEntityName(Tenant, entityName, queryParams));
         }
-
+        
         /// <summary>
         /// Retrieves data entry by id.
         /// </summary>
         /// <param name="entityName">Not currently used but kept in for consistency with REST-style API calls.</param>
         /// <param name="id">The id of the entity to be retrieved</param>
         /// <returns></returns>
-        [Route("{id}")]
+        [Route("{entityName}/{id}")]
         public async Task<IActionResult> Get(string entityName, string id)
         {
             var result = await _dataFormsProvider.GetDataEntryByKeyAsync(Tenant, id);
-            //var result = DataformsRavenContext.DocumentStore.DatabaseCommands.Get(id);
-            //if (result == null) return NotFound();
             return result == null 
                 ? HttpNotFound() as IActionResult 
                 : Ok(result);
         }
 
-        [HttpPost]
+        [HttpPost("{entityName}")]
         public async Task<IActionResult> Post(string entityName, [FromBody]object values)
         {
             var userAccount = _userAccountService.GetByUsername(Tenant, User.Identity.Name);
@@ -66,7 +72,7 @@ namespace SolutionForms.Client.Mvc.Controllers
             return CreatedAtRoute(new { controller=  "DataForms", action = "Live", formId = entityName, recordKey = response.Key }, response.Entity);
         }
 
-        [HttpPut, Route("{id}")]
+        [HttpPut("{entityName}/{id}")]
         public async Task<IActionResult> Put(string entityName, string id, [FromBody]object values)
         {
             var userAccount = _userAccountService.GetByUsername(Tenant, User.Identity.Name);
