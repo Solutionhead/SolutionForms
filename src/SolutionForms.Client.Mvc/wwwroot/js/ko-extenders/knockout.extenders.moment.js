@@ -26,7 +26,7 @@
     }).extend({ notify: 'always' });
 
     function forceDate(date) {
-      if (date != undefined) {
+      if (date != undefined && date !== '') {
         if (date instanceof Date) {
 
         } else if (typeof(date) === 'number') {
@@ -41,7 +41,7 @@
 
     wrapper.toAbsoluteDateISOString = function() {
       var mDate = forceDate(wrapper());
-      return mDate && mDate.format("YYYY-MM-DDT00:00:00.0000000Z");
+      return mDate && mDate.format(ko.extenders.moment.ISO_DATE_Format);
     }
     wrapper.format = format;
     
@@ -53,4 +53,6 @@
     wrapper(target.peek());
     return wrapper;
   };
+
+  ko.extenders.moment.ISO_DATE_Format = "YYYY-MM-DDT00:00:00.0000000Z";
 }));

@@ -34,6 +34,7 @@ module.exports = {
       viewModels: appDir('viewModels'),
       models: appDir('models'),
       components: appDir('components'),
+      services: appDir('services'),
       plugins: appDir('plugins'),
       customizations: appDir('tenant_customizations'),
       App: appDir('.'),

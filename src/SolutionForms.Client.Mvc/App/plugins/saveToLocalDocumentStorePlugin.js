@@ -5,30 +5,34 @@ function SaveToLocalDocumentStorePlugin() {
 
     var plugin = this;
     
-    plugin.submit = function (document) {
+    plugin.submit = function (values, document) {
+      if (values == undefined) return $.Deferred().reject('Argument cannot be null');
+
         plugin.isResolved = null;
         plugin.isExecuting = true;
 
-            var data, entityName;
+            var entityName;
             try {
-                if (document.dataSource == undefined || document.dataSource.documentName == undefined) {
-                    throw new Error("Invalid arguments: Missing or invalid entityName member.");
+                entityName = ko.unwrap(document.dataSource);
+                if(entityName && entityName.documentName) { entityName = entityName.documentName; }
+                if (entityName == undefined) {
+                    throw new Error("Unable to find the documentName or documentName was undefined.");
                 }
-
-                data = plugin.parseForm(document);
-                entityName = document.dataSource.documentName;
             } catch (e) {
                 console.log("Error processing submit function of SaveToLocalDocuentStorePlugin.");
                 console.log("Error: " + e.message);
-                failure();
-                return;
+
+                return $.Deferred()
+                  .done(failure)
+                  .reject(e.message);
             }
 
-            var isNew = document.documentId == undefined,
+            var docId = ko.unwrap(document.documentId),
+                isNew = docId == undefined,
                 dfd = $.Deferred();
 
-            $.ajax("/api/d/" + entityName + "/" + (isNew ? '' : document.documentId), {
-                data: ko.toJSON(data),
+            $.ajax("/api/d/" + entityName + "/" + (isNew ? '' : docId), {
+                data: ko.toJSON(values),
                 dataType: 'json',
                 contentType: 'application/json',
                 method: isNew ? 'POST' : 'PUT'
@@ -50,23 +54,11 @@ function SaveToLocalDocumentStorePlugin() {
     };
     plugin.submitCompleted = function(doucment) {
         return new Promise(function(fulfill, reject) {
-            //alert(plugin.isResolved ? 'Submit succeeded!' : 'Submit failed');
             fulfill();
         });
     };
 
     return plugin;
-}
-
-SaveToLocalDocumentStorePlugin.prototype.parseForm = function (form) {
-    var output = {
-        documentId: form.documentId
-    };
-
-    ko.utils.arrayMap(ko.unwrap(form.fields), function (field) {
-        output[field.exportName] = field.context().userResponse();
-    });
-    return output;
 }
 
 module.exports = SaveToLocalDocumentStorePlugin;

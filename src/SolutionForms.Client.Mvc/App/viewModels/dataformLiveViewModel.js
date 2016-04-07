@@ -1,7 +1,8 @@
 ﻿var $ = require('jquery'), 
     tableComponentName = 'data-table',
     editorComponentName = 'details-editor',
-    toastr = require('toastr');
+    toastr = require('toastr'),
+    formsService = require('services/dataFormsService');
 
 //consider loading components dynamically
 ko.components.register(tableComponentName, require('components/dataentry-table-view/dataentry-table-view'));
@@ -35,24 +36,23 @@ var page = require('page');
     ko.applyBindings(vm);
 
     function loadComponent(componentName, formId, docId) {
-        vm.activeComponent(null);
-
-        $.ajax('/api/dataforms/' + formId)
-                .then(function (data) {
-                    vm.activeComponent({
-                        name: data.componentName || componentName,
-                        params: {
-                            config: data,
-                            documentId: docId
-                        }
-                    });
-                })
-                .fail(function () {
-                    if (arguments[0].status === 401) {
-                        toastr.error("You are not authorized to view this form. Please see the system administrator if you believe this is an error.", "Unauthorized Access.");
-                    } else {
-                        toastr.error(arguments[2], "Error loading form.");
-                    }
-                });
+      vm.activeComponent(null);
+      formsService.getDataFormByIdAsync(formId)
+        .then(function(data) {
+          vm.activeComponent({
+            name: data.componentName || componentName,
+            params: {
+              config: data,
+              documentId: docId
+            }
+          });
+        })
+        .fail(function() {
+          if (arguments[0].status === 401) {
+            toastr.error("You are not authorized to view this form. Please see the system administrator if you believe this is an error.", "Unauthorized Access.");
+          } else {
+            toastr.error(arguments[2], "Error loading form.");
+          }
+        });
     }
 }());
