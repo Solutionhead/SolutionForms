@@ -1,0 +1,24 @@
+﻿<section>
+  <button class="btn btn-default" data-bind="command: editSeriesCommand, visible: editSeriesCommand.canExecute">
+    <span class="glyphicon glyphicon-repeat"></span>
+    Edit Series
+  </button>
+  <dynamic-form params="formId: 'DataForms-65', exports: eventEditorVm"></dynamic-form>
+
+  <div data-bind="if: showRecurrence">
+    <h3>Repeat</h3>
+    <recurrence-scheduler params="input: recurrenceInput, exports: recurrenceEditorExport"></recurrence-scheduler>
+  </div>
+  
+  <input type="button" data-bind="command: saveAsyncCommand" class="btn btn-primary" value="Save and close" />
+  <div class="btn-group">
+    <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="False">
+      Delete <span class="caret"></span>
+    </button>
+
+    <ul class="dropdown-menu">
+      <li><a href="#">Delete one</a></li>
+      <li><a href="#">Delete all</a></li>
+    </ul>
+  </div>
+</section>

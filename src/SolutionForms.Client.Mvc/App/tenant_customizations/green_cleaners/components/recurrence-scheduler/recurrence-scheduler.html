@@ -1,97 +1,103 @@
 ﻿<div>
   <div class="form-group">
+    <label class="col-sm-2">Starts</label>
+    <div class="col-sm-4">
+      <input class="form-control" placeholder="Start: " data-bind="datepicker: true, value: startDate"/>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label class="col-sm-2">Pattern</label>
     <div class="col-sm-4 col-md-3">
       <select class="form-control" data-bind="value: recurrence, options: recurrenceOptions"></select>
     </div>
   </div>
+  
+  <div class="form-group">
+    <div for="interval-select" class="col-sm-1 form-control-static">Every</div>
+    <div class="col-sm-3">
+      <select class="col-sm-1 form-control" data-bind="value: interval" id="interval-select">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+      </select>
+    </div>
+    <div class="col-sm-3 form-control-static" data-bind="text: recurrenceLabel"></div>
+  </div>
 
-  <section data-bind="visible: isRecurring">
-    <div class="form-group">
-      <div for="interval-select" class="col-sm-1 form-control-static">Every</div>
-      <div class="col-sm-3">
-        <select class="col-sm-1 form-control" data-bind="value: interval" id="interval-select">
-          <option value="1">1</option>
-          <option value="2">2</option>
-          <option value="3">3</option>
-          <option value="4">4</option>
-          <option value="5">5</option>
+  <div class="form-group col-sm-12" data-bind="visible: isWeekly">
+    <label class="checkbox-inline">
+      <input type="checkbox" value="Sunday" data-bind="checked: weeklyRecurrenceDays"> Sun
+    </label>
+    <label class="checkbox-inline">
+      <input type="checkbox" value="Monday" data-bind="checked: weeklyRecurrenceDays"> Mon
+    </label>
+    <label class="checkbox-inline">
+      <input type="checkbox" value="Tuesday" data-bind="checked: weeklyRecurrenceDays"> Tue
+    </label>
+    <label class="checkbox-inline">
+      <input type="checkbox" value="Wednesday" data-bind="checked: weeklyRecurrenceDays"> Wed
+    </label>
+    <label class="checkbox-inline">
+      <input type="checkbox" value="Thursday" data-bind="checked: weeklyRecurrenceDays"> Thu
+    </label>
+    <label class="checkbox-inline">
+      <input type="checkbox" value="Friday" data-bind="checked: weeklyRecurrenceDays"> Fri
+    </label>
+    <label class="checkbox-inline">
+      <input type="checkbox" value="Saturday" data-bind="checked: weeklyRecurrenceDays"> Sat
+    </label>
+  </div>
+
+  <div data-bind="visible: isMonthly">
+    <div class="form-group col-sm-12">
+      <div class="col-sm-3 col-md-2">
+        <label>
+          <input type="radio" name="monthlyRecurrenceOptions" value="bydate" data-bind="checked: monthlyRecurrenceOption"/> On Day
+        </label>
+      </div>
+      <div class="col-sm-3 col-md-2">
+        <select class="form-control" data-bind="value: monthlyByDate, options: monthlyByDateOptions"></select>
+      </div>
+    </div>
+
+    <div class="form-group col-sm-12">
+      <div class="col-sm-3 col-md-2">
+        <label>
+          <input type="radio" name="monthlyRecurrenceOptions" value="byday" data-bind="checked: monthlyRecurrenceOption"/> On the
+        </label>
+      </div>
+      <div class="col-sm-3 col-md-2">
+        <select class="form-control" data-bind="value: index">
+          <option>First</option>
+          <option>Second</option>
+          <option>Third</option>
+          <option>Fourth</option>
+          <option>Last</option>
         </select>
       </div>
-      <div class="col-sm-3 form-control-static" data-bind="text: recurrenceLabel"></div>
-    </div>
-
-    <div class="form-group col-sm-12" data-bind="visible: isWeekly">
-      <label class="checkbox-inline">
-        <input type="checkbox" value="Sunday" data-bind="checked: weeklyRecurrenceDays"> Sun
-      </label>
-      <label class="checkbox-inline">
-        <input type="checkbox" value="Monday" data-bind="checked: weeklyRecurrenceDays"> Mon
-      </label>
-      <label class="checkbox-inline">
-        <input type="checkbox" value="Tuesday" data-bind="checked: weeklyRecurrenceDays"> Tue
-      </label>
-      <label class="checkbox-inline">
-        <input type="checkbox" value="Wednesday" data-bind="checked: weeklyRecurrenceDays"> Wed
-      </label>
-      <label class="checkbox-inline">
-        <input type="checkbox" value="Thursday" data-bind="checked: weeklyRecurrenceDays"> Thu
-      </label>
-      <label class="checkbox-inline">
-        <input type="checkbox" value="Friday" data-bind="checked: weeklyRecurrenceDays"> Fri
-      </label>
-      <label class="checkbox-inline">
-        <input type="checkbox" value="Saturday" data-bind="checked: weeklyRecurrenceDays"> Sat
-      </label>
-    </div>
-    
-    <div data-bind="visible: isMonthly">
-      <div class="form-group col-sm-12">
-        <div class="col-sm-3 col-md-2">
-          <label>
-            <input type="radio" name="monthlyRecurrenceOptions" value="bydate" data-bind="checked: monthlyRecurrenceOption" /> On Day
-          </label>
-        </div>
-        <div class="col-sm-3 col-md-2">
-          <select class="form-control" data-bind="value: monthlyByDate, options: monthlyByDateOptions"></select>
-        </div>
-      </div>
-
-      <div class="form-group col-sm-12">
-        <div class="col-sm-3 col-md-2">
-          <label>
-            <input type="radio" name="monthlyRecurrenceOptions" value="byday" data-bind="checked: monthlyRecurrenceOption" /> On the
-          </label>
-        </div>
-        <div class="col-sm-3 col-md-2">
-          <select class="form-control" data-bind="value: index">
-            <option>First</option>
-            <option>Second</option>
-            <option>Third</option>
-            <option>Fourth</option>
-            <option>Last</option>
-          </select>
-        </div>
-        <div class="col-sm-3 col-md-2">
-          <select class="form-control" data-bind="value: monthlyByDay">
-            <option>Sunday</option>
-            <option>Monday</option>
-            <option>Tuesday</option>
-            <option>Wednesday</option>
-            <option>Thursday</option>
-            <option>Friday</option>
-            <option>Saturday</option>
-          </select>
-        </div>
+      <div class="col-sm-3 col-md-2">
+        <select class="form-control" data-bind="value: monthlyByDay">
+          <option>Sunday</option>
+          <option>Monday</option>
+          <option>Tuesday</option>
+          <option>Wednesday</option>
+          <option>Thursday</option>
+          <option>Friday</option>
+          <option>Saturday</option>
+        </select>
       </div>
     </div>
+  </div>
 
-    <div class="form-group">
-      <label class="sr-only">Repeat Until</label>
-      <div class="col-sm-4 col-md-3">
-        <input class="form-control" placeholder="End: Never" data-bind="datepicker: true, value: recurrenceEndDate"/>
-      </div>
+  <div class="form-group">
+    <label class="col-sm-2">Ends</label>
+    <div class="col-sm-4">
+      <input class="form-control" placeholder="End: Never" data-bind="datepicker: true, value: endDate"/>
     </div>
+  </div>
 
-    <div class="bg-info" style="padding: 3px" data-bind="html: summaryText, visible: summaryText"></div>
-  </section>
+  <div class="bg-info" style="padding: 3px" data-bind="html: summaryText, visible: summaryText"></div>
 </div>
