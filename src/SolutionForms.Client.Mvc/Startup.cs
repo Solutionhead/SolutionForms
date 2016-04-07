@@ -109,6 +109,7 @@ namespace SolutionForms.Client.Mvc
         public void ConfigureMembershipReboot(IServiceCollection services)
         {
             var confg = Configuration.GetSection("membershipReboot");
+            var smtp = Configuration.GetSection("smtp");
             services.Configure<SecuritySettings>(confg);
             
             services.ConfigureSolutionFormsProviders(new ApplicationAccountInformation(
@@ -118,12 +119,12 @@ namespace SolutionForms.Client.Mvc
                 new PathString("/Account/ResetPassword/")
                 ), new StmpDeliveryConfig
                 {
-                    Host = Configuration["smtp-host"],
-                    Port = int.Parse(Configuration["smtp-port"]),
-                    EnableSsl = bool.Parse(Configuration["smtp-enableSsl"]),
+                    Host = smtp["host"],
+                    Port = int.Parse(smtp["port"]),
+                    EnableSsl = bool.Parse(smtp["enableSsl"]),
                     UserName = Configuration["smtp-username"],
                     Password = Configuration["smtp-password"],
-                    FromEmailAddress = Configuration["smtp-fromEmail"]
+                    FromEmailAddress = smtp["fromEmail"]
                 });
         }
     }
