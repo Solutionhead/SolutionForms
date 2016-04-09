@@ -1,17 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using BrockAllen.MembershipReboot;
 using Microsoft.AspNet.Http.Features;
 using Microsoft.AspNet.Mvc;
-using Newtonsoft.Json.Linq;
-using Raven.Json.Linq;
 using SolutionForms.Client.Mvc.Attributes;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
 using SolutionForms.Core;
 using SolutionForms.Service.Providers.Models;
+using SolutionForms.Service.Providers.Parameters;
 using SolutionForms.Service.Providers.Providers;
 
 namespace SolutionForms.Client.Mvc.Controllers
@@ -34,14 +32,14 @@ namespace SolutionForms.Client.Mvc.Controllers
             _userAccountService = userAccountService;
         }
 
-        [Route("index/{indexName?}", Order = 0)]
+        [HttpGet("index/{indexName?}", Order = 0)]
         public async Task<ActionResult> GetByIndex(string id = null)
         {
             var queryParams = HttpContext.Request.Query.ToDictionary(q => q.Key, q => q.Value.ToString());
             return Json(await _dataFormsProvider.GetDataEntriesByIndexName(Tenant, id, queryParams));
         }
 
-        [Route("{entityName}", Order = 1)]
+        [HttpGet("{entityName}", Order = 1)]
         public async Task<ActionResult> Get(string entityName)
         {
             var queryParams = HttpContext.Request.Query.Select(q => new KeyValuePair<string, string>(q.Key, q.Value));
@@ -54,7 +52,7 @@ namespace SolutionForms.Client.Mvc.Controllers
         /// <param name="entityName">Not currently used but kept in for consistency with REST-style API calls.</param>
         /// <param name="id">The id of the entity to be retrieved</param>
         /// <returns></returns>
-        [Route("{entityName}/{id}")]
+        [HttpGet("{entityName}/{id}")]
         public async Task<IActionResult> Get(string entityName, string id)
         {
             var result = await _dataFormsProvider.GetDataEntryByKeyAsync(Tenant, id);
@@ -84,5 +82,21 @@ namespace SolutionForms.Client.Mvc.Controllers
             }
             return Ok(new {});
         }
+
+        [HttpPatch("{entityName}/{id}")]
+        public async Task<IActionResult> Patch(string entityName, string id, [FromBody]ScriptedPatchRequestParameters values)
+        {
+            var userAccount = _userAccountService.GetByUsername(Tenant, User.Identity.Name);
+            await _dataFormsProvider.PatchDataEntryAsync(Tenant, id, values, userAccount);
+            return Ok(new {});
+        }
+
+        [HttpDelete("{entityName}/{id}")]
+        public async Task<IActionResult> Delete(string entityName, string id)
+        {
+            await _dataFormsProvider.DeleteDataEntryAsync(Tenant, id);
+            return new NoContentResult();
+        }
     }
+
 }

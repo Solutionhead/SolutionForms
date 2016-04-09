@@ -7,6 +7,7 @@ using SolutionForms.Service.Providers.Helpers;
 using SolutionForms.Service.Providers.Parameters;
 using SolutionForms.Service.Providers.Returns;
 using System.Linq;
+using System.Windows.Markup;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Raven.Abstractions.Data;
@@ -221,8 +222,20 @@ namespace SolutionForms.Service.Providers.Providers
             await SaveEntryAsync(tenant, entityName, userAccount, jobject, id);
             return jobject;
         }
+
+        public async Task PatchDataEntryAsync(string tenant, string id, ScriptedPatchRequestParameters patchParams, ApplicationUser userAccount)
+        {
+            var commands = _documentStore.AsyncDatabaseCommands.ForDatabase(tenant);
+            await commands.PatchAsync(id, patchParams.ToScriptedPatchRequest());
+        }
+
+        public async Task DeleteDataEntryAsync(string tenant, string id)
+        {
+            var commands = _documentStore.AsyncDatabaseCommands.ForDatabase(tenant);
+            await commands.DeleteAsync(id, null);
+        }
     }
-    
+
     public class DataEntryCreatedReturn
     {
         public string Key { get; set; }
