@@ -1,0 +1,12 @@
+﻿<section>
+  <button class="btn btn-default" data-bind="command: editSeriesCommand, visible: editSeriesCommand.canExecute">
+    <span class="glyphicon glyphicon-repeat"></span>
+    Edit Series
+  </button>
+  <dynamic-form params="formId: 'DataForms-65', exports: eventEditorVm"></dynamic-form>
+
+  <div data-bind="if: showRecurrence">
+    <h3>Repeat</h3>
+    <recurrence-scheduler params="input: recurrenceInput, exports: recurrenceEditorExport"></recurrence-scheduler>
+  </div>
+</section>

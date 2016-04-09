@@ -1,0 +1,39 @@
+﻿<appointments-day-view params="options: appointmentsDayViewOptions, exports: appointmentsByDayViewModel"></appointments-day-view>
+
+<button class="btn btn-default" data-bind="command: newEvent">
+  <span class="glyphicon glyphicon-calendar"></span> Add Appointment
+</button>
+
+<section data-bind="modal: showModal, modalEventCallbacks: modalEventCallbacks" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        Appointment Details
+        <div class="pull-right"><a href="#" data-bind="click: hideModal"><span class="fa fa-close"></span></a></div>
+      </div>
+      <div class="modal-body" data-bind="component: { name: 'appointment-editor', params: { input: appointmentEditorConfig, exports: appointmentEditorViewModel }}"></div>
+      <div class="modal-footer">
+        <input type="button" data-bind="command: saveAsyncCommand" class="btn btn-primary" value="Save and close" />
+
+        <!-- ko ifnot: isCurrentEventNew -->
+        <!-- ko ifnot: isCurrentEventRecurring -->
+        <button type="button" class="btn btn-danger" data-bind="command: deleteEventAsyncCommand">Delete</button>
+        <!-- /ko -->
+
+        <div class="btn-group" data-bind="visible: isCurrentEventRecurring">
+          <button type="button" class="btn btn-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            Delete <span class="caret"></span>
+          </button>
+
+          <ul class="dropdown-menu dropdown-menu-right" role="menu">
+            <li><a data-bind="command: deleteFutureRecurrencesAsyncCommand" href="#">Delete this and all future appointments</a></li>
+            <!--<li><a href="#" data-bind="command: deleteSingleRecurrenceAsyncCommand">Delete this appointment</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#" data-bind="click: deleteEventAsyncCommand.execute, enable: deleteEventAsyncCommand" class="text-danger"><span class="fa fa-exclamation-triangle"></span> Delete event (Removes all history)</a></li>-->
+          </ul>
+        </div>
+        <!-- /ko -->
+      </div>
+    </div>
+  </div>
+</section>

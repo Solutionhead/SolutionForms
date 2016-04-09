@@ -1,0 +1,26 @@
+﻿<div>
+  <input type="text" class="form-control" data-bind="datepicker: 'M/D/YYYY', value: date"/>
+
+  <section data-bind="foreach: appointmentsByDate" class="container">
+    <div class="row">
+      <h3>{{ date | moment: 'M/D/YYYY' }}</h3>
+    </div>
+    {{ #foreach: appointments }}
+
+    <article>
+      <div data-bind="if: $parents[1].renderTeamHeader($data)" class="row">
+        <h4>{{ teamName }}</h4>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-4 col-md-2">
+          <span class="glyphicon" data-bind="css: {'glyphicon-repeat': isRecurring}"></span> 
+          <a href="#" data-bind="command: loadEventDetailsCommand">{{ startTime }} - {{ endTime }}</a>
+        </div>
+        <div class="col-sm-4 col-md-3">{{ customerName }}</div>
+        <div class="col-sm-4 col-md-7">{{ location }}</div>
+      </div>
+    </article>
+    {{ /foreach }}
+  </section>
+</div>
