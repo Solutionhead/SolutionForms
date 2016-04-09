@@ -4,7 +4,6 @@
 
 function DynamicFormUIViewModel(params) {
   if (!(this instanceof DynamicFormUIViewModel)) { return new DynamicFormUIViewModel(params); }
-
   var self = this;
 
   self.fields = ko.observableArray([]);
@@ -30,7 +29,11 @@ function DynamicFormUIViewModel(params) {
       isReady: self.isReady,
       setFormContext: self.setFieldValues,
       buildDto: self.buildDto,
-    });
+      setFieldValue: self.setFieldValue.bind(self),
+      getFieldValue: self.getFieldValue.bind(self),
+      hideField: self.hideField.bind(self),
+      showField: self.showField.bind(self)
+  });
   }
 
   return self;
@@ -40,10 +43,7 @@ DynamicFormUIViewModel.prototype.initializeFromConfig = function (jsonConfig) {
   var self = this;
 
   var form = (typeof jsonConfig === "string" ? ko.utils.parseJson(jsonConfig) : jsonConfig) || {};
-  //if (form.dataSource == undefined || form.dataSource.documentName == undefined) {
-  //  throw new Error("Invalid configuration: Missing or invalid dataSource property.");
-  //}
-
+  
   // load components
   ko.utils.arrayMap(form.components || [], loadComponent);
 
@@ -73,18 +73,30 @@ DynamicFormUIViewModel.prototype.setOrCreateObservable = function (name, value) 
 DynamicFormUIViewModel.prototype.loadFormById = function (formId) {
   var self = this;
   formsService.getDataFormByIdAsync(formId)
-    .then(function(data) {
+    .done(function(data) {
       self.initializeFromConfig(data);
     });
 }
 DynamicFormUIViewModel.prototype.setFieldValues = function (data) {
-  var vals = data || {},
-    self = this;
+  var vals = data || {};
 
   if (typeof vals === "string") { vals = ko.utils.parseJson(vals) || {}; }
-  ko.utils.arrayForEach(self.fields(), function (f) {
+  ko.utils.arrayForEach(this.fields(), function (f) {
     f.context().setValue(vals[f.exportName]);
   });
+}
+DynamicFormUIViewModel.prototype.getFieldByName = function (fieldName) {
+  return ko.utils.arrayFirst(this.fields(), function (f) {
+    return f.exportName === fieldName;
+  });
+}
+DynamicFormUIViewModel.prototype.setFieldValue = function (fieldName, value) {
+  var field = this.getFieldByName(fieldName);
+  field && field.context().setValue(value);
+}
+DynamicFormUIViewModel.prototype.getFieldValue = function (fieldName) {
+  var field = this.getFieldByName(fieldName);
+  return field && field.context().userResponse();
 }
 DynamicFormUIViewModel.prototype.buildDto = function () {
   var self = this,
@@ -95,6 +107,30 @@ DynamicFormUIViewModel.prototype.buildDto = function () {
   });
   return output;
 
+}
+DynamicFormUIViewModel.prototype.onFieldRendered = function(domNodes) {
+  var fieldContext;
+
+  var domNode = ko.utils.arrayFirst(domNodes, function (node) {
+    fieldContext = ko.contextFor(node);
+    if (fieldContext != undefined) {
+      return node;
+    };
+  });
+
+  if(fieldContext) { fieldContext.$data.__domNode = domNode; }
+}
+DynamicFormUIViewModel.prototype.hideField = function(fieldName) {
+  var field = this.getFieldByName(fieldName);
+  if (field && field.__domNode) {
+    $(field.__domNode).hide();
+  }
+}
+DynamicFormUIViewModel.prototype.showField = function(fieldName) {
+  var field = this.getFieldByName(fieldName);
+  if (field && field.__domNode) {
+    $(field.__domNode).show();
+  }
 }
 
 module.exports = {

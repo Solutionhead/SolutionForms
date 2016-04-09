@@ -1,5 +1,6 @@
-﻿<div data-bind="foreach: fields">
-  <div class="form-fieldset">
+﻿<div data-bind="template: { foreach: fields, afterRender: onFieldRendered, name: 'form-field-template' }"></div>
+
+<script id="form-field-template" type="text/html"><div class="form-fieldset">
     <div class="form-horizontal">
       <div class="form-group" data-bind="validationElement: validationElement()">
         <label class="col-sm-2 control-label" data-bind="text: displayName"></label>
@@ -8,5 +9,4 @@
         <div class="sr-only" data-bind="validationMessage: validationElement()"></div>
       </div>
     </div>
-  </div>
-</div>
+  </div></script>
