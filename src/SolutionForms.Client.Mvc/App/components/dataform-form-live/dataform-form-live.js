@@ -40,7 +40,7 @@ function DataFormLive(params) {
           var data = self.dynamicFormUIExport().buildDto();
           data.documentId = self.documentId();
 
-          self.notifyListenersAsync('submit', data, self).then(function () {
+          self.notifyListenersAsync('submit', data, self).done(function () {
               toastr.success('Save completed successfully');
               if (self.documentId == undefined) {
                 //assumes that the arguments[0] is the results of the ajax call
@@ -170,7 +170,7 @@ DataFormLive.prototype.loadDocumentData = function (documentId) {
       id: documentId,
       entityName: ko.unwrap(self.formId),
       form: self
-    }).then(function() {
+    }).done(function() {
       self.notifyListenersAsync('loaded', self);
     }, function() {
       toastr.error("Error: " + Arguments[2]);

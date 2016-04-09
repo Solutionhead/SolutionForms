@@ -8,6 +8,7 @@
   }
 }(function (ko, moment) {
   ko.extenders.moment = function (target, defaultFormatString) {
+    if(typeof defaultFormatString !== "string") { defaultFormatString = "MM-DD-YYYY" }
     var wrapper = ko.pureComputed({
       read: target,
       write: function (newValue) {
@@ -41,7 +42,7 @@
 
     wrapper.toAbsoluteDateISOString = function() {
       var mDate = forceDate(wrapper());
-      return mDate && mDate.format(ko.extenders.moment.ISO_DATE_Format);
+      return mDate && mDate._d.toISOString().replace(/\.(\d{3})Z$/, ".$10000Z");
     }
     wrapper.format = format;
     
@@ -53,6 +54,4 @@
     wrapper(target.peek());
     return wrapper;
   };
-
-  ko.extenders.moment.ISO_DATE_Format = "YYYY-MM-DDT00:00:00.0000000Z";
 }));
