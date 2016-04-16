@@ -17,10 +17,11 @@ function DynamicFormUIViewModel(params) {
     formId && self.loadFormById(formId);
   });
 
-  self.isReady = ko.pureComputed(function() {
-    return ko.utils.arrayFirst(self.fields(), function(f) {
+  self.isReady = ko.computed(function () {
+    var nonReady = self.fields().length && ko.utils.arrayFirst(self.fields(), function(f) {
       return f.context() == undefined;
-    }) === null;
+    });
+    return nonReady === null;
   });
 
   if (ko.isWritableObservable(params.exports)) {
@@ -29,10 +30,13 @@ function DynamicFormUIViewModel(params) {
       isReady: self.isReady,
       setFormContext: self.setFieldValues,
       buildDto: self.buildDto,
+      getFieldByName: self.getFieldByName.bind(self),
       setFieldValue: self.setFieldValue.bind(self),
       getFieldValue: self.getFieldValue.bind(self),
       hideField: self.hideField.bind(self),
-      showField: self.showField.bind(self)
+      showField: self.showField.bind(self),
+      resetForm: self.resetForm.bind(self),
+      getFieldContextByName: self.getFieldContextByName.bind(self)
   });
   }
 
@@ -56,6 +60,8 @@ DynamicFormUIViewModel.prototype.initializeFromConfig = function (jsonConfig) {
     self.setOrCreateObservable('fields', ko.utils.arrayMap(form.fields || [], function (f) {
       return new Field(f);
     }));
+
+    self.displayMode = getTemplateNameForFieldType;
   }).call(self);
 
   function loadComponent(path) {
@@ -89,6 +95,11 @@ DynamicFormUIViewModel.prototype.getFieldByName = function (fieldName) {
   return ko.utils.arrayFirst(this.fields(), function (f) {
     return f.exportName === fieldName;
   });
+}
+DynamicFormUIViewModel.prototype.getFieldContextByName = function (fieldName) {
+  var field = this.getFieldByName(fieldName);
+  var context = field && field.context();
+  return context && context.userResponse;
 }
 DynamicFormUIViewModel.prototype.setFieldValue = function (fieldName, value) {
   var field = this.getFieldByName(fieldName);
@@ -130,6 +141,20 @@ DynamicFormUIViewModel.prototype.showField = function(fieldName) {
   var field = this.getFieldByName(fieldName);
   if (field && field.__domNode) {
     $(field.__domNode).show();
+  }
+}
+DynamicFormUIViewModel.prototype.resetForm = function() {
+  ko.utils.arrayForEach(this.fields(), function(f) {
+    f.context().setValue(undefined);
+  });
+}
+
+function getTemplateNameForFieldType(fieldData) {
+  switch(fieldData.fieldType) {
+    case "container" :
+      return 'form-container-template';
+    default:
+      return 'form-field-template';
   }
 }
 

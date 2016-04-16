@@ -40,7 +40,8 @@ function DataFormLive(params) {
           var data = self.dynamicFormUIExport().buildDto();
           data.documentId = self.documentId();
 
-          self.notifyListenersAsync('submit', data, self).done(function () {
+          self.notifyListenersAsync('submit', data, self)
+            .done(function() {
               toastr.success('Save completed successfully');
               if (self.documentId == undefined) {
                 //assumes that the arguments[0] is the results of the ajax call
@@ -49,8 +50,7 @@ function DataFormLive(params) {
               }
               self.notifyListenersAsync('submitCompleted', self);
               complete();
-            },
-            function(xhr) {
+            }).fail(function(xhr) {
               toastr.error(xhr.message, 'Failed to Save');
               complete();
             });
@@ -141,10 +141,14 @@ DataFormLive.prototype.parseListeners = function() {
   }
 }
 DataFormLive.prototype.notifyListenersAsync = function (event, args) {
+  var self = this;
+  if (arguments.length > 1) {
+    args = Array.prototype.slice.call(arguments, 1);
+  }
   return $.when.apply(this, ko.utils.arrayMap(this.listeners[event], raiseEventOnListener));
 
   function raiseEventOnListener(listener) {
-        return listener[event](args);
+        return listener[event].apply(self, args);
     }
 }
 DataFormLive.prototype.loadDocumentData = function (documentId) {
@@ -172,8 +176,8 @@ DataFormLive.prototype.loadDocumentData = function (documentId) {
       form: self
     }).done(function() {
       self.notifyListenersAsync('loaded', self);
-    }, function() {
-      toastr.error("Error: " + Arguments[2]);
+    }).fail(function() {
+      toastr.error("Error: " + arguments[2]);
     });
   }
 }

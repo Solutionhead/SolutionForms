@@ -25,7 +25,8 @@ Field.prototype.DEFAULTS = {
     exportName: null,
     helpText: null,
     inputType: null,
-    settings: {}
+    settings: {},
+    fieldType: 'fieldset'
 }
 
 Field.prototype.setValue = function (val) {

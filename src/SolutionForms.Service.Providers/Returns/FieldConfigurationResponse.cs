@@ -13,5 +13,7 @@ namespace SolutionForms.Service.Providers.Returns
         public string HelpText { get; set; }
 
         public IDictionary<string, object> Settings { get; set; }
+
+        public string FieldType { get; set; }
     }
 }

@@ -17,5 +17,10 @@ namespace SolutionForms.Data.Models
         public string HelpText { get; set; }
 
         public string Settings { get; set; }
+
+        /// <summary>
+        /// Describes how the field will be rendered in the UI.
+        /// </summary>
+        public string FieldType { get; set; }
     }
 }

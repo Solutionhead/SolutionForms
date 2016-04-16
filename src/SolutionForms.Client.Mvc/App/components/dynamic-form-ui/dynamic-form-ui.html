@@ -1,12 +1,17 @@
-﻿<div data-bind="template: { foreach: fields, afterRender: onFieldRendered, name: 'form-field-template' }"></div>
+﻿<fieldset data-bind="template: { foreach: fields, afterRender: onFieldRendered, name: displayMode }"></fieldset>
 
-<script id="form-field-template" type="text/html"><div class="form-fieldset">
-    <div class="form-horizontal">
-      <div class="form-group" data-bind="validationElement: validationElement()">
-        <label class="col-sm-2 control-label" data-bind="text: displayName"></label>
-        <div class="col-sm-10" data-bind="component: { name: inputType, params: { input: $data, context: context, parentContext: $parent } }"></div>
-        <div data-bind="if: helpText" class="col-sm-10 col-sm-offset-2"><span class="help-block" data-bind="text: helpText"></span></div>
-        <div class="sr-only" data-bind="validationMessage: validationElement()"></div>
-      </div>
-    </div>
-  </div></script>
+<script id="form-field-template" type="text/html">
+  <div class="row">
+    <fieldset class="form-group" data-bind="validationElement: validationElement()">
+      <label class="col-sm-2" data-bind="text: displayName"></label>
+      <div class="col-sm-10" data-bind="component: { name: inputType, params: { input: $data, context: context, parentContext: $parent } }"></div>
+      <div data-bind="if: helpText" class="col-sm-10 col-sm-offset-2"><span class="help-block" data-bind="text: helpText"></span></div>
+      <div class="sr-only" data-bind="validationMessage: validationElement()"></div>
+    </fieldset>
+  </div>
+</script>
+
+<script id="form-container-template" type="text/html">
+  <div class="row" data-bind="component: { name: inputType, params: { input: $data, context: context, parentContext: $parent } }"></div>
+</script>
+
