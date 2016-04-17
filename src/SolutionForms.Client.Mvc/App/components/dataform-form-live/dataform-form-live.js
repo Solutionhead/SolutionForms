@@ -10,7 +10,9 @@ ko.validation.init({
     errorElementClass: 'has-error'
 });
 
-ko.components.register('dynamic-form', require('components/dynamic-form-ui/dynamic-form-ui'));
+if (!ko.components.isRegistered('dynamic-form')) {
+  ko.components.register('dynamic-form', require('components/dynamic-form-ui/dynamic-form-ui'));
+}
 
 function DataFormLive(params) {
     if (!(this instanceof DataFormLive)) { return new DataFormLive(params); }
@@ -22,6 +24,10 @@ function DataFormLive(params) {
 
     self.documentId = ko.pureComputed(function() {
       return ko.unwrap(params.documentId);
+    });
+
+    self.documentValues = ko.pureComputed(function() {
+      return ko.unwrap(params.documentValues);
     });
 
     self.formConfig = ko.pureComputed(function () {
@@ -69,12 +75,22 @@ function DataFormLive(params) {
         && self.isRendered() === true;
     });
 
-    ko.computed(function() {
+    var __disposables = [];
+    __disposables.push(ko.computed(function() {
       self.initFromConfig(ko.unwrap(params.config));
-    });
+    }));
     self.parseListeners();
-    self.loadDocumentData(params.documentId);
 
+    __disposables.push(ko.computed(function() {
+      var docId = ko.unwrap(params.documentId);
+      docId != undefined && self.loadDocumentData(docId);
+    }));
+
+    __disposables.push(ko.computed(function() {
+      var docId = ko.unwrap(params.documentValues);
+      docId != undefined && self.loadDocumentData(docId);
+    }));
+  
     self.dispose = dispose;
   
     return self;
@@ -82,6 +98,9 @@ function DataFormLive(params) {
     function dispose() {
         ko.utils.arrayForEach(self.subscriptions, function (subscription) {
             subscription.dispose && !subscription.isDisposed && subscription.dispose();
+        });
+        ko.utils.arrayForEach(__disposables, function(d) {
+          d.dispose && !d.isDisposed && d.dispose();
         });
         self.subscriptions = null;
     }

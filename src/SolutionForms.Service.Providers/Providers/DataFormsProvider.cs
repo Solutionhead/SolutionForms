@@ -11,6 +11,7 @@ using System.Windows.Markup;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Raven.Abstractions.Data;
+using Raven.Abstractions.Extensions;
 using Raven.Client.Connection;
 using Raven.Json.Linq;
 using SolutionForms.Service.Providers.Models;
@@ -180,6 +181,28 @@ namespace SolutionForms.Service.Providers.Providers
                 Key = id,
                 Entity = jobject
             };
+        }
+
+        public IEnumerable<DataEntryCreatedReturn> CreateDataEntriesFromJson(string tenant, string entityName, string jsonData, ApplicationUser ownerUser)
+        {
+            var jsonArray = JArray.Parse(jsonData);
+
+            using (var bulkInsert = _documentStore.BulkInsert(tenant))
+            {
+                foreach (var d in jsonArray.Children<JObject>())
+                {
+                    UserIdentityHelper.SetUserIdentity(d, ownerUser);
+                    var entity = RavenJObject.Parse(d.ToString());
+                    var meta = new RavenJObject {{"Raven-Entity-Name", entityName}};
+                    var id = (string) d["Id"];
+                    bulkInsert.Store(entity, meta, id);
+                    yield return new DataEntryCreatedReturn
+                    {
+                        Key = id,
+                        Entity = d
+                    };
+                }
+            }
         }
 
         private async Task SaveEntryAsync(string tenant, string entityName, ApplicationUser ownerUser, JObject jobject, string id)

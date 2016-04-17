@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using BrockAllen.MembershipReboot;
@@ -31,6 +32,19 @@ namespace SolutionForms.Client.Mvc.Controllers
             if(userAccountService == null) { throw new ArgumentNullException(nameof(userAccountService)); }
             _userAccountService = userAccountService;
         }
+
+        [HttpGet("~/data/load")]
+        public ActionResult Load()
+        {
+            var customers = System.IO.File.ReadAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SolutionForms", "customers.txt"));
+            var cResult = _dataFormsProvider.CreateDataEntriesFromJson(Tenant, "gc-customers", customers, _userAccountService.GetByUsername(Tenant, User.Identity.Name));
+            var events = System.IO.File.ReadAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SolutionForms", "events.txt"));
+            var eResult = _dataFormsProvider.CreateDataEntriesFromJson(Tenant, "events", events, _userAccountService.GetByUsername(Tenant, User.Identity.Name));
+            return Ok(new {
+                CustomersLoaded = cResult.Count(),
+                EventsLoaded = eResult.Count()
+            });
+        } 
 
         [HttpGet("index/{indexName?}", Order = 0)]
         public async Task<ActionResult> GetByIndex(string id = null)

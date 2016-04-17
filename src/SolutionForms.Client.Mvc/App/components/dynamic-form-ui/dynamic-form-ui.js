@@ -2,6 +2,14 @@
   formsService = require('services/dataFormsService'),
   setFormValuesPlugin = require('plugins/initializeFormValuesPlugin');
 
+/**
+ * Dynamicly generates form controls based on a given configuration object.
+ * 
+ * @param {} params 
+ * @param params.formId   string      The key value for the form to be generated. The requested form configuration will be loaded from the api.
+ * @param parms.config    object      The configuration object for generating the form.
+ * @param params.exports  observable  An optional argument which enables the consuming component to access the exported members.
+ */
 function DynamicFormUIViewModel(params) {
   if (!(this instanceof DynamicFormUIViewModel)) { return new DynamicFormUIViewModel(params); }
   var self = this;

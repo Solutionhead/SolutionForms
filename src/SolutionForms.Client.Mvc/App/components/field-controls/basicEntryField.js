@@ -1,18 +1,20 @@
 ﻿function BasicEntryField(params, isBase) {
-    if (params == undefined || !ko.isObservable(params.context)) throw new Error('Requires argument params.context.');
     if (!(this instanceof BasicEntryField)) { return new BasicEntryField(params); }
 
     var self = this;
 
-    self.settings = params.input.settings;
+    params.input = params.input || {};
+    self.settings = params.input.settings || {};
 
+    // this is used by the form-field ui component
     if (!ko.isObservable(self.userResponse)) {
-        self.userResponse = ko.observable();
+      self.userResponse = ko.isWritableObservable(params.input.valueContext)
+        ? params.input.valueContext : ko.observable();
     }
 
-    BasicEntryField.prototype.setupValidators.call(self, params.input.settings);
+    BasicEntryField.prototype.setupValidators.call(self, self.settings);
     
-    if (!isBase) {
+    if (!isBase && ko.isWritableObservable(params.context)) {
         params.context(self);
     }
 

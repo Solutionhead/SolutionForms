@@ -8,7 +8,7 @@ function InitializeFormValuesPlugin() {
   plugin.fetch = function (args) {
     var sender = args.form;
     return dataProvider.fetch(args)
-        .then(function (data) {
+        .done(function (data) {
           var vals = data || {};
           if (typeof vals === "string") { vals = ko.utils.parseJson(vals) || {}; }
           ko.utils.arrayForEach(sender.fields(), function (f) {

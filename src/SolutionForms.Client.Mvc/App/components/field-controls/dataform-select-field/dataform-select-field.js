@@ -2,19 +2,18 @@
   _toArray = require('lodash/fp/toArray');
 
 function SelectFieldViewModel(params) {
-    if (params == undefined || params.context == undefined) throw new Error('Requires argument params.context');
     if (!(this instanceof SelectFieldViewModel)) { return new SelectFieldViewModel(params); }
 
     var self = this,
         input = ko.unwrap(params.input) || {},
-        settings = ko.unwrap(input.settings) || {};
-    
+        settings = ko.unwrap(input.settings) || input;
+
     base.call(this, params, true);
     
     self.optionsCaption = ko.pureComputed(function () {
         return ko.unwrap(settings.displayDefaultSelection)
             ? ko.unwrap(settings.defaultSelectionText) || ' '
-            : null;
+            : ko.unwrap(settings.optionsCaption) || null;
     });
     self.initOptions(settings);
 
@@ -28,7 +27,10 @@ function SelectFieldViewModel(params) {
         }
     }
 
-    params.context(self);
+    if (ko.isWritableObservable(params.context)) {
+      params.context(self);
+    }
+
     return self;
 }
 
@@ -55,6 +57,11 @@ SelectFieldViewModel.prototype.setSelectedOptionsForDataSource = function (value
     //#endregion
 
     var self = this;
+    if (value == undefined) {
+      base.prototype.setValue.call(self, undefined);
+      return;
+    }
+    
     var key = value.Id,
         options = self.options() || [];
 
