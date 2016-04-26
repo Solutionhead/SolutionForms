@@ -44,6 +44,10 @@
       var mDate = forceDate(wrapper());
       return mDate && mDate._d.toISOString().replace(/\.(\d{3})Z$/, ".$10000Z");
     }
+    wrapper.toFloatingDateString = function() {
+      var mDate = forceDate(wrapper());
+      return mDate && mDate.format("YYYY-MM-DD[T00:00:00]");
+    }
     wrapper.format = format;
     
     function format(formatString) {
