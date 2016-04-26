@@ -109,3 +109,7 @@
 }
 
 .ui-datepicker {z-index: 1151 !important;}
+
+.ui-autocomplete {
+    z-index: 215000000 !important;
+}

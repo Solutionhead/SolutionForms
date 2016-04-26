@@ -16,7 +16,7 @@ function SelectFieldViewModel(params) {
             : ko.unwrap(settings.optionsCaption) || null;
     });
     self.initOptions(settings);
-
+  
     var baseSetValue = self.setValue.bind(self);
     self.setValue = function(value) {
         switch (self.settings.optionSource) {
@@ -25,6 +25,10 @@ function SelectFieldViewModel(params) {
             default:
                 return baseSetValue(value);
         }
+    }
+
+    if (ko.isObservable(input.valueContext)) {
+      input.valueContext.subscribe(self.setValue);
     }
 
     if (ko.isWritableObservable(params.context)) {
@@ -49,7 +53,8 @@ SelectFieldViewModel.prototype.setSelectedOptionsForDataSource = function (value
     // from the local data source.
     function findOptionByKey(opts, key) {
         var match = ko.utils.arrayFirst(opts, function (o) {
-            return o.optionValue.Id === key;
+          return (self.settings.optionDataSourceValueMember != undefined 
+            ? o.optionValue : o.optionValue.Id) === key;
         });
         return match == undefined ? null : match.optionValue;
     }
@@ -62,8 +67,9 @@ SelectFieldViewModel.prototype.setSelectedOptionsForDataSource = function (value
       return;
     }
     
-    var key = value.Id,
-        options = self.options() || [];
+    var key = self.settings.optionDataSourceValueMember != undefined 
+      ? value : value.Id,
+      options = self.options() || [];
 
     if (options.length) {
         base.prototype.setValue.call(self, findOptionByKey(options, key));

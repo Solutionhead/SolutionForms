@@ -1,10 +1,8 @@
-﻿<ul class="list-unstyled row" data-bind="foreach: options">
-    <li class="col-md-4 col-lg-3">
-        <div class="checkbox">
-            <label>
-                <input type="checkbox" data-bind="checked: $parent.userResponse, attr: { value: optionValue }" />
-                <!-- ko text: optionLabel --><!-- /ko -->
-            </label>
-        </div>
-    </li>
-</ul>
+﻿<!-- ko foreach: options -->
+  <div class="checkbox">
+    <label>
+      <input type="checkbox" data-bind="checked: $parent.userResponse, attr: { value: optionValue }" />
+      <!-- ko text: optionLabel --><!-- /ko -->
+    </label>
+  </div>
+<!-- /ko -->
