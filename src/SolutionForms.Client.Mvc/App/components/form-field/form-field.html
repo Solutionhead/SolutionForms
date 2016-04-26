@@ -1,8 +1,6 @@
-﻿<div class="row">
-  <fieldset class="form-group" data-bind="validationElement: fieldConfig.validationElement()">
-    <label class="col-sm-2" data-bind="text: labelText"></label>
-    <div class="col-sm-10" data-bind="component: { name: inputType, params: { input: fieldConfig } }"></div>
-    <div data-bind="if: fieldConfig.helpText" class="col-sm-10 col-sm-offset-2"><span class="help-block" data-bind="text: fieldConfig.helpText"></span></div>
-    <div class="sr-only" data-bind="validationMessage: fieldConfig.validationElement()"></div>
-  </fieldset>
+﻿<div class="form-group" data-bind="validationElement: fieldConfig.validationElement()">
+  <label class="col-sm-2" data-bind="text: labelText"></label>
+  <div class="col-sm-10" data-bind="component: { name: inputType, params: { input: fieldConfig } }"></div>
+  <div data-bind="if: fieldConfig.helpText" class="col-sm-10 col-sm-offset-2"><span class="help-block" data-bind="text: fieldConfig.helpText"></span></div>
+  <div class="sr-only" data-bind="validationMessage: fieldConfig.validationElement()"></div>
 </div>

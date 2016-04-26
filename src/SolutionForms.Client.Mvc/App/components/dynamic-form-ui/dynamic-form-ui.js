@@ -36,7 +36,9 @@ function DynamicFormUIViewModel(params) {
     params.exports({
       fields: self.fields,
       isReady: self.isReady,
+      isValid: self.isValid,
       setFormContext: self.setFieldValues,
+      setFieldValues: self.setFieldValues,
       buildDto: self.buildDto,
       getFieldByName: self.getFieldByName.bind(self),
       setFieldValue: self.setFieldValue.bind(self),
@@ -51,6 +53,9 @@ function DynamicFormUIViewModel(params) {
   return self;
 }
 
+DynamicFormUIViewModel.prototype.isValid = function() {
+  
+}
 DynamicFormUIViewModel.prototype.initializeFromConfig = function (jsonConfig) {
   var self = this;
 
