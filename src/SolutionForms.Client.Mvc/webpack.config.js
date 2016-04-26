@@ -11,6 +11,7 @@ module.exports = {
     'dataform-designer': 'viewModels/dataformDesignerViewModel',
     'dataform-live': 'viewModels/dataformLiveViewModel',
     //'home': 'viewModels/homeViewModel',
+    'tests': ['customizations/green_cleaners/Tests/appointment-recurrence-utils-tests'],
     'core': ['ko',
       lib('knockout-postbox/build/knockout-postbox'),
       lib('knockout.punches/knockout.punches'),
@@ -81,6 +82,7 @@ module.exports = {
     loaders: [
         { test: /\.html$/, loader: 'raw' },
         { test: /\.css$/, loader: 'style!css?sourceMap' },
+        { test: /\.js?$/, loader: 'babel', exclude: /(node_modules|bower_components)/, query: { presets: ['es2015'] } },
 
         { test: /knockout(\.debug)?\.js$/, loader: 'imports?exports=>false&define=>false!exports?ko' },
         { test: /knockout\.command\.js/, loader: 'imports?require=>false&define=>false' },
@@ -101,6 +103,10 @@ module.exports = {
         { test: /\.(ttf|eot|svg|png|gif|jpe?g)(\?v=[0-9]\.[0-9](\.[0-9])?)?$/, loader: "url" }
     ],
     noParse: []
+  },
+
+  node: {
+    fs: 'empty'
   }
 }
 
