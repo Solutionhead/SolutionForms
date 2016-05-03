@@ -38,13 +38,17 @@
 
   "exclude": [
     "wwwroot",
-    "node_modules"
+    "node_modules",
+    "bower_modules"
   ],
   "publishExclude": [
     "**.user",
-    "**.vspscc"
+    "**.vspscc",
+    "node_modules",
+    "bower_modules",
+    "AppData"
   ],
   "scripts": {
-    "prepublish": [ "npm install", "bower install", "gulp clean", "gulp min" ]
+    "prepublish": [ "npm install", "bower install", "gulp clean", "gulp min", "gulp copy" ]
   }
 }
