@@ -19,20 +19,13 @@ function AppointmentsController() {
   self.appointmentsByDayViewModel = ko.observable();
   self.appointmentEditorViewModel = ko.observable();
 
-  self.isCurrentEventRecurring = ko.pureComputed(function() {
+  self.isCurrentEventRecurring = ko.computed(function() {
     var editorVm = self.appointmentEditorViewModel();
     return editorVm && editorVm.isRecurringAppointment();
   });
   self.isCurrentEventNew = ko.pureComputed(function() {
     var editorVm = self.appointmentEditorViewModel();
     return editorVm && editorVm.isNewAppointment();
-  });
-  self.foo = ko.asyncCommand({
-    execute: function(done) {
-      console.log("FOO!");
-      console.log(arguments);
-      done();
-    }
   });
   self.appointmentsDayViewOptions = {
     onEventSelected: function(eventData) {
@@ -41,13 +34,16 @@ function AppointmentsController() {
     }
   }
 
-  self.modalEventCallbacks = {
-    "hide.bs.modal": function() {
+  ko.postbox.subscribe("appointment-saved", () => {
       var appointmentsVm = self.appointmentsByDayViewModel();
       appointmentsVm && appointmentsVm.fetchEvents();
-    }
-  }
+  });
 
+  ko.postbox.subscribe("appointment-deleted", () => {
+      var appointmentsVm = self.appointmentsByDayViewModel();
+      appointmentsVm && appointmentsVm.fetchEvents();
+  });
+  
   self.appointmentEditorConfig = {
     appointmentData: self.selectedEvent
   }
@@ -56,6 +52,7 @@ function AppointmentsController() {
     execute: function () {
       //todo: set date from day view
       self.selectedEvent({});
+      self.showModal(true);
     },
     canExecute: function () {
       return true;
@@ -88,6 +85,13 @@ function AppointmentsController() {
     execute: function(done) {
       ajaxOperationRunning(true);
       self.appointmentEditorViewModel().deleteSingleRecurrenceInstanceAsync()
+        .done(function() {
+          toastr.success("The appointment has been removed.");
+          self.showModal(false);
+        })
+        .fail(function() {
+          toastr.error("Failed to remove the appointment.");
+        })
         .always(function () {
           done();
           ajaxOperationRunning(false);
