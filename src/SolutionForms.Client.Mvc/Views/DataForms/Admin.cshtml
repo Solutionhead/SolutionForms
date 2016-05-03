@@ -18,6 +18,8 @@
     {
         <li>
           <a href="@item.Url">@item.Title</a>
+          [ <a href="@item.Url/new">New</a> ]
+          [ <a href="@Url.RouteUrl("DataFormDesigner", new { id = item.KeyValue })">Edit</a> ]
         </li>
     }
   </ul>

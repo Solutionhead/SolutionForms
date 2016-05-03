@@ -1,8 +1,10 @@
 ﻿using BrockAllen.MembershipReboot;
 using Microsoft.AspNet.Authentication.Cookies;
+using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.Http;
+using Microsoft.AspNet.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -42,8 +44,13 @@ namespace SolutionForms.Client.Mvc
             services.AddAuthentication();
             services.AddAuthorization();
 
-            services.AddMvc()
-                .AddJsonOptions(opt => opt.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver());
+            services.AddMvc(config =>
+            {
+                var policy = new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .Build();
+                config.Filters.Add(new AuthorizeFilter(policy));
+            }).AddJsonOptions(opt => opt.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver());
             
             services.AddAuthorization(options =>
             {
@@ -52,14 +59,8 @@ namespace SolutionForms.Client.Mvc
                 options.AddTenantPolicy("InviteUsers", "InviteUsers");
             });
 
-            // Add application services.
-
-            #region RavenDB and RavenUserStore
-
             ConfigureMembershipReboot(services);
-
-            #endregion
-
+            
             services.AddTransient<IEmailSender, AuthMessageSender>();
             services.AddTransient<ISmsSender, AuthMessageSender>();
         }
@@ -85,14 +86,18 @@ namespace SolutionForms.Client.Mvc
 
             app.UseStaticFiles();
 
-            app.UseSolutionFormsProviders(new CookieAuthenticationOptions
+            app.UseSolutionFormsProviders(new SolutionFormsProviderConfiguration
             {
+                CookieAuthenticationOptions = new CookieAuthenticationOptions
+                {
 
-                LoginPath = new PathString("/Account/Login"),
-                AutomaticAuthenticate = true,
-                AutomaticChallenge = true,
+                    LoginPath = new PathString("/Account/Login"),
+                    AutomaticAuthenticate = true,
+                    AutomaticChallenge = true,
+                },
+                ConnectionString = Configuration["Data:Raven:ConnectionString"]
             });
-            
+
             app.UseTenantResolver();
 
             app.UseMvc(routes =>
