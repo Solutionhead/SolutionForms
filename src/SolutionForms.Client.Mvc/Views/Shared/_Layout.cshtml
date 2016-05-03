@@ -4,28 +4,28 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>@ViewData["Title"] - SolutionForms.Client.Mvc</title>
+  <title>Solution Forms Beta</title>
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="~/favicon.ico" rel="shortcut icon" type="image/x-icon"/>
 
   <environment names="Development">
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+    <link rel="stylesheet" href="~/css/bootstrap.css" />
     <link rel="stylesheet" href="~/css/site.css" />
-    <link href="~/lib/font-awesome/css/font-awesome.css" rel="stylesheet" />
-    <link href="~/lib/jquery-ui/themes/base/all.css" rel="stylesheet" />
+    <link href="~/css/font-awesome.css" rel="stylesheet" />
+    <link href="~/css/jquery-ui-all.min.css" rel="stylesheet" />
   </environment>
   <environment names="Staging,Production">
     <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.5/css/bootstrap.min.css"
           asp-fallback-href="~/lib/bootstrap/dist/css/bootstrap.min.css"
-          asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
-    <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
-    <link href="~/lib/font-awesome/css/font-awesome.css" rel="stylesheet" />
-    <link href="~/lib/jquery-ui/themes/base/all.css" rel="stylesheet" />
+          asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute"/>
+    <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true"/>
+    <link href="https://opensource.keycdn.com/fontawesome/4.6.1/font-awesome.min.css" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
   </environment>
 </head>
-<body>
-  <div class="navbar navbar-inverse navbar-fixed-top">
+<body class="no-print">
+  <div class="navbar navbar-inverse navbar-fixed-top no-print">
     <div class="container">
       <div class="navbar-header">
         <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
@@ -39,8 +39,6 @@
       <div class="navbar-collapse collapse">
         <ul class="nav navbar-nav">
           <li><a asp-controller="Home" asp-action="Index">Home</a></li>
-          <li><a asp-controller="Home" asp-action="About">About</a></li>
-          <li><a asp-controller="Home" asp-action="Contact">Contact</a></li>
         </ul>
         @await Html.PartialAsync("_LoginPartial")
       </div>
@@ -50,7 +48,7 @@
     @RenderBody()
     <hr />
     <footer>
-      <p>&copy; 2015 - SolutionForms.Client.Mvc</p>
+      <p>&copy; 2016 - Solutionhead Technologies, LLC</p>
     </footer>
   </div>
   

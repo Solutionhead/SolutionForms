@@ -49,10 +49,20 @@
       return mDate && mDate.format("YYYY-MM-DD[T00:00:00]");
     }
     wrapper.format = format;
+    wrapper.isValid = isValid;
+    wrapper.isSame = isSame;
     
     function format(formatString) {
       var date = forceDate(wrapper());
       return date && date.format(formatString || defaultFormatString);
+    }
+
+    function isSame(val) {
+      return moment(wrapper()).isSame(val);
+    }
+
+    function isValid() {
+      return moment(wrapper()).isValid();
     }
 
     wrapper(target.peek());
