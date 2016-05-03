@@ -14,10 +14,13 @@ using Raven.Abstractions.Data;
 using Raven.Abstractions.Extensions;
 using Raven.Client.Connection;
 using Raven.Json.Linq;
+using SolutionForms.Data.Indexes;
 using SolutionForms.Service.Providers.Models;
 
 namespace SolutionForms.Service.Providers.Providers
 {
+    // ReSharper disable once InconsistentNaming
+
     public class DataFormsProvider
     {
         private readonly IDocumentStore _documentStore;
@@ -28,12 +31,23 @@ namespace SolutionForms.Service.Providers.Providers
             _documentStore = documentStore;
         }
 
-        public async Task<IEnumerable<DataFormReturn>> GetDataForms(string tenant)
+        public async Task<IEnumerable<DataFormReturn>> GetDataForms(string tenant, bool onlyHomepageLinks)
         {
+            new DataForms_Menu().Execute(_documentStore.DatabaseCommands.ForDatabase(tenant), _documentStore.Conventions);
+
             using (var session = _documentStore.OpenAsyncSession(tenant))
             {
-                return (await session.Query<DataForm>().ToListAsync())
-                    .Project().To<DataFormReturn>();
+               // Appparently, RavenDB can't handle inclusion of variable in filtering expression (!onlyHomepageLinks)
+               //return (await session.Query<DataForm, DataForms_Menu>()
+               //     .Where(f => !onlyHomepageLinks || f.LinkOnHomePage)
+               //     .ToListAsync())
+               //     .Project().To<DataFormReturn>();
+
+                var q = onlyHomepageLinks
+                    ? session.Query<DataForm, DataForms_Menu>()
+                        .Where(f => f.LinkOnHomePage)
+                    : session.Query<DataForm>();
+                return (await q.ToListAsync()).Project().To<DataFormReturn>();
             }
         }
 

@@ -32,5 +32,7 @@ namespace SolutionForms.Service.Providers.Parameters
         public ICollection<string> Plugins { get; set; }
 
         public ICollection<string> Components { get; set; }
+
+        public bool LinkOnHomePage { get; set; }
     }
 }

@@ -34,5 +34,7 @@ namespace SolutionForms.Data.Models
         public string[] AuthorizedClaims { get; set; }
 
         public string FormType { get; set; }
+
+        public bool LinkOnHomePage { get; set; }
     }
 }

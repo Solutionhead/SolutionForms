@@ -43,7 +43,7 @@ namespace SolutionForms.Service.Providers.Providers
             {
                 try
                 {
-                    if (await LookupTenantByDomainAsync(values.OrganizationDomain, session))
+                    if (await LookupTenantByDomainAsync(tenant, session))
                     {
                         return CreateTenantResult.DuplicateTenantDomainExists;
                     }

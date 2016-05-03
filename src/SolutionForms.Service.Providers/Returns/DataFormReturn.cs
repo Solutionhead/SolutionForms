@@ -30,5 +30,7 @@ namespace SolutionForms.Service.Providers.Returns
         public string[] AuthorizedClaims { get; set; }
 
         public string FormType { get; set; }
+
+        public bool LinkOnHomePage { get; set; }
     }
 }

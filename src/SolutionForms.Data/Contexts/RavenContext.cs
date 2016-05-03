@@ -1,22 +1,28 @@
 using System;
+using Raven.Abstractions.Data;
 using Raven.Client;
 using Raven.Client.Document;
 using Raven.Client.Embedded;
+using SolutionForms.Data.Indexes;
 
 namespace SolutionForms.Data.Contexts
 {
     public class RavenContext : IDisposable
     {
-        internal const int EmbeddableStorePortNumber = 8088;
         public static IDocumentStore DocumentStore { get; private set; }
         public static string DatabaseName { get; } = "SolutionForms";
 
-        public static IDocumentStore Init()
+        public static IDocumentStore Init(string connectionString)
         {
+#if DEBUG
+            //DocumentStore = CreateStoreFromConnectionString(connectionString);
             DocumentStore = CreateEmbeddableStore();
-            //DocumentStore = CreateStoreFromConnectionString(DATABASE_NAME);
+#else
+            DocumentStore = CreateStoreFromConnectionString(connectionString);
+#endif
             DocumentStore.Initialize();
             DocumentStore.DatabaseCommands.GlobalAdmin.EnsureDatabaseExists(DatabaseName);
+            CreateIndexes(DocumentStore);
             return DocumentStore;
         }
 
@@ -26,17 +32,24 @@ namespace SolutionForms.Data.Contexts
             DocumentStore = null;
         }
 
-        private static IDocumentStore CreateStoreFromConnectionString(string connectionStringName)
+        private static IDocumentStore CreateStoreFromConnectionString(string connectionString)
         {
+            var parser = ConnectionStringParser<RavenConnectionStringOptions>.FromConnectionString(connectionString);
+            parser.Parse();
+            var options = parser.ConnectionStringOptions;
             return new DocumentStore
             {
-                ConnectionStringName = connectionStringName,
+                Url = options.Url,
+                Credentials = options.Credentials,
                 Conventions = BuildDocumentConvention(),
+                DefaultDatabase = options.DefaultDatabase ?? DatabaseName,
             };
         }
+
         private static IDocumentStore CreateEmbeddableStore()
         {
-            Raven.Database.Server.NonAdminHttp.EnsureCanListenToWhenInNonAdminContext(EmbeddableStorePortNumber);
+            const int embeddableStorePortNumber = 8088;
+            Raven.Database.Server.NonAdminHttp.EnsureCanListenToWhenInNonAdminContext(embeddableStorePortNumber);
             return new EmbeddableDocumentStore
             {
                 DataDirectory = "App_Data/RavenDB",
@@ -44,7 +57,7 @@ namespace SolutionForms.Data.Contexts
                 UseEmbeddedHttpServer = true,
                 Conventions = BuildDocumentConvention(),
                 Configuration = {
-                    Port = EmbeddableStorePortNumber
+                    Port = embeddableStorePortNumber
                 }
             };
         }
@@ -54,6 +67,11 @@ namespace SolutionForms.Data.Contexts
             {
                 IdentityPartsSeparator = "-",
             };
+        }
+
+        private static void CreateIndexes(IDocumentStore store)
+        {
+            new DataForms_Menu().Execute(store);
         }
     }
 }
