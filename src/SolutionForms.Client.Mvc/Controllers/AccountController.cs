@@ -18,7 +18,7 @@ using SolutionForms.Service.Providers.Models;
 
 namespace SolutionForms.Client.Mvc.Controllers
 {
-    [Authorize]
+    [AllowAnonymous]
     public class AccountController : Controller
     {
         public AccountController(AuthenticationService<ApplicationUser> authService)
@@ -40,7 +40,7 @@ namespace SolutionForms.Client.Mvc.Controllers
 
         public UserAccountService<ApplicationUser> UserManager { get; }
 
-        private readonly ILogger _logger;
+        //private readonly ILogger _logger;
 
         [HttpGet, AllowAnonymous]
         public IActionResult RegisterTenant()

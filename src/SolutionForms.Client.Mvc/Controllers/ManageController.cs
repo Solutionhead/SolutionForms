@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using BrockAllen.MembershipReboot;
-using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Mvc;
 using SolutionForms.Client.Mvc.Models;
 using SolutionForms.Client.Mvc.Services;
@@ -9,7 +8,6 @@ using SolutionForms.Service.Providers.Models;
 
 namespace SolutionForms.Client.Mvc.Controllers
 {
-    [Authorize]
     public class ManageController : Controller
     {
         private readonly IEmailSender _emailSender;

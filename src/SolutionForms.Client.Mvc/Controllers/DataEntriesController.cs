@@ -36,10 +36,10 @@ namespace SolutionForms.Client.Mvc.Controllers
         [HttpGet("~/data/load")]
         public ActionResult Load()
         {
-            var customers = System.IO.File.ReadAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SolutionForms", "customers.txt"));
-            var cResult = _dataFormsProvider.CreateDataEntriesFromJson(Tenant, "gc-customers", customers, _userAccountService.GetByUsername(Tenant, User.Identity.Name));
-            var events = System.IO.File.ReadAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SolutionForms", "events.txt"));
-            var eResult = _dataFormsProvider.CreateDataEntriesFromJson(Tenant, "events", events, _userAccountService.GetByUsername(Tenant, User.Identity.Name));
+            var customers = System.IO.File.ReadAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SolutionForms", "clients.txt"));
+            var cResult = _dataFormsProvider.CreateDataEntriesFromJson(Tenant, "clients", customers, _userAccountService.GetByUsername(Tenant, User.Identity.Name));
+            var events = System.IO.File.ReadAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SolutionForms", "appointments.txt"));
+            var eResult = _dataFormsProvider.CreateDataEntriesFromJson(Tenant, "appointments", events, _userAccountService.GetByUsername(Tenant, User.Identity.Name));
             return Ok(new {
                 CustomersLoaded = cResult.Count(),
                 EventsLoaded = eResult.Count()
