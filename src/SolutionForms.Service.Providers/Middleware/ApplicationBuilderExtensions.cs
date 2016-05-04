@@ -70,6 +70,7 @@ namespace SolutionForms.Service.Providers.Middleware
                     provider.GetService<IHttpContextAccessor>().HttpContext));
 
             services.AddScoped<TenantProvider>();
+            services.AddScoped<PaymentProvider>();
         }
     }
 

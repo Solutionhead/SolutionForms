@@ -1,9 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Raven.Client;
 using SolutionForms.Data.Models;
 using SolutionForms.Service.Providers.Enums;
 using SolutionForms.Service.Providers.Parameters;
+using Stripe;
 
 namespace SolutionForms.Service.Providers.Providers
 {
@@ -43,20 +45,35 @@ namespace SolutionForms.Service.Providers.Providers
             {
                 try
                 {
-                    if (await LookupTenantByDomainAsync(tenant, session))
+                    if(await LookupTenantByDomainAsync(tenant, session))
                     {
                         return CreateTenantResult.DuplicateTenantDomainExists;
                     }
 
+                    var customerService = new StripeCustomerService();
+                    var customer = await customerService.CreateAsync(new StripeCustomerCreateOptions
+                        {
+                            Description = values.OrganizationName,
+                            Metadata = new Dictionary<string, string>
+                                {
+                                    { "Domain", tenant }
+                                }
+                        });
+
                     await session.StoreAsync(new Organization
-                    {
-                        OrganizationDomain = tenant,
-                        OrganizationName = values.OrganizationName
-                    });
+                        {
+                            OrganizationDomain = tenant,
+                            OrganizationName = values.OrganizationName,
+                            CustomerId = customer.Id,
+                            PaymentStatus = PaymentStatus.NotRequired
+                        });
+
                     await session.SaveChangesAsync();
+
                     return CreateTenantResult.TenantCreated;
                 }
-                catch (Exception) { 
+                catch(Exception)
+                { 
                     session.Dispose();
                     throw;
                 }
