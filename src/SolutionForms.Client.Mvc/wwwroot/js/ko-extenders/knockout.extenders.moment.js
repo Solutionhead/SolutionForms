@@ -8,6 +8,7 @@
   }
 }(function (ko, moment) {
   ko.extenders.moment = function (target, defaultFormatString) {
+    if(typeof defaultFormatString !== "string") { defaultFormatString = "MM-DD-YYYY" }
     var wrapper = ko.pureComputed({
       read: target,
       write: function (newValue) {
@@ -26,7 +27,7 @@
     }).extend({ notify: 'always' });
 
     function forceDate(date) {
-      if (date != undefined) {
+      if (date != undefined && date !== '') {
         if (date instanceof Date) {
 
         } else if (typeof(date) === 'number') {
@@ -39,12 +40,29 @@
       }
     }
 
+    wrapper.toAbsoluteDateISOString = function() {
+      var mDate = forceDate(wrapper());
+      return mDate && mDate._d.toISOString().replace(/\.(\d{3})Z$/, ".$10000Z");
+    }
+    wrapper.toFloatingDateString = function() {
+      var mDate = forceDate(wrapper());
+      return mDate && mDate.format("YYYY-MM-DD[T00:00:00]");
+    }
     wrapper.format = format;
-    wrapper.moment = moment;
-
+    wrapper.isValid = isValid;
+    wrapper.isSame = isSame;
+    
     function format(formatString) {
       var date = forceDate(wrapper());
       return date && date.format(formatString || defaultFormatString);
+    }
+
+    function isSame(val) {
+      return moment(wrapper()).isSame(val);
+    }
+
+    function isValid() {
+      return moment(wrapper()).isValid();
     }
 
     wrapper(target.peek());

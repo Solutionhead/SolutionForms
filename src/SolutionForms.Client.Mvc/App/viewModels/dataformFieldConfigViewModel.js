@@ -22,11 +22,12 @@ function DataformFieldViewModel(input) {
     validation.isRequired = self.isRequired;
     settings.validation = validation;
     self.settings = ko.observable(settings);
+    self.fieldType = ko.observable(values.fieldType);
 
     self.displayName.subscribe(function(name) {
         if (self.exportName() == undefined) {
             self.exportName(name);
-        } else if (name == undefined || name == '') {
+        } else if (name == undefined || name === '') {
             self.exportName(undefined);
         }
     });
@@ -41,6 +42,7 @@ DataformFieldViewModel.prototype.exportConfig = function () {
             helpText: this.helpText,
             exportName: this.exportName,
             settings: this.settings,
+            fieldType: this.fieldType
         });
 }
 

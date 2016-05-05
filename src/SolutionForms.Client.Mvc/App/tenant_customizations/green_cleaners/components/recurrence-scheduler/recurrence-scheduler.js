@@ -1,54 +1,63 @@
-﻿var base = require('controls/basicEntryField');
+﻿var moment = require('moment');
 require('koExtenders/knockout.extenders.numeric');
 require('koExtenders/knockout.extenders.moment');
+if (!ko.components.isRegistered('form-field')) {
+  ko.components.register('form-field', require('components/form-field/form-field'));
+}
+
 
 function RecurrenceSchedulerViewModel(params) {
-  if (params == undefined || params.context == undefined) throw new Error('Requires argument params.context');
   if (!(this instanceof RecurrenceSchedulerViewModel)) { return new RecurrenceSchedulerViewModel(params); }
 
-  var self = this,
-      input = ko.unwrap(params.input) || {},
-      settings = ko.unwrap(input.settings) || {};
-  var nonRecurring = 'Non-recurring', 
-    weekly = 'Weekly',
-    monthly = 'Monthly';
+  var self = this;
+  var weekly = 'Weekly',
+    monthly = 'Monthly',
+    values = ko.unwrap(params.input) || {};
 
-  base.call(this, params, true);
-
-  self.recurrenceOptions = [nonRecurring, weekly, monthly];
+  self.recurrenceOptions = [weekly, monthly];
   self.monthlyByDateOptions = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31];
+  self.weekIndexOptions = [{ value: 1, name: 'First' }, { value: 2, name: 'Second' }, { value: 3, name: 'Third' }, { value: 4, name: 'Fourth' }, { value: -1, name: 'Last' }];
 
-  self.recurrence = ko.observable();
-  self.interval = ko.observable().extend({ numeric: 0 });
-  self.index = ko.observable();
-  self.weeklyRecurrenceDays = ko.observableArray([]);
-  self.recurrenceEndDate = ko.observable().extend({ moment: 'M/D/YYYY' });
-  self.monthlyRecurrenceOption = ko.observable('bydate');
-  self.monthlyByDay = ko.observable();
-  self.monthlyByDate = ko.observable();
+  self.isWeekly = ko.pureComputed(function () {
+    return self.recurrence() === 'Weekly';
+  });
+  self.isMonthly = ko.pureComputed(function () {
+    return self.recurrence() === 'Monthly';
+  });
+  
+  self.recurrence = ko.observable(values.recurrenceType);
+  self.interval = ko.observable(values.interval).extend({ numeric: 0 });
+  self.index = ko.observable(values.index);
+  self.weeklyRecurrenceDays = ko.observableArray(self.isWeekly() && values.daysOfWeek || []);
+  self.endDate = ko.observable(values.endDate).extend({ moment: 'M/D/YYYY' });
+  self.startDate = ko.observable(values.startDate).extend({ moment: 'M/D/YYYY' });
+  self.monthlyByDay = ko.observable(self.isMonthly() && values.daysOfWeek);
+  self.monthlyByDate = ko.observable(values.dayOfMonth);
+  self.monthlyRecurrenceOption = ko.observable();
+  self.Exceptions = values.Exceptions;
 
   // computeds
   self.recurrenceLabel = ko.pureComputed(function () {
     var name = '';
     switch(self.recurrence()) {
       case 'Weekly':
-        name = 'week';
+        name = `${pluralize("week")} on`;
         break;
       case 'Monthly':
-        name = 'month';
+        name = pluralize('month');
         break;
     }
-    return name +
-      (parseInt(self.interval()) > 1 ? 's' : '');
+    return name;
+
+    function pluralize(val) {
+      return val + (parseInt(self.interval()) > 1 ? 's' : '');
+    }
   });
-  self.isRecurring = ko.pureComputed(function() {
-    return self.recurrence() !== nonRecurring;
-  });
-  self.isWeekly = ko.pureComputed(function () {
-    return self.recurrence() === 'Weekly';
-  });
-  self.isMonthly = ko.pureComputed(function () {
-    return self.recurrence() === 'Monthly';
+  self.indexText = ko.pureComputed(function() {
+    var index = self.index();
+    if(index == undefined) { return ''; }
+    var option = ko.utils.arrayFirst(self.weekIndexOptions, o => o.value === index);
+    return (option && option.name) || '';
   });
   self.summaryText = ko.pureComputed(function() {
     switch (self.recurrence()) {
@@ -58,66 +67,7 @@ function RecurrenceSchedulerViewModel(params) {
     }
   });
 
-  var startDateField = ko.pureComputed(function () {
-    if(params.parentContext == null) { return null; }
-    var field = ko.utils.arrayFirst(params.parentContext.fields(), function (f) {
-      //todo: move field identification into configuration?
-      return f.exportName === 'Start Date';
-    });
-
-    var context = field && field.context();
-    if (context) { 
-      var startDate = context.userResponse.extend({ moment: 'M/D/YYYY' });
-      return startDate;
-    }
-
-    return null;
-  });
-
-  self.userResponse = function() {
-    return self.recurrence() === nonRecurring ? null : ko.toJS({
-      recurrenceType: self.recurrence,
-      interval: self.interval,
-      daysOfWeek: self.isMonthly() ? self.monthlyByDay : self.weeklyRecurrenceDays,
-      endDate: self.recurrenceEndDate,
-      dayOfMonth: self.monthlyByDate,
-      index: self.index,
-      monthlyRecurrenceOption: self.isMonthly() ? self.monthlyRecurrenceOption : null
-    });
-  };
-
-  startDateField.subscribe(function (val) {
-    var startDate = startDateField();
-    if (!startDate) return;
-
-    if (startDate() == undefined) startDate(Date.now());
-    var selectedDays = self.weeklyRecurrenceDays();
-    if (!selectedDays || !selectedDays.length) {
-      startDate() && startDate.format
-        && self.weeklyRecurrenceDays.push(startDate.format('dddd'));
-    }
-
-    self.monthlyByDate(startDate.format('D'));
-    self.monthlyByDay(startDate.format('dddd'));
-
-    var indexOptions = ['First', 'Second', 'Third', 'Fourth', 'Last'];
-    var weekIndex = startDate.format('D') / 7;
-    self.index(indexOptions[0 | weekIndex]);
-  });
-
-  self.setValue = function (value) {
-    var initialValues = value || {};
-
-    self.recurrence(initialValues.recurrenceType);
-    self.interval(initialValues.interval);
-    self.index(initialValues.index);
-    self.weeklyRecurrenceDays(self.isWeekly() && initialValues.daysOfWeek || []);
-    self.recurrenceEndDate(initialValues.endDate);
-    self.monthlyRecurrenceOption(initialValues.monthlyRecurrenceOption);
-    self.monthlyByDay(self.isMonthly() && initialValues.daysOfWeek);
-    self.monthlyByDate(initialValues.dayOfMonth);
-  }
-
+  self.startDate.subscribe(self.setRecurrenceDefaults);
 
   function buildWeeklyRecurrenceSummary() {
     var text = 'Every ';
@@ -143,7 +93,6 @@ function RecurrenceSchedulerViewModel(params) {
       text += day;
     });
 
-    appendRecurrenceSummary(text);
     return appendRecurrenceSummary(text);
   }
   function buildMonthlyRecurrenceSummary() {
@@ -151,7 +100,7 @@ function RecurrenceSchedulerViewModel(params) {
     if (self.monthlyRecurrenceOption() === 'bydate') {
       text += 'Day <strong>' + self.monthlyByDate() + '</strong>';
     } else {
-      text += 'The <strong>' + self.index().toLowerCase() + ' ' + self.monthlyByDay() + '</strong>';
+      text += 'The <strong>' + self.indexText().toLowerCase() + ' ' + self.monthlyByDay() + '</strong>';
     }
     if (self.interval() === 1) {
       text += ' of every month';
@@ -161,19 +110,74 @@ function RecurrenceSchedulerViewModel(params) {
     return appendRecurrenceSummary(text);
   }
   function appendRecurrenceSummary(text) {
-    var startDate = startDateField();
-    text += ', effective <strong>' + startDate() + '</strong>';
-    if (self.recurrenceEndDate()) {
-      text += ' until <strong>' + self.recurrenceEndDate() + "</strong>";
+    var startDate = moment(self.startDate()).format('M/D/YYYY');
+    text += ', effective <strong>' + startDate + '</strong>';
+    if (self.endDate()) {
+      text += ' until <strong>' + self.endDate() + "</strong>";
     }
     return text;
   }
 
-  params.context(self);
+  params.exports({
+    buildDto: self.buildDto.bind(self)
+  });
+
+  (function init() {
+    var monthlyRecurrenceOpt = values && values.dayOfMonth > 0 ? 'bydate'
+      : 'byday';
+    self.monthlyRecurrenceOption(monthlyRecurrenceOpt);
+
+    if (!values || !values.recurrenceType) {
+      self.setRecurrenceDefaults();
+    }
+  }());
+
   return self;
 }
 
-RecurrenceSchedulerViewModel.prototype = base.prototype;
+RecurrenceSchedulerViewModel.prototype.setRecurrenceDefaults = function () {
+  var self = this, 
+    startDate = self.startDate();
+  if (!startDate) return;
+
+  var mDate = moment(startDate);
+
+  var selectedDays = self.weeklyRecurrenceDays();
+  if (!selectedDays || !selectedDays.length) {
+    mDate.isValid && self.weeklyRecurrenceDays.push(mDate.format('dddd'));
+  }
+
+  self.monthlyByDate(mDate.format('D'));
+  self.monthlyByDay(mDate.format('dddd'));
+
+  var indexOptions = self.weekIndexOptions;
+  var weekIndex = self.index() === -1 ? indexOptions[4] : mDate.format('D') / 7;
+  self.index(indexOptions[0 | weekIndex]);
+}
+RecurrenceSchedulerViewModel.prototype.buildDto = function () {
+  var dto = {
+    recurrenceType: this.recurrence(),
+    interval: this.interval(),
+    startDate: this.startDate.toFloatingDateString(),
+    endDate: this.endDate.toFloatingDateString(),
+    Exceptions: this.Exceptions
+  };
+
+  if (this.isWeekly()) {
+    dto.daysOfWeek = this.weeklyRecurrenceDays();
+  }
+
+  if (this.isMonthly()) {
+    if (this.monthlyRecurrenceOption() === "bydate") {
+      dto.dayOfMonth = this.monthlyByDate();
+    } else {
+      dto.index = this.index();
+      dto.daysOfWeek = [this.monthlyByDay()];
+    }
+  }
+
+  return dto;
+}
 
 module.exports = {
   name: 'Recurrence Scheduler',

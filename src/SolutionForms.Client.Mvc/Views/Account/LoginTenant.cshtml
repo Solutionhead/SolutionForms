@@ -11,8 +11,13 @@
       <form method="POST" class="form-horizontal" asp-controller="Account" asp-action="LoginTenant">
         <div>Enter your organization's <strong>Solution Forms domain.</strong>
         </div>
-        <input id="domain" asp-for="TenantDomain"/>
-        <button type="submit" class="btn btn-default">Continue</button>
+
+        <div class="input-group">
+          <input type="text" class="form-control input-lg" id="domain" asp-for="TenantDomain"/>
+          <span class="input-group-btn">
+            <button type="submit" class="btn btn-primary btn-lg">Continue</button>
+          </span>
+        </div>
       </form>
     </section>
   </div>

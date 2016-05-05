@@ -4,7 +4,9 @@ require('koExtenders/knockout.extenders.moment');
 
 ko.bindingHandlers.datepicker = {
   /*
-  valueAccessor: true | string (format) | object (config) 
+  * @param { bool | string | object } valueAccessor If string, the displayFormat. If object, configurations. 
+  * @param { observable } allBindingsAccessor
+  * @param { observable } [value] (optional) The observable bound to the field's value.
   */
     init: function(element, valueAccessor, allBindingsAccessor) {
       var $el = $(element),

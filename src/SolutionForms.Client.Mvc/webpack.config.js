@@ -10,14 +10,13 @@ module.exports = {
   entry: {
     'dataform-designer': 'viewModels/dataformDesignerViewModel',
     'dataform-live': 'viewModels/dataformLiveViewModel',
-    //'home': 'viewModels/homeViewModel',
     'core': ['ko',
-      lib('knockout-postbox/build/knockout-postbox'),
-      lib('knockout.punches/knockout.punches'),
-      lib('kolite-local/knockout.command'),
-      lib('bootstrap/dist/js/bootstrap'),
+      bower('knockout-postbox/build/knockout-postbox'),
+      bower('knockout.punches/knockout.punches'),
+      localScripts('kolite-local/knockout.command'),
+      bower('bootstrap/dist/js/bootstrap'),
       'toastr',
-      lib('toastr/toastr.css'),
+      bower('toastr/toastr.css'),
       //note: the page.js package depends on `path-to-regexp` which I couldn't find on bower, after much trying
       localPath('node_modules/page/page')
     ]
@@ -28,40 +27,42 @@ module.exports = {
     chunkFilename: '[id].chunk.js'
   },
   resolve: {
-    fallback: lib(),
+    fallback: bower(),
     alias: {
       // application assets
       viewModels: appDir('viewModels'),
       models: appDir('models'),
       components: appDir('components'),
+      containers: appDir('components/form-containers'),
+      services: appDir('services'),
       plugins: appDir('plugins'),
       customizations: appDir('tenant_customizations'),
       App: appDir('.'),
       app: appDir('.'),
-      controls: appDir('components/entryFieldControls'),
+      controls: appDir('components/field-controls'),
       styles: localPath('css'),
       bindings: appDir('bindings'),
       koExtenders: js('ko-extenders'),
 
       // framework assets
       ko: 'knockout',
-      jquery: lib('jquery/dist/jquery'),
-      'jquery-ui': lib('jquery-ui/ui'),
-      knockout: lib('knockout/dist/knockout.debug'),
+      jquery: bower('jquery/dist/jquery'),
+      'jquery-ui': bower('jquery-ui/ui'),
+      knockout: bower('knockout/dist/knockout.debug'),
 
       // other 3rd party utilities
-      koValidation: lib('Knockout-Validation/Dist/knockout.validation'),
-      'ko.bs.collapse': lib('knockout-bootstrap-collapse-local/knockout.bootstrap.collapse'),
-      'ko.sortable': lib('knockout-sortable/build/knockout-sortable'),
-      //'ko.kendo': lib('knockout-kendo/build/knockout-kendo.min'),
-      'kendoui': lib('kendo-ui-core/js'),
-      'kendoui-core': lib('kendo-ui-core/js/kendo.core.min'),
-      'kendoui-styles': lib('kendo-ui-core/styles/'),
-      'underscore': lib('underscore/underscore-min'),
-      moment: lib('moment/min/moment.min'),
-      toastr: lib('toastr/toastr'),
+      koValidation: bower('Knockout-Validation/Dist/knockout.validation'),
+      'ko.bs.collapse': localScripts('knockout-bootstrap-collapse-local/knockout.bootstrap.collapse'),
+      'ko.sortable': bower('knockout-sortable/build/knockout-sortable'),
+      'kendoui': bower('kendo-ui-core/js'),
+      'kendoui-core': bower('kendo-ui-core/js/kendo.core.min'),
+      'kendoui-styles': bower('kendo-ui-core/styles/'),
+      'underscore': bower('underscore/underscore-min'),
+      moment: bower('moment/min/moment.min'),
+      toastr: bower('toastr/toastr'),
       lodash: nodeModules('lodash'),
-      lib: lib(),
+      lib: bower(),
+      'local': localScripts(),
     }
   },
   plugins: [
@@ -79,6 +80,7 @@ module.exports = {
     loaders: [
         { test: /\.html$/, loader: 'raw' },
         { test: /\.css$/, loader: 'style!css?sourceMap' },
+        { test: /\.js?$/, loader: 'babel', exclude: /(node_modules|bower_components)/, query: { presets: ['es2015'] } },
 
         { test: /knockout(\.debug)?\.js$/, loader: 'imports?exports=>false&define=>false!exports?ko' },
         { test: /knockout\.command\.js/, loader: 'imports?require=>false&define=>false' },
@@ -99,12 +101,17 @@ module.exports = {
         { test: /\.(ttf|eot|svg|png|gif|jpe?g)(\?v=[0-9]\.[0-9](\.[0-9])?)?$/, loader: "url" }
     ],
     noParse: []
+  },
+
+  node: {
+    fs: 'empty'
   }
 }
 
 function localPath(loc) { return path.join(__dirname, loc || ''); }
 function appDir(loc) { return path.join(localPath('App'), loc || ''); }
-function lib(loc) { return path.join(localPath('wwwroot/lib'), loc || ''); }
+function bower(loc) { return path.join(localPath('bower_modules'), loc || ''); }
+function localScripts(loc) { return path.join(appDir('lib'), loc || ''); }
 function cssDir(loc) { return path.join(localPath('wwwroot/css'), loc || ''); }
 function js(loc) { return path.join(localPath('wwwroot/js'), loc || ''); }
 function nodeModules(loc) { return path.join(localPath('node_modules'), loc || ''); }

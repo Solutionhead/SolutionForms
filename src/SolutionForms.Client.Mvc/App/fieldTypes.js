@@ -26,6 +26,8 @@
             name: 'Table',
             componentName: 'table-input'
         },
+        // moder fields are registered by the field
+        hiddenField: require('controls/dataform-hidden-field/dataform-hidden-field')
     };
     module.exports = fieldTypes;
 
@@ -56,10 +58,7 @@
     });
     ko.components.register(fieldTypes.checkboxField.componentName, require('controls/dataform-checkboxes-field/dataform-checkboxes-field'));
     ko.components.register(fieldTypes.selectField.componentName, require('controls/dataform-select-field/dataform-select-field'));
-    ko.components.register(fieldTypes.dateField.componentName, {
-        viewModel: require('controls/basicEntryField'),
-        template:  require('controls/dataform-date-field/dataform-date-field.html')
-    });
-    ko.components.register(fieldTypes.tableField.componentName, require('controls/dataform-table-field/dataform-table-field'));
 
+    ko.components.register(fieldTypes.dateField.componentName, require('controls/dataform-date-field/dataform-date-field'));
+    ko.components.register(fieldTypes.tableField.componentName, require('controls/dataform-table-field/dataform-table-field'));
 }());

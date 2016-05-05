@@ -28,5 +28,9 @@ namespace SolutionForms.Service.Providers.Returns
         public DataSourceReturn DataSource { get; set; }
 
         public string[] AuthorizedClaims { get; set; }
+
+        public string FormType { get; set; }
+
+        public bool LinkOnHomePage { get; set; }
     }
 }

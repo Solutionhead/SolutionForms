@@ -16,18 +16,25 @@ using SmtpMessageDelivery = SolutionForms.Service.Providers.MembershipRebootUtil
 
 namespace SolutionForms.Service.Providers.Middleware
 {
+    public class SolutionFormsProviderConfiguration
+    {
+        public string ConnectionString { get; set; }
+
+        public CookieAuthenticationOptions CookieAuthenticationOptions { get; set; }
+    }
+
     public static class ApplicationBuilderExtensions
     {
-        public static void UseSolutionFormsProviders(this IApplicationBuilder app, CookieAuthenticationOptions cookieOptions = null)
+        public static void UseSolutionFormsProviders(this IApplicationBuilder app, SolutionFormsProviderConfiguration configuration)
         {
-            RavenContext.Init();
-            if (cookieOptions != null) app.UseCookieAuthentication(cookieOptions);
+            RavenContext.Init(configuration.ConnectionString);
+            if (configuration.CookieAuthenticationOptions != null) app.UseCookieAuthentication(configuration.CookieAuthenticationOptions);
             app.UseCookieAuthentication(new CookieAuthenticationOptions
             {
                 AutomaticAuthenticate = true,
                 AutomaticChallenge = true,
                 AuthenticationScheme = MembershipRebootApplicationConstants.AuthenticationType,
-                CookieSecure = cookieOptions?.CookieSecure ?? CookieSecureOption.SameAsRequest
+                CookieSecure = configuration?.CookieAuthenticationOptions?.CookieSecure ?? CookieSecureOption.SameAsRequest
             });
             AutoMapperConfiguration.ConfigureMappings();
         }
@@ -63,6 +70,7 @@ namespace SolutionForms.Service.Providers.Middleware
                     provider.GetService<IHttpContextAccessor>().HttpContext));
 
             services.AddScoped<TenantProvider>();
+            services.AddScoped<PaymentProvider>();
         }
     }
 

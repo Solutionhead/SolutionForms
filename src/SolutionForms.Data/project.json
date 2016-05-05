@@ -8,7 +8,6 @@
   "frameworks": {
     "net451": {
       "dependencies": {
-        "RavenDB.Embedded": "3.0.30037"
       },
       "frameworkAssemblies": {
         "System.ComponentModel.DataAnnotations": "4.0.0"
@@ -16,6 +15,7 @@
     }
   },
   "dependencies": {
+    "RavenDB.Database": "3.0.30115",
     "SolutionForms.Core": "1.0.0-*"
   }
 }

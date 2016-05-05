@@ -7,15 +7,20 @@ using SolutionForms.Service.Providers.Helpers;
 using SolutionForms.Service.Providers.Parameters;
 using SolutionForms.Service.Providers.Returns;
 using System.Linq;
+using System.Windows.Markup;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Raven.Abstractions.Data;
+using Raven.Abstractions.Extensions;
 using Raven.Client.Connection;
 using Raven.Json.Linq;
+using SolutionForms.Data.Indexes;
 using SolutionForms.Service.Providers.Models;
 
 namespace SolutionForms.Service.Providers.Providers
 {
+    // ReSharper disable once InconsistentNaming
+
     public class DataFormsProvider
     {
         private readonly IDocumentStore _documentStore;
@@ -26,12 +31,23 @@ namespace SolutionForms.Service.Providers.Providers
             _documentStore = documentStore;
         }
 
-        public async Task<IEnumerable<DataFormReturn>> GetDataForms(string tenant)
+        public async Task<IEnumerable<DataFormReturn>> GetDataForms(string tenant, bool onlyHomepageLinks)
         {
+            new DataForms_Menu().Execute(_documentStore.DatabaseCommands.ForDatabase(tenant), _documentStore.Conventions);
+
             using (var session = _documentStore.OpenAsyncSession(tenant))
             {
-                return (await session.Query<DataForm>().ToListAsync())
-                    .Project().To<DataFormReturn>();
+               // Appparently, RavenDB can't handle inclusion of variable in filtering expression (!onlyHomepageLinks)
+               //return (await session.Query<DataForm, DataForms_Menu>()
+               //     .Where(f => !onlyHomepageLinks || f.LinkOnHomePage)
+               //     .ToListAsync())
+               //     .Project().To<DataFormReturn>();
+
+                var q = onlyHomepageLinks
+                    ? session.Query<DataForm, DataForms_Menu>()
+                        .Where(f => f.LinkOnHomePage)
+                    : session.Query<DataForm>();
+                return (await q.ToListAsync()).Project().To<DataFormReturn>();
             }
         }
 
@@ -153,7 +169,47 @@ namespace SolutionForms.Service.Providers.Providers
                 return queryResult.Results.Select(r => JObject.Parse(r.ToJsonDocument().DataAsJson.ToString()));
             }
         }
+        
+        public async Task<IEnumerable<JObject>> GetDataEntriesByIndexName(string tenant, string indexName, IDictionary<string, string> queryParams)
+        {
+            var query = new IndexQuery
+            {
+                Query = queryParams.ContainsKey("$filter") ? queryParams["$filter"] : null
+            };
+            
+            int pageSize;
+            if (queryParams.ContainsKey("$top") && int.TryParse(queryParams["$top"], out pageSize))
+            {
+                query.PageSize = pageSize;
+            }
 
+            int skip;
+            if (queryParams.ContainsKey("$skip") && int.TryParse(queryParams["$skip"], out skip))
+            {
+                query.Start = skip;
+            }
+
+            var includes = GetQueryStringIncludes(queryParams);
+            var queryResult = await _documentStore.AsyncDatabaseCommands.ForDatabase(tenant).QueryAsync(
+                indexName,
+                query, includes
+                );
+
+            var jsonResult = queryResult.Results;
+            if (queryResult.Includes != null && queryResult.Includes.Count > 0)
+            {
+                jsonResult.ForEach(r =>
+                {
+                    includes.ForEach(i =>
+                    {
+                        r[i.Replace("Id", "")] = r.ContainsKey(i) ? queryResult.Includes.FirstOrDefault(ri => r[i].Value<string>() == ri["Id"].Value<string>()) : null;
+                    });
+                });
+            }
+
+            return jsonResult.Select(r => JObject.Parse(r.ToJsonDocument().DataAsJson.ToString())); ;
+        }
+        
         public async Task<DataEntryCreatedReturn> CreateDataEntryAsync(string tenant, string entityName, object values, ApplicationUser ownerUser)
         {
             var jobject = JObject.FromObject(values);
@@ -168,7 +224,33 @@ namespace SolutionForms.Service.Providers.Providers
             };
         }
 
-        private async Task SaveEntryAsync(string tenant, string entityName, ApplicationUser ownerUser, JObject jobject, string id)
+        public IEnumerable<DataEntryCreatedReturn> CreateDataEntriesFromJson(string tenant, string entityName, string jsonData, ApplicationUser ownerUser)
+        {
+            var jsonArray = JArray.Parse(jsonData);
+            var maxId = 0;
+            using (var bulkInsert = _documentStore.BulkInsert(tenant))
+            {
+                foreach (var d in jsonArray.Children<JObject>())
+                {
+                    UserIdentityHelper.SetUserIdentity(d, ownerUser);
+                    var entity = RavenJObject.Parse(d.ToString());
+                    var meta = new RavenJObject {{"Raven-Entity-Name", entityName}};
+                    var id = (string) d["Id"];
+                    var identity = int.Parse(id.Substring(id.IndexOf(_documentStore.Conventions.IdentityPartsSeparator, StringComparison.Ordinal) + 1));
+                    maxId = Math.Max(identity, maxId);
+                    bulkInsert.Store(entity, meta, id);
+                    yield return new DataEntryCreatedReturn
+                    {
+                        Key = id,
+                        Entity = d
+                    };
+                }
+            }
+
+            _documentStore.DatabaseCommands.SeedIdentityFor(entityName, maxId);
+        }
+
+        private async Task<PutResult> SaveEntryAsync(string tenant, string entityName, ApplicationUser ownerUser, JObject jobject, string id)
         {
             UserIdentityHelper.SetUserIdentity(jobject, ownerUser);
 
@@ -178,7 +260,7 @@ namespace SolutionForms.Service.Providers.Providers
             // NOTE: The PutAsync database command allows us to set the `Raven-Entity-Name` metadata which tells RavenDB to put this entity in it's own entity collection.
             //  Using the `session.Store` or `asyncSession.StoreAsync` methods will cause RavenDB to reflect on the parameter object causing all entites to be stored in
             //  a single entity collection of `JObject` which is not what we want.
-            await commands.PutAsync(
+            var result = await commands.PutAsync(
                 id,
                 null,
                 RavenJObject.Parse(dataEntry),
@@ -186,6 +268,8 @@ namespace SolutionForms.Service.Providers.Providers
                 {
                     {"Raven-Entity-Name", entityName},
                 });
+
+            return result;
         }
 
         public async Task<JObject> GetDataEntryByKeyAsync(string tenant, string id)
@@ -208,8 +292,27 @@ namespace SolutionForms.Service.Providers.Providers
             await SaveEntryAsync(tenant, entityName, userAccount, jobject, id);
             return jobject;
         }
+
+        public async Task PatchDataEntryAsync(string tenant, string id, ScriptedPatchRequestParameters patchParams, ApplicationUser userAccount)
+        {
+            var commands = _documentStore.AsyncDatabaseCommands.ForDatabase(tenant);
+            await commands.PatchAsync(id, patchParams.ToScriptedPatchRequest());
+        }
+
+        public async Task DeleteDataEntryAsync(string tenant, string id)
+        {
+            var commands = _documentStore.AsyncDatabaseCommands.ForDatabase(tenant);
+            await commands.DeleteAsync(id, null);
+        }
+
+        private static string[] GetQueryStringIncludes(IDictionary<string, string> queryStringParams)
+        {
+            return queryStringParams.ContainsKey("$includes")
+                ? queryStringParams["$includes"].Split(',')
+                : null;
+        }
     }
-    
+
     public class DataEntryCreatedReturn
     {
         public string Key { get; set; }

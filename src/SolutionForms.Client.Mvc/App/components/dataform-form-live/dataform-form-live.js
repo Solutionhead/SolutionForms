@@ -1,16 +1,8 @@
 ﻿require('App/fieldTypes'); //register field type components
 require('koValidation');
-var Field = require('models/formFieldLive'),
-  toastr = require('toastr'),
+var toastr = require('toastr'),
   _ = require('underscore'),
   page = require('page');
-
-//var plugins = {
-//  //todo: dynamically load plugins
-//  // --> See this discussion on plugins with webpack https://github.com/webpack/webpack/issues/118 
-//  "plugins/saveToLocalDocumentStorePlugin": require('plugins/saveToLocalDocumentStorePlugin')(),
-//  "plugins/initializeFormValuesPlugin": require('plugins/initializeFormValuesPlugin')(),
-//};
 
 ko.validation.init({
     insertMessages: false,
@@ -18,20 +10,44 @@ ko.validation.init({
     errorElementClass: 'has-error'
 });
 
+if (!ko.components.isRegistered('dynamic-form')) {
+  ko.components.register('dynamic-form', require('components/dynamic-form-ui/dynamic-form-ui'));
+}
+
 function DataFormLive(params) {
     if (!(this instanceof DataFormLive)) { return new DataFormLive(params); }
     var self = this;
-    var subscriptions = [],
-      components_loaded = [];
-    
-    self.documentId = params.documentId;
-    self.fields = ko.observableArray([]);
-    self.parseConfig(params.config);
 
+
+    self.subscriptions = [];
+    self.plugins = ko.observableArray([]);
+
+    self.documentId = ko.pureComputed(function() {
+      return ko.unwrap(params.documentId);
+    });
+
+    self.documentValues = ko.pureComputed(function() {
+      return ko.unwrap(params.documentValues);
+    });
+
+    self.formConfig = ko.pureComputed(function () {
+      return ko.unwrap(params.config) || {};
+    });
+
+    self.dynamicFormUIExport = ko.observable();
+    self.fields = ko.pureComputed(function() {
+      var formVm = self.dynamicFormUIExport();
+      return formVm ? formVm.fields() : [];
+    });
+    
     self.saveCommandAsync = ko.asyncCommand({
       execute: function (complete) {
         try {
-          self.notifyListenersAsync('submit', self).then(function () {
+          var data = self.dynamicFormUIExport().buildDto();
+          data.documentId = self.documentId();
+
+          self.notifyListenersAsync('submit', data, self)
+            .done(function() {
               toastr.success('Save completed successfully');
               if (self.documentId == undefined) {
                 //assumes that the arguments[0] is the results of the ajax call
@@ -40,8 +56,7 @@ function DataFormLive(params) {
               }
               self.notifyListenersAsync('submitCompleted', self);
               complete();
-            },
-            function(xhr) {
+            }).fail(function(xhr) {
               toastr.error(xhr.message, 'Failed to Save');
               complete();
             });
@@ -51,143 +66,143 @@ function DataFormLive(params) {
       }
     });
 
-    self.isRendered = ko.pureComputed(function() {
-        return ko.utils.arrayFirst(self.fields(), function(f) {
-            return f.context() == undefined;
-        }) === null;
+    self.isRendered = ko.pureComputed(function () {
+      return self.dynamicFormUIExport() && self.dynamicFormUIExport().isReady();
     });
 
-  (function loadDocumentData(documentId) {
-    if (!documentId) { return; }
+    self.ready = ko.pureComputed(function() {
+      return self.formConfig() != undefined
+        && self.isRendered() === true;
+    });
 
-    if (self.isRendered()) {
-      fetchData();
-    } else {
-      var renderedSub = self.isRendered.subscribe(function(rendered) {
-        if (rendered) {
-          fetchData();
-          renderedSub.dispose();
-          renderedSub = null;
-        }
-      });
-      subscriptions.push(renderedSub);
-    }
+    var __disposables = [];
+    __disposables.push(ko.computed(function() {
+      self.initFromConfig(ko.unwrap(params.config));
+    }));
+    self.parseListeners();
 
-    function fetchData() {
-      self.notifyListenersAsync('fetch', {
-        id: documentId,
-        entityName: ko.unwrap(self.formId),
-        form: self
-      }).then(function() {
-        self.notifyListenersAsync('loaded', self);
-      }, function() {
-        toastr.error("Error: " + Arguments[2]);
-      });
-    }
-  })(params.documentId);
+    __disposables.push(ko.computed(function() {
+      var docId = ko.unwrap(params.documentId);
+      docId != undefined && self.loadDocumentData(docId);
+    }));
 
+    __disposables.push(ko.computed(function() {
+      var docId = ko.unwrap(params.documentValues);
+      docId != undefined && self.loadDocumentData(docId);
+    }));
+  
     self.dispose = dispose;
-
-    //self.exportedContext = ko.pureComputed(function() {
-    //  var obj = {};
-    //  ko.utils.arrayMap(self.fields(), function (field) {
-    //    var fieldContext = field.context();
-    //    obj[field.exportName] = fieldContext.userResponse;
-
-    //    field.contet().userResponse.subscribe(function() { console.log('field.context changed') });
-    //    obj[field.exportName].subscribe(function(val) { console.log('exported obj changed'); });
-    //    fieldContext.userResponse.subscribe(function(val) { console.log('fieldContext obj changed'); });
-    //  });
-    //  return obj;
-    //});
-    
+  
     return self;
 
     function dispose() {
-        ko.utils.arrayForEach(subscriptions, function (subscription) {
+        ko.utils.arrayForEach(self.subscriptions, function (subscription) {
             subscription.dispose && !subscription.isDisposed && subscription.dispose();
         });
-        subscriptions = null;
+        ko.utils.arrayForEach(__disposables, function(d) {
+          d.dispose && !d.isDisposed && d.dispose();
+        });
+        self.subscriptions = null;
     }
 }
 
-DataFormLive.prototype.parseConfig = function(jsonConfig) {
-    var form = (typeof jsonConfig === "string" ? ko.utils.parseJson(jsonConfig) : jsonConfig) || {};
-    if (form.dataSource == undefined || form.dataSource.documentName == undefined) {
-        throw new Error("Invalid configuration: Missing or invalid dataSource property.");
+DataFormLive.prototype.initFromConfig = function (jsonConfig) {
+  var self = this;
+
+  var config = (typeof jsonConfig === "string" ? ko.utils.parseJson(jsonConfig) : jsonConfig) || {};
+  if (config.dataSource == undefined || config.dataSource.documentName == undefined) {
+    throw new Error("Invalid configuration: Missing or invalid dataSource property.");
+  }
+
+  self.setOrCreateObservable("dataSource", config.dataSource);
+  self.setOrCreateObservable("dataSourceId", config.dataSourceId);
+  self.setOrCreateObservable("formId", config.id);
+  self.setOrCreateObservable("formTitle", config.title);
+  self.setOrCreateObservable("formDescription", config.description);
+
+  var plugins = ko.utils.arrayMap(config.plugins || [], function (path) {
+    try {
+      var plugin = require('plugins/' + path)();
+      return plugin;
+    } catch (e) {
+      toastr.error('Plugin failed to load: ' + path);
     }
+  });
 
-    // load components
-    ko.utils.arrayMap(form.components || [], loadComponent);
+  self.plugins(plugins);
+}
+DataFormLive.prototype.parseListeners = function() {
+  var listeners = {
+    load: [],
+    fetch: [],
+    loaded: [],
+    before_submit: [],
+    submit: [],
+    submitCompleted: [],
+  };
 
-    form.plugins = ko.utils.arrayMap(form.plugins || [], function (path) {
-      try {
-        var plugin = require('plugins/' + path)();
-        return plugin;
-      } catch (e) {
-        toastr.error('Plugin failed to load');
-      }
+  ko.utils.arrayForEach(this.plugins(), function (p) {
+    _.each(listeners, function (l, lname) {
+      addListenerIfHasHandlerForEvent(p, lname);
     });
+  });
 
-  (function buildDataObject() {
-    this.dataSource = form.dataSource;
-    this.dataSourceId = form.dataSourceId;
-    this.formId = form.id;
-    this.formTitle = form.title;
-    this.formDescription = form.description;
+  this.listeners = listeners;
 
-    this.setOrCreateObservable('fields', ko.utils.arrayMap(form.fields || [], function(f) {
-      return new Field(f);
-    }));
-  }).call(this);
-
-  this.listeners = (function parseListeners() {
-    var listeners = {
-      load: [],
-      fetch: [],
-      loaded: [],
-      before_submit: [],
-      submit: [],
-      submitCompleted: [],
-    };
-
-    ko.utils.arrayForEach(form.plugins || [], function(p) {
-      _.each(listeners, function(l, lname) {
-        addListenerIfHasHandlerForEvent(p, lname);
-      });
-    });
-
-    return listeners;
-
-    function addListenerIfHasHandlerForEvent(plugin, event) {
-      if (plugin && hasHandlerForEvent.call(plugin, event)) {
-        listeners[event].push(plugin);
-      }
+  function addListenerIfHasHandlerForEvent(plugin, event) {
+    if (plugin && hasHandlerForEvent.call(plugin, event)) {
+      listeners[event].push(plugin);
     }
+  }
 
-    function hasHandlerForEvent(eventName) {
-      return typeof this[eventName] === "function";
-    }
-  }).call(this);
-
-  function loadComponent(path) {
-    var componentFactory = require('customizations/' + path);
-    if (componentFactory && componentFactory.componentName && !ko.components.isRegistered(componentFactory.componentName)) {
-      componentFactory.synchronous = true; // enforce all components to be rendered synchronously to ensure proper order
-      ko.components.register(componentFactory.componentName, componentFactory);
-    }
+  function hasHandlerForEvent(eventName) {
+    return typeof this[eventName] === "function";
   }
 }
 DataFormLive.prototype.notifyListenersAsync = function (event, args) {
+  var self = this;
+  if (arguments.length > 1) {
+    args = Array.prototype.slice.call(arguments, 1);
+  }
   return $.when.apply(this, ko.utils.arrayMap(this.listeners[event], raiseEventOnListener));
 
   function raiseEventOnListener(listener) {
-        return listener[event](args);
+        return listener[event].apply(self, args);
     }
 }
-DataFormLive.prototype.setOrCreateObservable = function(name, value) {
-    if (ko.isObservable(this[name])) this[name](value);
-    else this[name] = ko.observable(value);
+DataFormLive.prototype.loadDocumentData = function (documentId) {
+  if (documentId == undefined) { return; }
+
+  var self = this;
+
+  if (self.isRendered()) {
+    fetchData();
+  } else {
+    var renderedSub = self.isRendered.subscribe(function(rendered) {
+      if (rendered) {
+        fetchData();
+        renderedSub.dispose();
+        renderedSub = null;
+      }
+    });
+    self.subscriptions.push(renderedSub);
+  }
+
+  function fetchData() {
+    self.notifyListenersAsync('fetch', {
+      id: documentId,
+      entityName: ko.unwrap(self.formId),
+      form: self
+    }).done(function() {
+      self.notifyListenersAsync('loaded', self);
+    }).fail(function() {
+      toastr.error("Error: " + arguments[2]);
+    });
+  }
+}
+DataFormLive.prototype.setOrCreateObservable = function (name, value) {
+  if (ko.isWritableObservable(this[name])) this[name](value);
+  else this[name] = ko.observable(value);
 }
 
 module.exports = {

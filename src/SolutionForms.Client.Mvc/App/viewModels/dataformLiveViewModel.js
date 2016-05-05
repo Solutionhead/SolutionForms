@@ -1,58 +1,68 @@
-﻿var $ = require('jquery'), 
-    tableComponentName = 'data-table',
-    editorComponentName = 'details-editor',
-    toastr = require('toastr');
+﻿var $ = require('jquery'),
+    emptyContainerName = 'empty-container',
+    defaultContainerName = 'default-container',
+    toastr = require('toastr'),
+    formsService = require('services/dataFormsService');
 
-//consider loading components dynamically
-ko.components.register(tableComponentName, require('components/dataentry-table-view/dataentry-table-view'));
-ko.components.register(editorComponentName, require('components/dataform-form-live/dataform-form-live'));
+require('../fieldTypes');
+if (!ko.components.isRegistered(emptyContainerName)) {
+  ko.components.register(emptyContainerName, require('containers/empty-container/empty-container'));
+}
+if (!ko.components.isRegistered(defaultContainerName)) {
+  ko.components.register(defaultContainerName, require('containers/default-container/default-container'));
+}
 
 var page = require('page');
 
 (function () {
-    var currentFormId;
-    var vm = {
-        activeComponent: ko.observable(),
-        createNewEntry: function() {
-            currentFormId && page('/Forms/' + currentFormId + '/new');
-        }
-    };
+  var currentFormId,
+    documentId = ko.observable();
 
-    page('/Forms/:formId/new', function (opt) {
-        currentFormId = opt.params.formId;
-        loadComponent(editorComponentName, opt.params.formId);
-    });
-    page('/Forms/:formId/:documentId?', function (opt) {
-        currentFormId = opt.params.formId;
-        if (opt.params.documentId == undefined) {
-            loadComponent(tableComponentName, opt.params.formId);
-        } else {
-            loadComponent(editorComponentName, opt.params.formId, opt.params.documentId);
-        }
-    });
-    page();
+  var vm = {
+    activeComponent: ko.observable(),
+    formId: ko.observable()
+  };
 
-    ko.applyBindings(vm);
+  page('/Forms/:formId/:documentId?', function (opt) {
+    vm.formId(opt.params.formId);
+    documentId(opt.params.documentId);
+    loadComponent(opt.params.formId);
+  });
 
-    function loadComponent(componentName, formId, docId) {
-        vm.activeComponent(null);
+  ko.postbox.subscribe('initNew', function(val) {
+    console.log('publication recieved:' + val);
+    page('/Forms/' + currentFormId + '/new');
+  });
+  
+  page();
 
-        $.ajax('/api/dataforms/' + formId)
-                .then(function (data) {
-                    vm.activeComponent({
-                        name: data.componentName || componentName,
-                        params: {
-                            config: data,
-                            documentId: docId
-                        }
-                    });
-                })
-                .fail(function () {
-                    if (arguments[0].status === 401) {
-                        toastr.error("You are not authorized to view this form. Please see the system administrator if you believe this is an error.", "Unauthorized Access.");
-                    } else {
-                        toastr.error(arguments[2], "Error loading form.");
-                    }
-                });
+  ko.applyBindings(vm);
+
+  function loadComponent(formId) {
+    if (formId === currentFormId && formId != undefined) {
+      return;
     }
+
+    currentFormId = formId;
+    vm.activeComponent(null);
+
+    formsService.getDataFormByIdAsync(formId)
+      .then(function (data) {
+        vm.activeComponent({
+          name: data.formType || 'default-container',
+          params: {
+            config: data,
+            documentId: documentId,
+            formId: formId
+          }
+        });
+      })
+      .fail(function () {
+        if (arguments[0].status === 401) {
+          toastr.error("You are not authorized to view this form. Please see the system administrator if you believe this is an error.", "Unauthorized Access.");
+        } else {
+          toastr.error(arguments[2], "Error loading form.");
+        }
+      });
+  }
 }());

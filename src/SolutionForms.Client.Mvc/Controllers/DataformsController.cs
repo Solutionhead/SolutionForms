@@ -31,7 +31,7 @@ namespace SolutionForms.Client.Mvc.Controllers
         [ApiRoute]
         public async Task<IEnumerable<DataFormReturn>> Get()
         {
-            return await _dataFormsProvider.GetDataForms(Tenant);
+            return await _dataFormsProvider.GetDataForms(Tenant, false);
         }
 
         [ApiRoute("{id}")]
@@ -117,7 +117,24 @@ namespace SolutionForms.Client.Mvc.Controllers
         {
             var vm = new DataFormsIndexViewModel
             {
-                Forms = (await _dataFormsProvider.GetDataForms(Tenant)).Select(f => new DataFormSummaryViewModel
+                Forms = (await _dataFormsProvider.GetDataForms(Tenant, true)).Select(f => new DataFormSummaryViewModel
+                {
+                    Url = Url.Action("Live", new { formId = f.Id }),
+                    AuthorizationClaims = f.AuthorizedClaims,
+                    Description = f.Description,
+                    KeyValue = f.Id,
+                    Title = f.Title
+                })
+            };
+            return View(vm);
+        }
+
+        [Route("~/forms/admin")]
+        public async Task<ViewResult> Admin()
+        {
+            var vm = new DataFormsIndexViewModel
+            {
+                Forms = (await _dataFormsProvider.GetDataForms(Tenant, false)).Select(f => new DataFormSummaryViewModel
                 {
                     Url = Url.Action("Live", new { formId = f.Id }),
                     AuthorizationClaims = f.AuthorizedClaims,

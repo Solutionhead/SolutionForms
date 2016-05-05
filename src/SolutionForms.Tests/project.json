@@ -1,0 +1,42 @@
+﻿{
+  "userSecretsId": "aspnet5-SolutionForms.Tests-64f3f333-0d20-44d5-bbb0-3ea737af4135",
+  "version": "1.0.0-*",
+  "description": "SolutionForms.Tests Class Library",
+  "authors": [ "Roman" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "dependencies": {
+    "Stripe.net": "6.3.2",
+    "xunit": "2.1.0",
+    "xunit.runner.dnx": "2.1.0-rc1-build204",
+    "Microsoft.Extensions.Configuration.FileProviderExtensions": "1.0.0-rc1-final",
+    "Microsoft.Extensions.Configuration.Json": "1.0.0-rc1-final",
+    "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final",
+    "Microsoft.Extensions.SecretManager": "1.0.0-rc1-final",
+    "SecretManager": "1.0.0-beta5",
+    "AutoMapper": "4.2.1"    
+  },
+  "commands": {
+    "test": "xunit.runner.dnx"
+  },
+
+  "frameworks": {
+    "dnx451": {
+      "dependencies": {
+        "Moq": "4.2.1510.2205",
+        "SolutionForms.Client.Mvc": "1.0.0-*"
+      }
+    },
+    "dnxcore50": {
+      "dependencies": {
+        "Microsoft.CSharp": "4.0.1-beta-23516",
+        "System.Collections": "4.0.11-beta-23516",
+        "System.Linq": "4.0.1-beta-23516",
+        "System.Runtime": "4.0.21-beta-23516",
+        "System.Threading": "4.0.11-beta-23516"
+      }
+    }
+  }
+}

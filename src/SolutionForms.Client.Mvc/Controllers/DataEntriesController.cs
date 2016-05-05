@@ -1,22 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using BrockAllen.MembershipReboot;
 using Microsoft.AspNet.Http.Features;
 using Microsoft.AspNet.Mvc;
-using Newtonsoft.Json.Linq;
-using Raven.Json.Linq;
 using SolutionForms.Client.Mvc.Attributes;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
 using SolutionForms.Core;
 using SolutionForms.Service.Providers.Models;
+using SolutionForms.Service.Providers.Parameters;
 using SolutionForms.Service.Providers.Providers;
 
 namespace SolutionForms.Client.Mvc.Controllers
 {
-    [ApiRoute(controllerNameOverride: "d", route: "{entityName}")]
+    [ApiRoute(controllerNameOverride: "d")]
     [MigrateToOss]
     public class DataEntriesController : Controller
     {
@@ -34,30 +33,49 @@ namespace SolutionForms.Client.Mvc.Controllers
             _userAccountService = userAccountService;
         }
 
+        [HttpGet("~/data/load")]
+        public ActionResult Load()
+        {
+            var customers = System.IO.File.ReadAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SolutionForms", "clients.txt"));
+            var cResult = _dataFormsProvider.CreateDataEntriesFromJson(Tenant, "clients", customers, _userAccountService.GetByUsername(Tenant, User.Identity.Name));
+            var events = System.IO.File.ReadAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SolutionForms", "appointments.txt"));
+            var eResult = _dataFormsProvider.CreateDataEntriesFromJson(Tenant, "appointments", events, _userAccountService.GetByUsername(Tenant, User.Identity.Name));
+            return Ok(new {
+                CustomersLoaded = cResult.Count(),
+                EventsLoaded = eResult.Count()
+            });
+        } 
+
+        [HttpGet("index/{indexName?}", Order = 0)]
+        public async Task<ActionResult> GetByIndex(string id = null)
+        {
+            var queryParams = HttpContext.Request.Query.ToDictionary(q => q.Key, q => q.Value.ToString());
+            return Json(await _dataFormsProvider.GetDataEntriesByIndexName(Tenant, id, queryParams));
+        }
+
+        [HttpGet("{entityName}", Order = 1)]
         public async Task<ActionResult> Get(string entityName)
         {
             var queryParams = HttpContext.Request.Query.Select(q => new KeyValuePair<string, string>(q.Key, q.Value));
             return Json(await _dataFormsProvider.GetDataEntriesByEntityName(Tenant, entityName, queryParams));
         }
-
+        
         /// <summary>
         /// Retrieves data entry by id.
         /// </summary>
         /// <param name="entityName">Not currently used but kept in for consistency with REST-style API calls.</param>
         /// <param name="id">The id of the entity to be retrieved</param>
         /// <returns></returns>
-        [Route("{id}")]
+        [HttpGet("{entityName}/{id}")]
         public async Task<IActionResult> Get(string entityName, string id)
         {
             var result = await _dataFormsProvider.GetDataEntryByKeyAsync(Tenant, id);
-            //var result = DataformsRavenContext.DocumentStore.DatabaseCommands.Get(id);
-            //if (result == null) return NotFound();
             return result == null 
                 ? HttpNotFound() as IActionResult 
                 : Ok(result);
         }
 
-        [HttpPost]
+        [HttpPost("{entityName}")]
         public async Task<IActionResult> Post(string entityName, [FromBody]object values)
         {
             var userAccount = _userAccountService.GetByUsername(Tenant, User.Identity.Name);
@@ -66,7 +84,7 @@ namespace SolutionForms.Client.Mvc.Controllers
             return CreatedAtRoute(new { controller=  "DataForms", action = "Live", formId = entityName, recordKey = response.Key }, response.Entity);
         }
 
-        [HttpPut, Route("{id}")]
+        [HttpPut("{entityName}/{id}")]
         public async Task<IActionResult> Put(string entityName, string id, [FromBody]object values)
         {
             var userAccount = _userAccountService.GetByUsername(Tenant, User.Identity.Name);
@@ -78,5 +96,21 @@ namespace SolutionForms.Client.Mvc.Controllers
             }
             return Ok(new {});
         }
+
+        [HttpPatch("{entityName}/{id}")]
+        public async Task<IActionResult> Patch(string entityName, string id, [FromBody]ScriptedPatchRequestParameters values)
+        {
+            var userAccount = _userAccountService.GetByUsername(Tenant, User.Identity.Name);
+            await _dataFormsProvider.PatchDataEntryAsync(Tenant, id, values, userAccount);
+            return Ok(new {});
+        }
+
+        [HttpDelete("{entityName}/{id}")]
+        public async Task<IActionResult> Delete(string entityName, string id)
+        {
+            await _dataFormsProvider.DeleteDataEntryAsync(Tenant, id);
+            return new NoContentResult();
+        }
     }
+
 }

@@ -1,15 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Threading.Tasks;
 using BrockAllen.MembershipReboot;
 using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Http.Features;
 using Microsoft.AspNet.Mvc;
+using SolutionForms.Client.Mvc.Attributes;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
+using SolutionForms.Client.Mvc.Models;
 using SolutionForms.Client.Mvc.ViewModels.Account;
+using SolutionForms.Service.Providers.Providers;
 using SolutionForms.Service.Providers.Models;
+using SolutionForms.Client.Mvc.Helpers;
 
 // For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -72,5 +74,40 @@ namespace SolutionForms.Client.Mvc.Controllers
                 Message = $"We've sent your invitation for {values.FirstName} to join the {Tenant} team! Tell {values.FirstName} to be on the look out for the email."
             });
         }
+
+        #region API Actions
+
+        [ApiRoute]
+        public async Task<IActionResult> GetPaymentInformation()
+        {
+            var tenant = Tenant;
+            if(string.IsNullOrWhiteSpace(tenant))
+            {
+                return View("Error");
+            }
+
+            var paymentProvider = HttpContext.GetApplicationService<PaymentProvider>();
+            var result = await paymentProvider.GetPaymentInformationAsync(tenant);
+            var response = result.Map().To<PaymentInformationResponse>();
+            return Json(response);            
+        }
+
+        [ApiRoute]
+        public async Task<IActionResult> SetPaymentInformation([FromBody] SetPaymentInformationRequest request)
+        {
+            var tenant = Tenant;
+            if(string.IsNullOrWhiteSpace(tenant))
+            {
+                return View("Error");
+            }
+
+            var paymentProvider = HttpContext.GetApplicationService<PaymentProvider>();
+            var parameters = request.Map().To<SetPaymentInformationParameters>();
+            await paymentProvider.SetPaymentInformationAsync(tenant, parameters);
+            return Ok();
+        }
+
+        #endregion
+
     }
 }

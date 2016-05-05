@@ -14,7 +14,8 @@ namespace SolutionForms.Client.Mvc.Controllers
 
         public IActionResult Index()
         {
-            return string.IsNullOrWhiteSpace(Tenant) ? View() as IActionResult 
+            return string.IsNullOrWhiteSpace(Tenant) 
+                ? RedirectToAction("Login", "Account")
                 : RedirectToAction("Index", "DataForms");
         }
 
