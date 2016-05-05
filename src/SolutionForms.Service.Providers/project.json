@@ -1,4 +1,4 @@
-﻿{
+{
   "version": "1.0.0-*",
   "description": "SolutionForms.Service.Providers Class Library",
   "authors": [ "Vinney" ],
@@ -9,7 +9,7 @@
     "net451": {
       "dependencies": {
         "SolutionForms.Data": "1.0.0-*",
-        "AutoMapper": "4.1.1"
+        "AutoMapper": "4.2.1"
       },
       "frameworkAssemblies": {
         "System.ComponentModel.DataAnnotations": "4.0.0"
@@ -22,6 +22,7 @@
     "Microsoft.AspNet.Authentication.Cookies": "1.0.0-rc1-final",
     "Microsoft.AspNet.Http.Abstractions": "1.0.0-rc1-final",
     "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0-rc1-final",
-    "RavenDB.Embedded": "3.0.30037"
+    "RavenDB.Embedded": "3.0.30037",
+    "Stripe.net": "6.3.2"
   }
 }

@@ -1,4 +1,6 @@
-﻿using BrockAllen.MembershipReboot;
+﻿using System;
+using System.Security.Permissions;
+using BrockAllen.MembershipReboot;
 using Microsoft.AspNet.Authentication.Cookies;
 using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Builder;
@@ -14,6 +16,7 @@ using SolutionForms.Client.Mvc.Middleware.Multitenancy;
 using SolutionForms.Client.Mvc.Services;
 using SolutionForms.Service.Providers.Middleware;
 using SolutionForms.Service.Providers.Models;
+using Stripe;
 
 namespace SolutionForms.Client.Mvc
 {
@@ -33,6 +36,12 @@ namespace SolutionForms.Client.Mvc
 
             builder.AddEnvironmentVariables();
             Configuration = builder.Build();
+
+            if(AutoMapperConfig.Configuration == null)
+            {
+                throw new Exception("AutoMapper not configured.");
+            }
+            StripeConfiguration.SetApiKey(Configuration["stripe-api-key"]);
         }
 
         public IConfigurationRoot Configuration { get; set; }

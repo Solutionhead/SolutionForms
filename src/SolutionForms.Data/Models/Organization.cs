@@ -6,7 +6,8 @@ namespace SolutionForms.Data.Models
     {
         [Required]
         public string OrganizationName { get; set; }
-
         public string OrganizationDomain { get; set; }
+        public string CustomerId { get; set; }
+        public PaymentStatus PaymentStatus { get; set; }
     }
 }

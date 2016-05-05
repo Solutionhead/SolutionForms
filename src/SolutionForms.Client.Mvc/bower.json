@@ -17,8 +17,5 @@
     "knockout-kendo": "^0.9.6",
     "font-awesome": "4.4.0",
     "knockout.punches": "~0.5.1"
-  },
-  "resolutions": {
-    "jquery": ">=1.8"
   }
 }
