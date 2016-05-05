@@ -6,6 +6,7 @@ using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.Http;
+using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,7 +51,7 @@ namespace SolutionForms.Client.Mvc
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
-            services.AddAuthentication();
+            services.AddAuthentication(); 
             services.AddAuthorization();
 
             services.AddMvc(config =>
@@ -59,7 +60,12 @@ namespace SolutionForms.Client.Mvc
                     .RequireAuthenticatedUser()
                     .Build();
                 config.Filters.Add(new AuthorizeFilter(policy));
+
+#if RELEASE
+                config.Filters.Add(new RequireHttpsAttribute());
+#endif
             }).AddJsonOptions(opt => opt.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver());
+            
             
             services.AddAuthorization(options =>
             {
