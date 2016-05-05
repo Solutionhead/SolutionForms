@@ -43,6 +43,7 @@
 /// <reference path="../App/tenant_customizations/green_cleaners/Tests/appointment-recurrence-utils-tests.js" />
 /// <reference path="../app/tenant_customizations/green_cleaners/tests/schedule-simple-view-tests.js" />
 /// <reference path="../App/tenant_customizations/green_cleaners/utils/appointment-recurrence-utils.js" />
+/// <reference path="../app/utils/luceneutils.js" />
 /// <reference path="../app/viewModels/dataformDesignerViewModel.js" />
 /// <reference path="../app/viewModels/dataformFieldConfigViewModel.js" />
 /// <reference path="../app/viewModels/dataformFieldsDesigner.js" />
