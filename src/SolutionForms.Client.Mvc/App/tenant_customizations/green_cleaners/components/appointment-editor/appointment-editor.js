@@ -1,5 +1,6 @@
 ﻿import 'bindings/ko.bindings.jq-autocomplete';
 import toastr from 'toastr';
+import {prepareFilterString} from 'App/utils/luceneUtils';
 
 if (!ko.components.isRegistered('dynamic-form')) {
   ko.components.register('dynamic-form', require('components/dynamic-form-ui/dynamic-form-ui'));
@@ -230,9 +231,10 @@ function AppointmentEditor(params) {
 }
 
 AppointmentEditor.prototype.lookupClients = function(searchTerm, callback) {
+  searchTerm = prepareFilterString(searchTerm);
   $.ajax({
     dataType: "json",
-    url: `/api/d/index?id=${encodeURI("clients/byName")}&$filter=Name:*${searchTerm}*`
+    url: `/api/d/index?id=${encodeURI("clients/byName")}&$filter=Name:*${encodeURI(searchTerm)}*`
   }).done(callback)
   .fail(() => { toastr.error("Failed to return clients")});
 }
@@ -257,15 +259,14 @@ AppointmentEditor.prototype.saveAppointmentAsync = function(id, initialValues) {
     }).done((response) => {
       //todo: write test for this assignment after creation of new client
       event.ClientId = response.Id;
-      toastr.success('New Customer Added: ' + customerData.Name);
-      $dfd.done(postOrPutEvent);
+      toastr.success(`New Customer Added: ${customerData.Name}`);
+      $dfd.done(() => self.postOrPutEvent(id, event));
       self.newClientVm().setFieldValues({});
     }).fail(() => { toastr.error("We were unable to create new the client. The appointment could not be added.", "Appointment Not Added") });
     
     return $dfd;
   }
-
-  var client = self.selectedCustomer() || {};
+  const client = self.selectedCustomer() || {};
   event.ClientId = client.Id;
   if (event.ClientId == undefined) {
     toastr.fail("The client is missing.", "Unable to save appointment");
@@ -279,27 +280,28 @@ AppointmentEditor.prototype.saveAppointmentAsync = function(id, initialValues) {
 
     return self.submitRecurrenceExceptionForDateAsync(id, initialValues.Date)
       .done(function() {
-        postOrPutEvent(null);
+        self.postOrPutEvent(null, event);
       });
   }
 
-  return postOrPutEvent(id);
+  return self.postOrPutEvent(id, event);
 
 
   function isRecurrenceException() {
     return id && self.recurrenceInput() != undefined && event.Recurrence == undefined;
   }
-  function postOrPutEvent(id) {
-    const isNew = id == undefined;
-    return $.ajax("/api/d/appointments/" + (isNew ? '' : id), {
-      data: ko.toJSON(event),
-      dataType: 'json',
-      contentType: 'application/json',
-      method: isNew ? 'POST' : 'PUT'
-    }).done((response) => {
-      ko.postbox.publish('appointment-saved', response);
-    });
-  }
+}
+
+AppointmentEditor.prototype.postOrPutEvent = function(id, values) {
+  const isNew = id == undefined;
+  return $.ajax("/api/d/appointments/" + (isNew ? '' : id), {
+    data: ko.toJSON(values),
+    dataType: 'json',
+    contentType: 'application/json',
+    method: isNew ? 'POST' : 'PUT'
+  }).done((response) => {
+    ko.postbox.publish('appointment-saved', response);
+  });
 }
 
 AppointmentEditor.prototype.deleteEventAsync = function (id) {

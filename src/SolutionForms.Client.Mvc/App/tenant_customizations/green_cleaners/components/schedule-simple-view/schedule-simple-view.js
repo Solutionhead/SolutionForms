@@ -1,6 +1,7 @@
 ﻿import * as recurrenceUtils from '../../utils/appointment-recurrence-utils';
 import reportView from '../daily-appointment-report/daily-appointment-report';
 import 'local/printThis/printThis';
+import _sortBy from 'lodash/sortBy';
 
 var _each = require('lodash/map'),
   toastr = require('toastr'),
@@ -94,13 +95,7 @@ function ScheduleSimpleView(params) {
     self.appointmentsByDate(_each(datesCache, function (value, key) {
       return {
         date: key,
-        appointments: value.sort(function (a, b) {
-          if(a.teamName < b.teamName) return -1;
-          if(a.teamName > b.teamName) return 1;
-          if (a.start._d < b.start._d) return -1;
-          if (a.start._d > b.start._d) return 1;
-          return 0;
-        })
+        appointments: _sortBy(value, 'teamName', 'start')
       }
     }));
   }
