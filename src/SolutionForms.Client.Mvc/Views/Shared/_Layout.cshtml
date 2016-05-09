@@ -51,8 +51,16 @@
       <p>&copy; 2016 - Solutionhead Technologies, LLC</p>
     </footer>
   </div>
-  
-  <script src="~/js/build/core.bundle.js"></script>
+
+<script src="~/js/build/core.bundle.js"></script>
+<script>
+  //shell scripts
+  ko.validation.init({
+    insertMessages: false,
+    decorateInputElement: true,
+    errorElementClass: 'has-error'
+  });
+</script>
   @RenderSection("scripts", required: false)
 </body>
 </html>

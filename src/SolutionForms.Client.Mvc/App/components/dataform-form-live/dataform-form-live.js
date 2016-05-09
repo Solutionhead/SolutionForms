@@ -4,12 +4,6 @@ var toastr = require('toastr'),
   _ = require('underscore'),
   page = require('page');
 
-ko.validation.init({
-    insertMessages: false,
-    decorateElement: true,
-    errorElementClass: 'has-error'
-});
-
 if (!ko.components.isRegistered('dynamic-form')) {
   ko.components.register('dynamic-form', require('components/dynamic-form-ui/dynamic-form-ui'));
 }

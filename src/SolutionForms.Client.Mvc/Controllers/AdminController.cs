@@ -12,6 +12,7 @@ using SolutionForms.Client.Mvc.ViewModels.Account;
 using SolutionForms.Service.Providers.Providers;
 using SolutionForms.Service.Providers.Models;
 using SolutionForms.Client.Mvc.Helpers;
+using Stripe;
 
 // For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -22,11 +23,14 @@ namespace SolutionForms.Client.Mvc.Controllers
     {
         private readonly UserAccountService<ApplicationUser> _userAccountService;
         public string Tenant => HttpContext.Features.Get<ITenantFeature>().Tenant.Id;
+        private readonly StripeHelper _stripeHelper;
 
-        public AdminController(UserAccountService<ApplicationUser> userAccountService)
+        public AdminController(UserAccountService<ApplicationUser> userAccountService, StripeHelper stripeHelper)
         {
             if(userAccountService == null) throw new ArgumentNullException(nameof(userAccountService));
             _userAccountService = userAccountService;
+
+            _stripeHelper = stripeHelper;
         }
         
         public IActionResult Index()
@@ -38,6 +42,8 @@ namespace SolutionForms.Client.Mvc.Controllers
         {
             return View();
         }
+
+        #region MVC routes
 
         [Route("/admin/invite"), Authorize(Policy = "InviteUsers")]
         public IActionResult InviteUsers()
@@ -71,13 +77,25 @@ namespace SolutionForms.Client.Mvc.Controllers
 
             return View(new InviteUsersViewModel
             {
-                Message = $"We've sent your invitation for {values.FirstName} to join the {Tenant} team! Tell {values.FirstName} to be on the look out for the email."
+                Message =
+                    $"We've sent your invitation for {values.FirstName} to join the {Tenant} team! Tell {values.FirstName} to be on the look out for the email."
             });
         }
 
+        [Route("/admin/payment")]
+        public IActionResult ManagePayment()
+        {
+            return View(new ManagePaymentViewModel
+            {
+                ApiKey = _stripeHelper.PublishableApiKey
+            });
+        }
+
+        #endregion
+
         #region API Actions
 
-        [ApiRoute]
+        [ApiRoute(controllerNameOverride:"payments")]
         public async Task<IActionResult> GetPaymentInformation()
         {
             var tenant = Tenant;
@@ -92,7 +110,7 @@ namespace SolutionForms.Client.Mvc.Controllers
             return Json(response);            
         }
 
-        [ApiRoute]
+        [ApiRoute(controllerNameOverride:"payments"), HttpPost]
         public async Task<IActionResult> SetPaymentInformation([FromBody] SetPaymentInformationRequest request)
         {
             var tenant = Tenant;
@@ -103,11 +121,10 @@ namespace SolutionForms.Client.Mvc.Controllers
 
             var paymentProvider = HttpContext.GetApplicationService<PaymentProvider>();
             var parameters = request.Map().To<SetPaymentInformationParameters>();
-            await paymentProvider.SetPaymentInformationAsync(tenant, parameters);
-            return Ok();
+            var result = await paymentProvider.SetPaymentInformationAsync(tenant, parameters);
+            return Ok(result);
         }
 
         #endregion
-
     }
 }
