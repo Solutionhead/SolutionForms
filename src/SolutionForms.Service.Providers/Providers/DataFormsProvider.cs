@@ -209,8 +209,7 @@ namespace SolutionForms.Service.Providers.Providers
 
             return jsonResult.Select(r => JObject.Parse(r.ToJsonDocument().DataAsJson.ToString())); ;
         }
-
-
+        
         public async Task<DataEntryCreatedReturn> CreateDataEntryAsync(string tenant, string entityName, object values, ApplicationUser ownerUser)
         {
             var jobject = JObject.FromObject(values);

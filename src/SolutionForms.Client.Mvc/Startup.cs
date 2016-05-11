@@ -6,6 +6,7 @@ using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.Http;
+using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,6 +21,10 @@ using Stripe;
 
 namespace SolutionForms.Client.Mvc
 {
+    public class StripeHelper
+    {
+        public string PublishableApiKey { get; set; }
+    }
     public class Startup
     {
         public Startup(IHostingEnvironment env)
@@ -37,11 +42,8 @@ namespace SolutionForms.Client.Mvc
             builder.AddEnvironmentVariables();
             Configuration = builder.Build();
 
-            if(AutoMapperConfig.Configuration == null)
-            {
-                throw new Exception("AutoMapper not configured.");
-            }
-            StripeConfiguration.SetApiKey(Configuration["stripe-api-key"]);
+            AutoMapperConfig.Configure();
+            StripeConfiguration.SetApiKey(Configuration["stripe:private_key"]);
         }
 
         public IConfigurationRoot Configuration { get; set; }
@@ -50,7 +52,7 @@ namespace SolutionForms.Client.Mvc
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
-            services.AddAuthentication();
+            services.AddAuthentication(); 
             services.AddAuthorization();
 
             services.AddMvc(config =>
@@ -59,6 +61,11 @@ namespace SolutionForms.Client.Mvc
                     .RequireAuthenticatedUser()
                     .Build();
                 config.Filters.Add(new AuthorizeFilter(policy));
+
+#if RELEASE
+                // this causes issues when running the app locally, currently there appears to be an isse VS 2015 debugging a website with SSL
+                config.Filters.Add(new RequireHttpsAttribute());
+#endif
             }).AddJsonOptions(opt => opt.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver());
             
             services.AddAuthorization(options =>
@@ -66,6 +73,15 @@ namespace SolutionForms.Client.Mvc
                 options.AddPolicy("AppOwner", policy => policy.RequireClaim("AppOwner"));
                 options.AddTenantPolicy("AppAdmin");
                 options.AddTenantPolicy("InviteUsers", "InviteUsers");
+            });
+
+            services.AddSingleton(p =>
+            {
+                var pubKey = Configuration["stripe:pub_key"];
+                return new StripeHelper
+                {
+                    PublishableApiKey = pubKey
+                };
             });
 
             ConfigureMembershipReboot(services);

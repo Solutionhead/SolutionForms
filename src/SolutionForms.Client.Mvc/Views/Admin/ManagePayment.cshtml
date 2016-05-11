@@ -1,0 +1,118 @@
+﻿@model ManagePaymentViewModel
+
+@section scripts
+{
+  <script type="text/javascript" src="https://js.stripe.com/v2"></script>
+  <script type="text/javascript" src="~/js/build/admin-payment.bundle.js"></script>
+  <script type="text/javascript">
+    Stripe.setPublishableKey("@Model.ApiKey");
+  </script>
+
+}
+
+<style>
+  .configurable-visibility {
+    display: none;
+  }
+</style>
+
+<!-- Now change all the name attributes on your credit card inputs to data-stripe instead -->
+<div class="container">
+  <h1>Update Payment Information</h1>
+  <form data-bind="submit: createCardAsync.execute, with: paymentInfo" autocomplete="on">
+    <div class="row">
+      <div class="col-xs-12 col-sm-8">
+        <div class="form-group" data-bind="validationElement: cardNumber">
+          <label for="cc-number">Card Number</label>
+          <div class="input-group">
+            <input type="tel" class="form-control cc-number" id="cc-number" autocomplete="cc-number" placeholder="Card number" data-bind="textInput: cardNumber, ccNum: true">
+            <span class="input-group-addon"><i class="fa fa-lg fa-fw" data-bind="css: cardIcon"></i></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-6">
+        <div class="form-group" data-bind="validationElement: expDate">
+          <label for="">Expires</label>
+          <input type="tel" class="form-control cc-exp" placeholder="MM / YY" autocomplete="cc-exp" data-bind="textInput: expDate, ccExp: true">
+        </div>
+      </div>
+      <div class="col-xs-12 col-sm-4">
+        <div class="form-group" data-bind="validationElement: cardCvc">
+          <label for="">CV Code</label>
+          <input type="tel" class="form-control cc-cvc" autocomplete="off" placeholder="CVC" data-bind="textInput: cardCvc, ccCvc: true">
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-xs-12 col-sm-8">
+        <span class="control-label card-address-label">Billing Address</span>
+      </div>
+      <div class="col-xs-12 col-sm-6">
+        <div class="form-group" data-bind="validationElement: firstName">
+          <input type="text" class="form-control" autocomplete="billing given-name" placeholder="First name" data-bind="value: firstName">
+        </div>
+      </div>
+      <div class="col-xs-12 col-sm-6">
+        <div class="form-group" data-bind="validationElement: lastName">
+          <input type="text" class="form-control" autocomplete="billing family-name" placeholder="Last name" data-bind="textInput: lastName">
+        </div>
+      </div>
+      <!-- ko if: $root.displayAddress -->
+      <div class="col-xs-12">
+        <div class="form-group">
+          <input type="text" class="form-control" autocomplete="billing address-line1" placeholder="Address" data-bind="textInput: addressLine1">
+        </div>
+      </div>
+      <div class="col-xs-12">
+        <div class="form-group">
+          <input type="text" class="form-control" autocomplete="billing address-line2" placeholder="Apt., Suite., Bldg." data-bind="textInput: addressLine2">
+        </div>
+      </div>
+      <div class="col-xs-12 col-sm-6">
+        <div class="form-group" data-bind="validationElement: city">
+          <input type="text" class="form-control" autocomplete="billing address-level2" placeholder="City" data-bind="textInput: city">
+        </div>
+      </div>
+      <div class="col-xs-12 col-sm-3">
+        <div class="form-group" data-bind="validationElement: state">
+          <input type="text" class="form-control" autocomplete="billing address-level1" placeholder="State" data-bind="textInput: state">
+        </div>
+      </div>
+      <div class="col-xs-12 col-sm-3">
+        <div class="form-group">
+          <input type="text" class="form-control" autocomplete="billing postal-code" placeholder="Zip" data-bind="value: zip">
+        </div>
+      </div>
+      <div class="col-xs-12 col-sm-12 configurable-visibility" data-bind="visible: $root.displayCountry">
+        <div class="form-group">
+          <input type="text" class="form-control" autocomplete="billing country-name" placeholder="Country" data-bind="value: country">
+        </div>
+      </div>
+      <!-- /ko -->
+      <div class="col-xs-12 col-sm-3 configurable-visibility" data-bind="visible: $root.displayPhone">
+        <div class="form-group">
+          <input type="tel" class="form-control" autocomplete="billing tel-area-code" placeholder="Area code" data-bind="value: areaCode">
+        </div>
+      </div>
+      <div class="col-xs-12 col-sm-6 configurable-visibility">
+        <div class="form-group">
+          <input type="tel" class="form-control" autocomplete="billing tel-local" placeholder="Phone" data-bind="value: phone">
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-xs-12">
+        <div class="form-group">
+          <input type="email" id="email" class="form-control" placeholder="Email receipts to..." data-bind="textInput: email"/>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn btn-primary" data-bind="enable: $root.createCardAsync.canExecute">Save Changes</button>
+  </form>
+</div>

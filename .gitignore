@@ -24,6 +24,8 @@ bld/
 
 # Visual Studio 2015 cache/options directory
 .vs/
+**/*publish.ps1
+**/*.pubxml
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
@@ -149,6 +151,11 @@ publish/
 # Uncomment if necessary however generally it will be regenerated when needed
 #!**/packages/repositories.config
 
+# JS packages
+**/bower_modules/*
+**/node_modules/*
+
+
 # Windows Azure Build Output
 csx/
 *.build.csdef
@@ -171,7 +178,6 @@ ClientBin/
 *.dbproj.schemaview
 *.pfx
 *.publishsettings
-node_modules/
 orleans.codegen.cs
 
 # RIA/Silverlight projects
@@ -210,7 +216,5 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
-/src/SolutionForms.Client.Mvc/wwwroot/lib/jquery/src
-/src/SolutionForms.Client.Mvc/wwwroot/lib/kendo-ui-core
 /src/SolutionForms.Client.Mvc/wwwroot/css/site.min.css
-/src/SolutionForms.Client.Mvc/wwwroot/_references.js
+**/wwwroot/_references.js

@@ -46,7 +46,7 @@ namespace SolutionForms.Service.Providers.Providers
             }
         }
 
-        public async Task SetPaymentInformationAsync(string tenantDomain, SetPaymentInformationParameters parameters)
+        public async Task<StripeCustomer> SetPaymentInformationAsync(string tenantDomain, SetPaymentInformationParameters parameters)
         {
             using(var session = _documentStore.OpenAsyncSession())
             {
@@ -57,6 +57,10 @@ namespace SolutionForms.Service.Providers.Providers
                     {
                         throw new Exception(string.Format("Could not find Organization for Domain '{0}'.", tenantDomain));
                     }
+                    if (organization.CustomerId == null)
+                    {
+                        throw new Exception($"The customer {tenantDomain} does not have an associated Stripe customer ID.");
+                    }
 
                     var stripeCustomerService = new StripeCustomerService();
                     var customer = await stripeCustomerService.GetAsync(organization.CustomerId);
@@ -66,15 +70,12 @@ namespace SolutionForms.Service.Providers.Providers
                     }
 
                     var cardService = new StripeCardService();
-                    if(customer.DefaultSource != null)
+                    if(customer.DefaultSourceId != null)
                     {
-                        await cardService.DeleteAsync(customer.Id, customer.DefaultSource.Id);
+                        await cardService.DeleteAsync(customer.Id, customer.DefaultSourceId);
                     }
-                    
-                    await cardService.CreateAsync(customer.Id, new StripeCardCreateOptions
-                        {
-                            Source = parameters.ToStripeSourceOptions()
-                        });
+
+                    return await stripeCustomerService.UpdateAsync(customer.Id, parameters.ToStripeCustomerUpdateOptions());
                 }
                 catch(Exception)
                 {
