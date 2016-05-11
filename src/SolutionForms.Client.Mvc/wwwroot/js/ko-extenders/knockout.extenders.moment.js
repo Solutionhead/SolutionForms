@@ -28,14 +28,14 @@
 
     function forceDate(date) {
       if (date != undefined && date !== '') {
-        if (date instanceof Date) {
+        //if (date instanceof Date) {
 
-        } else if (typeof(date) === 'number') {
+        //} else if (typeof(date) === 'number') {
           
-        }
-        else {
-          date = Date.parse(date);
-        }
+        //}
+        //else {
+        //  date = Date.parse(date);
+        //}
         return moment(date);
       }
     }
