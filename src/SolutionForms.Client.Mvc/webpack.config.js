@@ -10,6 +10,7 @@ module.exports = {
   entry: {
     'dataform-designer': 'viewModels/dataformDesignerViewModel',
     'dataform-live': 'viewModels/dataformLiveViewModel',
+    'admin-payment': 'viewModels/managePaymentsViewModel',
     'core': ['ko',
       bower('knockout-postbox/build/knockout-postbox'),
       bower('knockout.punches/knockout.punches'),
@@ -18,7 +19,8 @@ module.exports = {
       'toastr',
       bower('toastr/toastr.css'),
       //note: the page.js package depends on `path-to-regexp` which I couldn't find on bower, after much trying
-      localPath('node_modules/page/page')
+      localPath('node_modules/page/page'),
+      'koValidation'
     ]
   },
   output: {
@@ -73,6 +75,8 @@ module.exports = {
       new webpack.ProvidePlugin({
         $: 'jquery',
         jQuery: 'jquery',
+        'window.jquery': 'jquery',
+        'window.jQuery': 'jquery',
         wptoast: new WebpackNotifierPlugin()
       })
   ],
