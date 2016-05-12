@@ -70,9 +70,9 @@ DynamicFormUIViewModel.prototype.initializeFromConfig = function (jsonConfig) {
     self.formId = form.id;
     self.formDescription = form.description;
     
-    self.setOrCreateObservable('fields', ko.utils.arrayMap(form.fields || [], function (f) {
-      return new Field(f);
-    }));
+    self.setOrCreateObservable('fields', ko.utils.arrayMap(form.fields || [], 
+      (f) => { return new Field(f); }),
+      (vals) => { return ko.observableArray(vals || []); });
 
     self.displayMode = getTemplateNameForFieldType;
   }).call(self);
@@ -85,9 +85,9 @@ DynamicFormUIViewModel.prototype.initializeFromConfig = function (jsonConfig) {
     }
   }
 }
-DynamicFormUIViewModel.prototype.setOrCreateObservable = function (name, value) {
+DynamicFormUIViewModel.prototype.setOrCreateObservable = function (name, value, observableConstructor) {
   if (ko.isObservable(this[name])) this[name](value);
-  else this[name] = ko.observable(value);
+  else this[name] = typeof observableConstructor === "function" ? observableConstructor(value) : ko.observable(value);
 }
 DynamicFormUIViewModel.prototype.loadFormById = function (formId) {
   var self = this;
