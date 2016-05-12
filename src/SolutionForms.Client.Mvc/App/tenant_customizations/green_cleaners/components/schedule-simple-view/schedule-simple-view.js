@@ -117,13 +117,14 @@ function ScheduleSimpleView(params) {
   function addAppointment(eventData) {
     //Trim the time specification off of the input value as this causes the date to be adjusted to the local timezone which may result in a change in the day
     eventData.Date = moment(eventData.Date, "YYYY-MM-DD").format("M/D/YYYY");
-
+    
+    const key = haveKey(eventData) ? ' (KEY)' : '';
     var apt = new EventInstance({
       id: eventData.Id,
       date: eventData.Date,
       startTime: eventData["Start Time"],
       endTime: eventData["End Time"],
-      label: eventData.Client.Name,
+      label: `${eventData.Client.Name} ${key}`,
       location: eventData.Location,
       teamName: eventData.Team,
       notes: eventData.InternalNotes,
@@ -148,6 +149,9 @@ function ScheduleSimpleView(params) {
       datesCache[date] = [];
     };
     datesCache[date].push(appt);
+  }
+  function haveKey(eventData) {
+    return (eventData.HaveKey && eventData.HaveKey.length && eventData.HaveKey  [0] === "Yes") || false;
   }
 }
 

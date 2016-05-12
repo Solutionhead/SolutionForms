@@ -95,7 +95,7 @@ function AppointmentEditor(params) {
     var hack1 = ko.computed(function() {
       var f = eventEditor.getFieldContextByName('HaveKey');
       if (!f) { return; }
-      __disposabled.push(f.subscribeTo(newClientHasKeyTopic));
+      __disposables.push(f.subscribeTo(newClientHasKeyTopic));
       cleanupHacks(hack1);
     });
     remainingHacks.push(hack1);
@@ -133,7 +133,6 @@ function AppointmentEditor(params) {
       }
     } else {
       // set values from selected existing client
-
       editor.showField("ClientName");
       editor.showField("ClientNotes");
     }
@@ -166,6 +165,7 @@ function AppointmentEditor(params) {
     eventEditor.setFieldValue('ClientName', val.Name);
     eventEditor.setFieldValue('Location', val.Address);
     eventEditor.setFieldValue('Notes', val.Notes);
+    eventEditor.setFieldValue('HaveKey', val.HaveKey);
   });
   params.input.appointmentData.subscribe(function (values) {
     originalValues = ko.utils.parseJson(ko.toJSON(values));
