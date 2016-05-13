@@ -7,6 +7,8 @@ using SolutionForms.Service.Providers.Helpers;
 using SolutionForms.Service.Providers.Parameters;
 using SolutionForms.Service.Providers.Returns;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Threading;
 using System.Windows.Markup;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -31,17 +33,19 @@ namespace SolutionForms.Service.Providers.Providers
             _documentStore = documentStore;
         }
 
+        #region Data Form operations
+
         public async Task<IEnumerable<DataFormReturn>> GetDataForms(string tenant, bool onlyHomepageLinks)
         {
             new DataForms_Menu().Execute(_documentStore.DatabaseCommands.ForDatabase(tenant), _documentStore.Conventions);
 
             using (var session = _documentStore.OpenAsyncSession(tenant))
             {
-               // Appparently, RavenDB can't handle inclusion of variable in filtering expression (!onlyHomepageLinks)
-               //return (await session.Query<DataForm, DataForms_Menu>()
-               //     .Where(f => !onlyHomepageLinks || f.LinkOnHomePage)
-               //     .ToListAsync())
-               //     .Project().To<DataFormReturn>();
+                // Appparently, RavenDB can't handle inclusion of variable in filtering expression (!onlyHomepageLinks)
+                //return (await session.Query<DataForm, DataForms_Menu>()
+                //     .Where(f => !onlyHomepageLinks || f.LinkOnHomePage)
+                //     .ToListAsync())
+                //     .Project().To<DataFormReturn>();
 
                 var q = onlyHomepageLinks
                     ? session.Query<DataForm, DataForms_Menu>()
@@ -73,7 +77,7 @@ namespace SolutionForms.Service.Providers.Providers
             {
                 var doc = await session.LoadAsync<DataForm>(id);
                 if (doc == null) return;
-                
+
                 doc.Description = dataform.Description;
                 doc.Title = dataform.Title;
                 doc.Fields = new List<FieldConfiguration>(dataform.Fields.Project().To<FieldConfiguration>());
@@ -152,7 +156,12 @@ namespace SolutionForms.Service.Providers.Providers
             }
         }
 
-        public async Task<IEnumerable<JObject>> GetDataEntriesByEntityName(string tenant, string entityName, IEnumerable<KeyValuePair<string, string>> queryParams)
+        #endregion
+
+        #region Data Entry operations
+
+        public async Task<IEnumerable<JObject>> GetDataEntriesByEntityName(string tenant, string entityName,
+            IEnumerable<KeyValuePair<string, string>> queryParams)
         {
             using (var session = _documentStore.OpenAsyncSession(tenant))
             {
@@ -162,21 +171,22 @@ namespace SolutionForms.Service.Providers.Providers
 
                 queryParams
                     .Where(param => string.Equals(param.Key, "$filter", StringComparison.OrdinalIgnoreCase))
-                        .ToList()
-                        .ForEach(filterParam => { query.Where(filterParam.Value); });
+                    .ToList()
+                    .ForEach(filterParam => { query.Where(filterParam.Value); });
 
                 var queryResult = await query.QueryResultAsync();
                 return queryResult.Results.Select(r => JObject.Parse(r.ToJsonDocument().DataAsJson.ToString()));
             }
         }
-        
-        public async Task<IEnumerable<JObject>> GetDataEntriesByIndexName(string tenant, string indexName, IDictionary<string, string> queryParams)
+
+        public async Task<IEnumerable<JObject>> GetDataEntriesByIndexName(string tenant, string indexName,
+            IDictionary<string, string> queryParams)
         {
             var query = new IndexQuery
             {
                 Query = queryParams.ContainsKey("$filter") ? queryParams["$filter"] : null
             };
-            
+
             int pageSize;
             if (queryParams.ContainsKey("$top") && int.TryParse(queryParams["$top"], out pageSize))
             {
@@ -190,9 +200,11 @@ namespace SolutionForms.Service.Providers.Providers
             }
 
             var includes = GetQueryStringIncludes(queryParams);
-            var queryResult = await _documentStore.AsyncDatabaseCommands.ForDatabase(tenant).QueryAsync(
-                indexName,
-                query, includes
+
+            var queryResult = await _documentStore.AsyncDatabaseCommands.ForDatabase(tenant)
+                .QueryAsync(
+                    indexName,
+                    query, includes
                 );
 
             var jsonResult = queryResult.Results;
@@ -202,20 +214,29 @@ namespace SolutionForms.Service.Providers.Providers
                 {
                     includes.ForEach(i =>
                     {
-                        r[i.Replace("Id", "")] = r.ContainsKey(i) ? queryResult.Includes.FirstOrDefault(ri => r[i].Value<string>() == ri["Id"].Value<string>()) : null;
+                        r[i.Replace("Id", "")] = r.ContainsKey(i)
+                            ? queryResult.Includes.FirstOrDefault(ri => r[i].Value<string>() == ri["Id"].Value<string>())
+                            : null;
                     });
                 });
             }
 
-            return jsonResult.Select(r => JObject.Parse(r.ToJsonDocument().DataAsJson.ToString())); ;
+            return jsonResult.Select(r => JObject.Parse(r.ToJsonDocument().DataAsJson.ToString()));
+            ;
         }
-        
-        public async Task<DataEntryCreatedReturn> CreateDataEntryAsync(string tenant, string entityName, object values, ApplicationUser ownerUser)
+
+        public async Task<DataEntryCreatedReturn> CreateDataEntryAsync(string tenant, string entityName, object values,
+            ApplicationUser ownerUser, bool awaitIndexing = false)
         {
             var jobject = JObject.FromObject(values);
-            var id = $"{entityName}{_documentStore.Conventions.IdentityPartsSeparator}{_documentStore.DatabaseCommands.NextIdentityFor(entityName)}";
+            var id =
+                $"{entityName}{_documentStore.Conventions.IdentityPartsSeparator}{_documentStore.DatabaseCommands.NextIdentityFor(entityName)}";
             jobject.Add(DatabaseConstants.IdPropertyName, id);
             await SaveEntryAsync(tenant, entityName, ownerUser, jobject, id);
+            if (awaitIndexing)
+            {
+                await ClearIndexesAsync(tenant);
+            }
 
             return new DataEntryCreatedReturn
             {
@@ -224,7 +245,51 @@ namespace SolutionForms.Service.Providers.Providers
             };
         }
 
-        public IEnumerable<DataEntryCreatedReturn> CreateDataEntriesFromJson(string tenant, string entityName, string jsonData, ApplicationUser ownerUser)
+        public async Task<JObject> GetDataEntryByKeyAsync(string tenant, string id)
+        {
+            var commands = _documentStore.AsyncDatabaseCommands.ForDatabase(tenant);
+            var result = await commands.GetAsync(id);
+            return result == null
+                ? null
+                : JObject.Parse(result.DataAsJson.ToString());
+        }
+
+        public async Task<JObject> UpdateDataEntryAsync(string tenant, string entityName, string id, object values,
+            ApplicationUser userAccount, bool awaitIndexing = false)
+        {
+            if (await GetDataEntryByKeyAsync(tenant, id) == null)
+            {
+                return null;
+            }
+            var jobject = JObject.FromObject(values);
+            jobject.Add(DatabaseConstants.IdPropertyName, id);
+            await SaveEntryAsync(tenant, entityName, userAccount, jobject, id);
+            if (awaitIndexing)
+            {
+                await ClearIndexesAsync(tenant);
+            }
+            return jobject;
+        }
+
+        public async Task PatchDataEntryAsync(string tenant, string id, ScriptedPatchRequestParameters patchParams,
+            ApplicationUser userAccount)
+        {
+            var commands = _documentStore.AsyncDatabaseCommands.ForDatabase(tenant);
+            await commands.PatchAsync(id, patchParams.ToScriptedPatchRequest());
+        }
+
+        public async Task DeleteDataEntryAsync(string tenant, string id, bool awaitIndexing = false)
+        {
+            var commands = _documentStore.AsyncDatabaseCommands.ForDatabase(tenant);
+            await commands.DeleteAsync(id, null);
+            if (awaitIndexing)
+            {
+                await ClearIndexesAsync(tenant);
+            }
+        }
+
+        public IEnumerable<DataEntryCreatedReturn> LoadDataEntriesFromJson(string tenant, string entityName,
+            string jsonData, ApplicationUser ownerUser)
         {
             var jsonArray = JArray.Parse(jsonData);
             var maxId = 0;
@@ -236,7 +301,11 @@ namespace SolutionForms.Service.Providers.Providers
                     var entity = RavenJObject.Parse(d.ToString());
                     var meta = new RavenJObject {{"Raven-Entity-Name", entityName}};
                     var id = (string) d["Id"];
-                    var identity = int.Parse(id.Substring(id.IndexOf(_documentStore.Conventions.IdentityPartsSeparator, StringComparison.Ordinal) + 1));
+                    var identity =
+                        int.Parse(
+                            id.Substring(
+                                id.IndexOf(_documentStore.Conventions.IdentityPartsSeparator, StringComparison.Ordinal) +
+                                1));
                     maxId = Math.Max(identity, maxId);
                     bulkInsert.Store(entity, meta, id);
                     yield return new DataEntryCreatedReturn
@@ -250,7 +319,19 @@ namespace SolutionForms.Service.Providers.Providers
             _documentStore.DatabaseCommands.SeedIdentityFor(entityName, maxId);
         }
 
-        private async Task<PutResult> SaveEntryAsync(string tenant, string entityName, ApplicationUser ownerUser, JObject jobject, string id)
+        #endregion
+
+        #region private members
+
+        private static string[] GetQueryStringIncludes(IDictionary<string, string> queryStringParams)
+        {
+            return queryStringParams.ContainsKey("$includes")
+                ? queryStringParams["$includes"].Split(',')
+                : null;
+        }
+
+        private async Task<PutResult> SaveEntryAsync(string tenant, string entityName, ApplicationUser ownerUser,
+            JObject jobject, string id)
         {
             UserIdentityHelper.SetUserIdentity(jobject, ownerUser);
 
@@ -272,45 +353,35 @@ namespace SolutionForms.Service.Providers.Providers
             return result;
         }
 
-        public async Task<JObject> GetDataEntryByKeyAsync(string tenant, string id)
+        private async Task ClearIndexesAsync(string tenant)
         {
-            var commands = _documentStore.AsyncDatabaseCommands.ForDatabase(tenant);
-            var result = await commands.GetAsync(id);
-            return result == null
-                ? null
-                : JObject.Parse(result.DataAsJson.ToString());
+            await ClearIndexesAsync(_documentStore, tenant, staleIndexes => staleIndexes.Any());
         }
 
-        public async Task<JObject> UpdateDataEntryAsync(string tenant, string entityName, string id, object values, ApplicationUser userAccount)
+        private async Task ClearIndexAsync(string tenant, string indexName)
         {
-            if (await GetDataEntryByKeyAsync(tenant, id) == null)
+            await ClearIndexesAsync(_documentStore, tenant, staleIndexes => staleIndexes.Any(i => i.Equals(indexName)));
+        }
+
+        private async Task ClearIndexAsync(string tenant, string[] indexNamees)
+        {
+            await ClearIndexesAsync(_documentStore, tenant, indexes => indexes.Any(indexNamees.Contains));
+        }
+
+        private static async Task ClearIndexesAsync(IDocumentStore documentStore, string tenant, Func<IEnumerable<string>, bool> waitExpression)
+        {
+            var stats = await documentStore.AsyncDatabaseCommands.ForDatabase(tenant)
+                .GetStatisticsAsync();
+
+            var staleIndexes = stats.StaleIndexes;
+                Thread.Sleep(10);
+            if(waitExpression.Invoke(staleIndexes))
             {
-                return null;
+                await ClearIndexesAsync(documentStore, tenant, waitExpression);
             }
-            var jobject = JObject.FromObject(values);
-            jobject.Add(DatabaseConstants.IdPropertyName, id);
-            await SaveEntryAsync(tenant, entityName, userAccount, jobject, id);
-            return jobject;
         }
 
-        public async Task PatchDataEntryAsync(string tenant, string id, ScriptedPatchRequestParameters patchParams, ApplicationUser userAccount)
-        {
-            var commands = _documentStore.AsyncDatabaseCommands.ForDatabase(tenant);
-            await commands.PatchAsync(id, patchParams.ToScriptedPatchRequest());
-        }
-
-        public async Task DeleteDataEntryAsync(string tenant, string id)
-        {
-            var commands = _documentStore.AsyncDatabaseCommands.ForDatabase(tenant);
-            await commands.DeleteAsync(id, null);
-        }
-
-        private static string[] GetQueryStringIncludes(IDictionary<string, string> queryStringParams)
-        {
-            return queryStringParams.ContainsKey("$includes")
-                ? queryStringParams["$includes"].Split(',')
-                : null;
-        }
+        #endregion
     }
 
     public class DataEntryCreatedReturn

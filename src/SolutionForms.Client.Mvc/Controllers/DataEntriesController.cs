@@ -32,20 +32,7 @@ namespace SolutionForms.Client.Mvc.Controllers
             if(userAccountService == null) { throw new ArgumentNullException(nameof(userAccountService)); }
             _userAccountService = userAccountService;
         }
-
-        [HttpGet("~/data/load")]
-        public ActionResult Load()
-        {
-            var customers = System.IO.File.ReadAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SolutionForms", "clients.txt"));
-            var cResult = _dataFormsProvider.CreateDataEntriesFromJson(Tenant, "clients", customers, _userAccountService.GetByUsername(Tenant, User.Identity.Name));
-            var events = System.IO.File.ReadAllText(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "SolutionForms", "appointments.txt"));
-            var eResult = _dataFormsProvider.CreateDataEntriesFromJson(Tenant, "appointments", events, _userAccountService.GetByUsername(Tenant, User.Identity.Name));
-            return Ok(new {
-                CustomersLoaded = cResult.Count(),
-                EventsLoaded = eResult.Count()
-            });
-        } 
-
+        
         [HttpGet("index/{indexName?}", Order = 0)]
         public async Task<ActionResult> GetByIndex(string id = null)
         {
@@ -76,20 +63,20 @@ namespace SolutionForms.Client.Mvc.Controllers
         }
 
         [HttpPost("{entityName}")]
-        public async Task<IActionResult> Post(string entityName, [FromBody]object values)
+        public async Task<IActionResult> Post(string entityName, [FromBody]object values, bool? awaitIndexing = false)
         {
             var userAccount = _userAccountService.GetByUsername(Tenant, User.Identity.Name);
             //todo: ensure that the current user is authorized to creation of the current entity type
-            var response = await _dataFormsProvider.CreateDataEntryAsync(Tenant, entityName, values, userAccount);
+            var response = await _dataFormsProvider.CreateDataEntryAsync(Tenant, entityName, values, userAccount, awaitIndexing ?? false);
             return CreatedAtRoute(new { controller=  "DataForms", action = "Live", formId = entityName, recordKey = response.Key }, response.Entity);
         }
 
         [HttpPut("{entityName}/{id}")]
-        public async Task<IActionResult> Put(string entityName, string id, [FromBody]object values)
+        public async Task<IActionResult> Put(string entityName, string id, [FromBody]object values, bool? awaitIndexing = false)
         {
             var userAccount = _userAccountService.GetByUsername(Tenant, User.Identity.Name);
             //todo: ensure that the current user is authorized to creation of the current entity type
-            var response = await _dataFormsProvider.UpdateDataEntryAsync(Tenant, entityName, id, values, userAccount);
+            var response = await _dataFormsProvider.UpdateDataEntryAsync(Tenant, entityName, id, values, userAccount, awaitIndexing ?? false);
             if (response == null)
             {
                 return HttpNotFound();
@@ -106,9 +93,9 @@ namespace SolutionForms.Client.Mvc.Controllers
         }
 
         [HttpDelete("{entityName}/{id}")]
-        public async Task<IActionResult> Delete(string entityName, string id)
+        public async Task<IActionResult> Delete(string entityName, string id, bool? awaitIndexing = false)
         {
-            await _dataFormsProvider.DeleteDataEntryAsync(Tenant, id);
+            await _dataFormsProvider.DeleteDataEntryAsync(Tenant, id, awaitIndexing ?? false);
             return new NoContentResult();
         }
     }
