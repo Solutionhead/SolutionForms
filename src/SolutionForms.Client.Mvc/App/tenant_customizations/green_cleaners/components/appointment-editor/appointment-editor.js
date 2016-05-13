@@ -160,8 +160,9 @@ function AppointmentEditor(params) {
   });
   self.selectedCustomer.subscribe(function(val) {
     var eventEditor = self.eventEditorVm();
-    if (!val || eventEditor == undefined) { return; }
-    
+    if (eventEditor == undefined) { return; }
+    val = val || {};
+
     eventEditor.setFieldValue('ClientName', val.Name);
     eventEditor.setFieldValue('Location', val.Address);
     eventEditor.setFieldValue('Notes', val.Notes);
