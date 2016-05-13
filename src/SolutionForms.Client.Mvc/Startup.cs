@@ -4,6 +4,9 @@ using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.Http;
+// ReSharper disable once RedundantUsingDirective
+// This using statement (Microsoft.AspNet.Mvc) is valid but may appear "unnecessary" due to RELEASE complier directive below
+using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
