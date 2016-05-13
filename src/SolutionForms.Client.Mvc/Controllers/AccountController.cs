@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using BrockAllen.MembershipReboot;
 using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Mvc;
-using Microsoft.Extensions.Logging;
 using Microsoft.AspNet.Http.Features;
 using SolutionForms.Client.Mvc.Helpers;
 using SolutionForms.Client.Mvc.ViewModels.Account;

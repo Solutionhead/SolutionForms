@@ -2,7 +2,7 @@
 <article title="team-cover-sheet">
   <hgroup>
     <h1 data-bind="text: $parent.reportDate"></h1>
-    <h2 data-bind="text: teamName"></h2>
+    <h2>{{ teamName }}</h2>
   </hgroup>
 
   <table class="table table-striped">
@@ -22,8 +22,8 @@
 <!-- ko foreach: appointments -->
 <article title="appointment-details">
   <hgroup>
-    <h1 data-bind="text: label"></h1>
-    <h2 data-bind="text: teamName"></h2>
+    <h1>{{ label }}</h1>
+    <h2>{{ teamName }}</h2>
     <h3 data-bind="text: $parents[1].reportDate"></h3>
   </hgroup>
 
