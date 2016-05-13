@@ -294,7 +294,7 @@ AppointmentEditor.prototype.saveAppointmentAsync = function(id, initialValues) {
 
 AppointmentEditor.prototype.postOrPutEvent = function(id, values) {
   const isNew = id == undefined;
-  return $.ajax("/api/d/appointments/" + (isNew ? '' : id), {
+  return $.ajax(`/api/d/appointments/${isNew ? '' : id}?awaitIndexing=true`, {
     data: ko.toJSON(values),
     dataType: 'json',
     contentType: 'application/json',
