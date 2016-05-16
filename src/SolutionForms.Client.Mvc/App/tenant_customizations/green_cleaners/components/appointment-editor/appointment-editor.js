@@ -316,17 +316,31 @@ AppointmentEditor.prototype.deleteEventAsync = function (id) {
 }
 
 AppointmentEditor.prototype.submitRecurrenceExceptionForDateAsync = function(eventId, date) {
+  var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
+  var ARGUMENT_NAMES = /([^\s,]+)/g;
+  function getParamNames(func) {
+    var fnStr = func.toString().replace(STRIP_COMMENTS, '');
+    var result = fnStr.slice(fnStr.indexOf('(')+1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
+    if(result === null)
+      result = [];
+    return result;
+  }
+
+  var args = {};
+  args[getParamNames(createRecurrenceException)[0]] = getFormattedDateString(date);
+
   //NOTE: the `exDate` property name must match the argument name in `createRecurrenceException`
   return issuePatch("/api/d/appointments/" + eventId,
     getMethodBodyAsString(createRecurrenceException),
-    { "exDate": getFormattedDateString(date) }
+    args
   );
 
   function createRecurrenceException(exDate) {
     this.Recurrence.Exceptions = this.Recurrence.Exceptions || [];
-    if (_.indexOf(this.Recurrence.Exceptions, exDate) === -1) {
-      this.Recurrence.Exceptions.push(exDate);
-    }
+    // NOTE: this must be vanilla JS because it will be run inside Raven. The indexOf method,
+    // however, is a wrapper function around Lo-Dash's _.indexOf provided my Raven. 
+    // See https://ravendb.net/docs/article-page/3.0/csharp/client-api/commands/patches/how-to-use-javascript-to-patch-your-documents
+    (-1===this.Recurrence.Exceptions.indexOf(exDate)) && this.Recurrence.Exceptions.push(exDate);
   }
 }
 
