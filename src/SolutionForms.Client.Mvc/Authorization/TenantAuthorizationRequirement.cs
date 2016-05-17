@@ -1,6 +1,7 @@
 using System.Linq;
 using BrockAllen.MembershipReboot;
 using Microsoft.AspNet.Authorization;
+using SolutionForms.Client.Mvc.Helpers;
 
 namespace SolutionForms.Client.Mvc.Authorization
 {
@@ -15,7 +16,7 @@ namespace SolutionForms.Client.Mvc.Authorization
 
         protected override void Handle(AuthorizationContext context, TenantAuthorizationRequirement requirement)
         {
-            if (context.User.HasClaim("AppOwner") || context.User.IsInRole("admin"))
+            if (context.User.HasClaim(AuthorizationPolicies.AppAdmin) || context.User.IsInRole("admin"))
             {
                 context.Succeed(requirement);
                 return;

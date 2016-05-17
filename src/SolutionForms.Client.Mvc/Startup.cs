@@ -4,15 +4,13 @@ using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.Http;
-// ReSharper disable once RedundantUsingDirective
-// This using statement (Microsoft.AspNet.Mvc) is valid but may appear "unnecessary" due to RELEASE complier directive below
-using Microsoft.AspNet.Mvc;
 using Microsoft.AspNet.Mvc.Filters;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 using SolutionForms.Client.Mvc.Authorization;
+using SolutionForms.Client.Mvc.Helpers;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
 using SolutionForms.Client.Mvc.Services;
 using SolutionForms.Service.Providers.Middleware;
@@ -64,13 +62,13 @@ namespace SolutionForms.Client.Mvc
 
 #if RELEASE
                 // this causes issues when running the app locally, currently there appears to be an isse VS 2015 debugging a website with SSL
-                config.Filters.Add(new RequireHttpsAttribute());
+                config.Filters.Add(new Microsoft.AspNet.Mvc.RequireHttpsAttribute());
 #endif
             }).AddJsonOptions(opt => opt.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver());
             
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("AppOwner", policy => policy.RequireClaim("AppOwner"));
+                options.AddPolicy(AuthorizationPolicies.AppAdmin, policy => policy.RequireClaim(AuthorizationPolicies.AppAdmin));
                 options.AddTenantPolicy("AppAdmin");
                 options.AddTenantPolicy("InviteUsers", "InviteUsers");
             });

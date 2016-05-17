@@ -18,7 +18,7 @@ using Stripe;
 
 namespace SolutionForms.Client.Mvc.Controllers
 {
-    [Authorize(Policy = "AppAdmin")]
+    [Authorize(Policy = AuthorizationPolicies.AppAdmin)]
     public class AdminController : Controller
     {
         private readonly UserAccountService<ApplicationUser> _userAccountService;

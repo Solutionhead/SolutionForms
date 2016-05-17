@@ -69,7 +69,7 @@ namespace SolutionForms.Client.Mvc.Controllers
             }
             UserManager.CreateAccount(model.OrganizationDomain, model.Email, model.Password, model.Email, null, null, null, new List<Claim>
             {
-                new Claim("AppOwner", "true")
+                new Claim(AuthorizationPolicies.AppAdmin, "true")
             });
             
             return TenantRedirectHelper.RedirectToTenantDomain(model.OrganizationDomain, "Login", HttpContext.Request, Url);
