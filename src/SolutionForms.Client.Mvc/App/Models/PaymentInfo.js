@@ -5,8 +5,7 @@
     this.cardNumber = ko.observable(values.cardNumber);
     this.cardCvc = ko.observable(values.cardCvc);
     this.expDate = ko.observable(values.expDate);
-    this.firstName = ko.observable(values.firstName);
-    this.lastName = ko.observable(values.lastName);
+    this.nameOnCard = ko.observable(values.nameOnCard);
     this.addressLine1 = ko.observable(values.addressLine1);
     this.addressLine2 = ko.observable(values.addressLine2);
     this.city = ko.observable(values.city);

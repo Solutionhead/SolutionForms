@@ -20,6 +20,16 @@
 <div class="container">
   <h1>Update Payment Information</h1>
   <form data-bind="submit: createCardAsync.execute, with: paymentInfo" autocomplete="on">
+
+    <div class="row">
+      <div class="col-xs-12 col-sm-8">
+        <div class="form-group" data-bind="validationElement: nameOnCard">
+          <label for="cc-name">Name on Card</label>
+            <input type="text" class="form-control" id="cc-name" placeholder="" data-bind="textInput: nameOnCard">
+        </div>
+      </div>
+    </div>
+
     <div class="row">
       <div class="col-xs-12 col-sm-8">
         <div class="form-group" data-bind="validationElement: cardNumber">
@@ -49,17 +59,7 @@
 
     <div class="row">
       <div class="col-xs-12 col-sm-8">
-        <span class="control-label card-address-label">Billing Address</span>
-      </div>
-      <div class="col-xs-12 col-sm-6">
-        <div class="form-group" data-bind="validationElement: firstName">
-          <input type="text" class="form-control" autocomplete="billing given-name" placeholder="First name" data-bind="value: firstName">
-        </div>
-      </div>
-      <div class="col-xs-12 col-sm-6">
-        <div class="form-group" data-bind="validationElement: lastName">
-          <input type="text" class="form-control" autocomplete="billing family-name" placeholder="Last name" data-bind="textInput: lastName">
-        </div>
+        <label class="control-label card-address-label">Billing Address</label>
       </div>
       <!-- ko if: $root.displayAddress -->
       <div class="col-xs-12">
@@ -108,7 +108,7 @@
     <div class="row">
       <div class="col-xs-12">
         <div class="form-group">
-          <input type="email" id="email" class="form-control" placeholder="Email receipts to..." data-bind="textInput: email"/>
+          <input type="email" id="email" class="form-control" placeholder="Email receipts to..." data-bind="textInput: email" />
         </div>
       </div>
     </div>

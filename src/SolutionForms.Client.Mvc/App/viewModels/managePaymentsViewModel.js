@@ -50,7 +50,7 @@ var vm = {
 
       var payment = vm.paymentInfo;
       Stripe.card.createToken({
-        name: `${payment.firstName()} ${payment.lastName()}`,
+        name: payment.nameOnCard(),
         number: payment.cardNumber(),
         cvc: payment.cardCvc(),
         exp: payment.expDate(),
@@ -79,8 +79,7 @@ var cardIcons = {
 vm.paymentInfo.cardNumber.extend({ creditcardNum: true, required: true });
 vm.paymentInfo.expDate.extend({ 'cardExpDate': true, 'required': true });
 vm.paymentInfo.cardCvc.extend({ 'cardCVC': true, 'required': true });
-vm.paymentInfo.firstName.extend({ 'required': true });
-vm.paymentInfo.lastName.extend({ 'required': true });
+vm.paymentInfo.nameOnCard.extend({ 'required': true });
 vm.paymentInfo.addressLine1.extend({ 'required': true });
 vm.paymentInfo.city.extend({ 'required': true });
 vm.paymentInfo.state.extend({ 'required': true });
