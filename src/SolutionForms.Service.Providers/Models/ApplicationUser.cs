@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using BrockAllen.MembershipReboot;
 using BrockAllen.MembershipReboot.Hierarchical;
-using Newtonsoft.Json;
+using Raven.Imports.Newtonsoft.Json;
 
 namespace SolutionForms.Service.Providers.Models
 {
