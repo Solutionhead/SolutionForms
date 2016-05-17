@@ -68,9 +68,9 @@ namespace SolutionForms.Client.Mvc
             
             services.AddAuthorization(options =>
             {
-                options.AddPolicy(AuthorizationPolicies.AppAdmin, policy => policy.RequireClaim(AuthorizationPolicies.AppAdmin));
-                options.AddTenantPolicy("AppAdmin");
-                options.AddTenantPolicy("InviteUsers", "InviteUsers");
+                options.AddPolicy(AuthorizationPolicies.AppOwner, policy => policy.RequireClaim(AuthorizationPolicies.AppOwner));
+                options.AddTenantPolicy(AuthorizationPolicies.AppAdmin);
+                options.AddTenantPolicy(AuthorizationPolicies.InviteUsers, AuthorizationPolicies.InviteUsers);
             });
 
             services.AddSingleton(p =>
