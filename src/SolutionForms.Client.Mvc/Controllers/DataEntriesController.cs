@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using BrockAllen.MembershipReboot;
+using Microsoft.AspNet.Authorization;
 using Microsoft.AspNet.Http.Features;
 using Microsoft.AspNet.Mvc;
 using SolutionForms.Client.Mvc.Attributes;
+using SolutionForms.Client.Mvc.Helpers;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
 using SolutionForms.Core;
 using SolutionForms.Service.Providers.Models;
@@ -98,6 +99,16 @@ namespace SolutionForms.Client.Mvc.Controllers
             await _dataFormsProvider.DeleteDataEntryAsync(Tenant, id, awaitIndexing ?? false);
             return new NoContentResult();
         }
-    }
 
+        [HttpPost("{entityname}/seed-identity/{nextId}"), Authorize(Policy = AuthorizationPolicies.AppAdmin)]
+        public async Task<IActionResult> SeedIdentity(string entityName, long nextId)
+        {
+            await _dataFormsProvider.SeedIdentityForTable(entityName, nextId);
+            return Ok(new
+            {
+                CollectionName = entityName,
+                NextId = nextId
+            });
+        }
+    }
 }

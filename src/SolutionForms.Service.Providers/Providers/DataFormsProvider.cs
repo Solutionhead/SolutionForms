@@ -7,9 +7,7 @@ using SolutionForms.Service.Providers.Helpers;
 using SolutionForms.Service.Providers.Parameters;
 using SolutionForms.Service.Providers.Returns;
 using System.Linq;
-using System.Linq.Expressions;
 using System.Threading;
-using System.Windows.Markup;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Raven.Abstractions.Data;
@@ -317,6 +315,11 @@ namespace SolutionForms.Service.Providers.Providers
             }
 
             _documentStore.DatabaseCommands.SeedIdentityFor(entityName, maxId);
+        }
+
+        public async Task SeedIdentityForTable(string entityname, long nextId)
+        {
+            await _documentStore.AsyncDatabaseCommands.SeedIdentityForAsync(entityname, nextId);
         }
 
         #endregion
