@@ -100,7 +100,7 @@ namespace SolutionForms.Client.Mvc.Controllers
             return new NoContentResult();
         }
 
-        [HttpPost("{entityname}/seed-identity/{nextId}"), Authorize(Policy = AuthorizationPolicies.AppAdmin)]
+        [HttpPost("{entityName}/seed-identity/{nextId}"), Authorize(Policy = AuthorizationPolicies.AppAdmin)]
         public async Task<IActionResult> SeedIdentity(string entityName, long nextId)
         {
             await _dataFormsProvider.SeedIdentityForTable(entityName, nextId);
