@@ -11,7 +11,7 @@
   <hr/>
   @if (Model != null && !string.IsNullOrWhiteSpace(Model.Message))
   {
-  <p class="bg-primary message">@Model.Message</p>
+  <p class="bg-primary message">@Html.Raw(Model.Message)</p>
   }
   <div asp-validation-summary="ValidationSummary.All" class="bg-info message"></div>
 
