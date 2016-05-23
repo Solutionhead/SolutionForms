@@ -188,9 +188,18 @@ namespace SolutionForms.Client.Mvc.Controllers
         [Route("account/activate/{code}")]
         public IActionResult ActivateAccount(string code)
         {
+            var user = UserManager.GetByVerificationKey(code);
+            if (user.IsAccountVerified)
+            {
+                return User.Identity.IsAuthenticated
+                    ? TenantRedirectHelper.RedirectToTenantDomain(user.Tenant, "Index", "Home", Request, Url)
+                    : TenantRedirectHelper.RedirectToTenantDomain(user.Tenant, "Login", Request, Url);
+            }
+
             return View(new ActivateAccountViewModel
             {
-                VerificationCode = code
+                VerificationCode = code,
+                DisplayPasswordConfirmation = !user.HasPassword()
             });
         }
 

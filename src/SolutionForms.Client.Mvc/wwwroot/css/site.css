@@ -114,3 +114,7 @@ body {
 
 .ui-autocomplete {
   z-index: 215000000 !important; }
+
+p.message {
+  padding: 15px;
+  font-size: 1.2em; }

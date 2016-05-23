@@ -75,10 +75,11 @@ namespace SolutionForms.Client.Mvc.Controllers
                 return View();
             }
 
+            ModelState.Clear();
             return View(new InviteUsersViewModel
             {
                 Message =
-                    $"We've sent your invitation for {values.FirstName} to join the {Tenant} team! Tell {values.FirstName} to be on the look out for the email."
+                    $"We've sent your invitation for {values.FirstName} to join the <strong>{Tenant}</strong> team! Tell {values.FirstName} to be on the look out for the email."
             });
         }
 
