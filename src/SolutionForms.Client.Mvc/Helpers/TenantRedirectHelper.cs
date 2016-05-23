@@ -35,9 +35,11 @@ namespace SolutionForms.Client.Mvc.Helpers
             return CreateRedirectToTenantDomainAction(tenant, request, url);
         }
 
+        private static readonly Regex regex = new Regex(@"^([\w-]*\.)?(solutionforms\.((com|local)(:\d*)?)(/.*)?)", RegexOptions.IgnoreCase);
         private static IActionResult CreateRedirectToTenantDomainAction(string tenant, HttpRequest request, string pathAndQuery)
         {
-            var url = $"{request.Scheme}://{tenant}.{request.Host}{pathAndQuery}";
+            string formatted = $"{request.Scheme}://{tenant}.$2{pathAndQuery}";
+            var url = regex.Replace(request.Host.Value, formatted);
             return new RedirectResult(url);
         }
         
