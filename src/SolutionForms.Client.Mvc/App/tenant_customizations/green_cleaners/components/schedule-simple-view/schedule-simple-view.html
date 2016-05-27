@@ -1,24 +1,4 @@
 ﻿<div>
-  <input type="text" class="form-control" data-bind="datepicker: 'M/D/YYYY', value: date"/>
-
-  <button type="button" data-bind="click: toggleReportView">Daily Reports</button>
-
-  <div data-bind="modal: showReport" tabindex="-1" class="modal fade" role="dialog">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
-        <div class="modal-header bg-primary">Daily Report
-          <button data-bind="click: printReport" class="btn-default pull-right">Print</button>
-        </div>
-        <div class="modal-body print" id="report">
-          <report-view params="reportDate: date, appointments: appointmentsForCurrentDate"></report-view>
-        </div>
-        <div class="modal-footer">
-          <button type="button" data-bind="click: toggleReportView">Close</button>
-        </div>
-      </div>
-    </div>
-  </div>
-
   <section data-bind="foreach: appointmentsByDate" class="container">
     <div class="row">
       <h3>{{ date | moment: 'dddd, M/D/YYYY' }}</h3>
@@ -34,7 +14,7 @@
       <div class="row">
         <div class="col-sm-4 col-md-2">
           <span class="glyphicon" data-bind="css: {'glyphicon-repeat': isRecurring}"></span> 
-          <a href="#" data-bind="command: loadEventDetailsCommand">{{ startTime }} - {{ endTime }}</a>
+          <a href="#" data-bind="command: $parents[1].selectAppointmentCommand">{{ startTime }} - {{ endTime }}</a>
         </div>
         <div class="col-sm-4 col-md-3">{{ label }}</div>
         <div class="col-sm-4 col-md-7">{{ location }}</div>

@@ -26,17 +26,19 @@
       }
     }).extend({ notify: 'always' });
 
-    function forceDate(date) {
-      if (date != undefined && date !== '') {
-        //if (date instanceof Date) {
+    function forceDate(dateValue) {
+      if (dateValue != undefined && dateValue !== '') {
+        if (typeof dateValue === "string") {
+          var m = moment(dateValue, defaultFormatString);
+          if (m.isValid()) return m;
+          return moment(dateValue); // if parsing fails using supplied format string, try default parsing and hope it's in ISO format!
+        } else if (dateValue instanceof Date) {
+          return moment(dateValue);
+        } else if (dateValue._isAMomentObject) {
+          return dateValue;
+        }
 
-        //} else if (typeof(date) === 'number') {
-          
-        //}
-        //else {
-        //  date = Date.parse(date);
-        //}
-        return moment(date);
+        console.log(`Unsupported date format encountered: '${dateValue}'. Supported values types are string in format '${defaultFormatString}' as specified by defaultFormatString argument, a Date object, or a moment instance.`);
       }
     }
 

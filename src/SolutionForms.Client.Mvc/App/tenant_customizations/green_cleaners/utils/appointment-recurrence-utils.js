@@ -19,7 +19,7 @@ export function createRecurrenceInstances(startDate, endDate, eventData) {
     var instanceDate = getFirstOccurrenceDateFromRange(startDate, eventData.Recurrence),
       exceptions = eventData.Recurrence.Exceptions || [];
 
-    while (instanceDate >= startDate && instanceDate <= endDate && (eventData.Recurrence.endDate == undefined || instanceDate <= moment(eventData.Recurrence.endDate).toDate())) {
+    while (instanceDate >= startDate && instanceDate <= endDate && recurrenceHasNotEnded(instanceDate)) {
       if (!exceptions.length || find(exceptions, (exDate) => { return moment(exDate, "YYYY-MM-DD").isSame(instanceDate); }) == undefined) {
         eventData.date = instanceDate;
         result.push(new Appointment(eventData));
@@ -27,7 +27,18 @@ export function createRecurrenceInstances(startDate, endDate, eventData) {
 
       instanceDate = getNextInstanceDateForRecurrence(instanceDate, eventData.Recurrence);
     }
+
   }
+
+  function recurrenceHasNotEnded(instanceDate) {
+    if (eventData.Recurrence.endDate == undefined) {
+      return true;
+    }
+
+    const recurrenceEndDate = moment(eventData.Recurrence.endDate, moment.ISO_8601);
+    return recurrenceEndDate.isValid() ? instanceDate <= recurrenceEndDate.toDate() : true;
+  }
+
 
   return result;
 }

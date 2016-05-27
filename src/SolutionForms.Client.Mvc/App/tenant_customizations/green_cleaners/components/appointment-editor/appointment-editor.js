@@ -187,7 +187,7 @@ function AppointmentEditor(params) {
       var recurrence = null;
       if (values.Recurrence) {
         recurrence = values.Recurrence;
-        //recurrence.startDate = values.Date;
+        
         values.Id = null;
         values.Recurrence = null;
       }
@@ -214,7 +214,8 @@ function AppointmentEditor(params) {
           });
       },
       deleteAppointmentAndFutureRecurrencesAsync: function () {
-        return self.endRecurringEventAsOfDateAsync(currentEventId(), self.eventEditorVm().currentInstanceDate);
+        var endDate = moment(originalValues.Date, 'MM/DD/YYYY').subtract(1,'days').format("YYYY-MM-DDT00:00:00");
+        return self.endRecurringEventAsOfDateAsync(currentEventId(), endDate);
       },
       deleteEventAsync: function() {
         return self.deleteEventAsync(currentEventId());

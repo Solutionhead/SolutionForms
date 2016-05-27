@@ -4,6 +4,10 @@
   .page-break {
     display: none; } }
 
+.print {
+  visibility: hidden;
+  display: none; }
+
 @media print {
   .page-break {
     display: block;
@@ -14,7 +18,8 @@
   .no-print {
     visibility: hidden; }
   .print {
-    visibility: visible; } }
+    visibility: visible;
+    display: block; } }
 
 body {
   padding-top: 50px;
@@ -115,6 +120,6 @@ body {
 .ui-autocomplete {
   z-index: 215000000 !important; }
 
-p.message {
+p.message, div.message {
   padding: 15px;
   font-size: 1.2em; }

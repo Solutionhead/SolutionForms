@@ -6,11 +6,13 @@
     .page-break { display: none; }
 }
 
+.print { visibility: hidden; display: none; }
+
 @media print {
     .page-break { display: block;page-break-before: always; }
     .page-break-after { display: block;page-break-after: always; }
     .no-print { visibility: hidden; }
-    .print { visibility: visible; }
+    .print { visibility: visible; display: block; }
 }
 body {
     padding-top: 50px;

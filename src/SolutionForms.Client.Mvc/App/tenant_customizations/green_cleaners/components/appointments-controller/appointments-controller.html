@@ -1,6 +1,13 @@
-﻿<button class="btn btn-default" data-bind="command: newEvent">
-  <span class="glyphicon glyphicon-calendar"></span> Add Appointment
-</button>
+﻿<div class="btn-group" role="group">
+  <button class="btn btn-default" data-bind="command: newEvent">
+    <span class="glyphicon glyphicon-calendar"></span> Add Appointment
+  </button>
+  <button type="button" class="btn btn-default" data-bind="click: printReport">
+    <span class="glyphicon glyphicon-print"></span> Daily Reports
+  </button>
+</div>
+
+<input type="text" class="form-control" data-bind="datepicker: 'M/D/YYYY', value: startDateFilter" />
 
 <appointments-day-view params="options: appointmentsDayViewOptions, exports: appointmentsByDayViewModel"></appointments-day-view>
 
@@ -42,3 +49,7 @@
     </div>
   </div>
 </section>
+
+<div class="modal-body print" id="report">
+  <report-view params="reportDate: startDateFilter, appointments: appointmentsForCurrentDate"></report-view>
+</div>
