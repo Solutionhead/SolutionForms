@@ -1,7 +1,8 @@
-﻿<div>
-  <section data-bind="foreach: appointmentsByDate" class="container">
+﻿<section>
+  <div class="container">
+    {{ #foreach: appointmentsByDate }}
     <div class="row">
-      <h3>{{ date | moment: 'dddd, M/D/YYYY' }}</h3>
+      <h3>{{ $parent.dateControlBreak($data) | moment: 'dddd, M/D/YYYY' }}</h3>
     </div>
 
     {{ #foreach: appointments }}
@@ -13,7 +14,7 @@
 
       <div class="row">
         <div class="col-sm-4 col-md-2">
-          <span class="glyphicon" data-bind="css: {'glyphicon-repeat': isRecurring}"></span> 
+          <span class="glyphicon" data-bind="css: {'glyphicon-repeat': isRecurring}"></span>
           <a href="#" data-bind="command: $parents[1].selectAppointmentCommand">{{ startTime }} - {{ endTime }}</a>
         </div>
         <div class="col-sm-4 col-md-3">{{ label }}</div>
@@ -22,5 +23,10 @@
       </div>
     </article>
     {{ /foreach }}
-  </section>
-</div>
+    {{ /foreach }}
+  </div>
+
+  {{ #if: !appointmentsByDate().length }}
+  <div class="message bg-info">No appointments found for current filters.</div>
+  {{ /if }}
+</section>

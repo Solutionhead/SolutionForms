@@ -1,4 +1,5 @@
-﻿import * as recurrenceUtils from '../../utils/appointment-recurrence-utils';
+﻿import {prepareFilterString} from 'App/utils/luceneUtils';
+import * as recurrenceUtils from '../../utils/appointment-recurrence-utils';
 import 'bindings/datepicker';
 import _sortBy from 'lodash/sortBy';
 import reportView from '../daily-appointment-report/daily-appointment-report';
@@ -27,6 +28,7 @@ function AppointmentsController() {
   self.appointmentEditorViewModel = ko.observable();
   self.startDateFilter = ko.observable(moment()).extend({ moment: 'M/D/YYYY' });
   self.endDateFilter = ko.observable().extend({ moment: 'M/D/YYYY' });
+  self.customerFilter = ko.observable();
   self.appointmentsByDate = ko.observableArray([]);
 
   self.isCurrentEventRecurring = ko.computed(function() {
@@ -48,7 +50,10 @@ function AppointmentsController() {
   self.appointmentEditorConfig = {
     appointmentData: self.selectedEvent
   }
-  
+
+  self.searchAppointmentsCommand = ko.command({
+    execute: fetchEvents
+  }); 
   var startDate = ko.pureComputed(() => {
     var date = self.startDateFilter();
     if (date == undefined) self.selectedEvent(null);
@@ -56,6 +61,11 @@ function AppointmentsController() {
     return d.isValid() ? d : moment();
   });
   var endDate = ko.pureComputed(() => {
+    var customerId = self.customerFilter();
+    if (customerId != undefined && customerId !== '') {
+      return moment(startDate()).add(6, "months");
+    }
+
     var date = self.endDateFilter();
     return date == undefined ?
       moment(startDate()).add(1, 'd') : 
@@ -194,7 +204,7 @@ function AppointmentsController() {
       if (eventData.Recurrence) {
         eventData.Date = moment(eventData.Date, 'YYYY-MM-DD').toDate(); // must be a Date instance!
         eventData.Recurrence.startDate = eventData.Date;
-        var instances = recurrenceUtils.createRecurrenceInstances(viewDate, viewDate, eventData);
+        var instances = recurrenceUtils.createRecurrenceInstances(viewDate, endDate().toDate(), eventData);
         ko.utils.arrayForEach(instances, apt => {
           // Convert dates to floating date string.
           eventData.Date = ko.observable(apt.date).extend({ moment: true }).toFloatingDateString();
@@ -220,14 +230,14 @@ function AppointmentsController() {
   });
 
   function fetchEvents() {
-    return self.fetchEvents(startDate(), endDate());
+    return self.fetchEvents(startDate(), endDate(), self.customerFilter());
   }
 
   fetchEvents();
   return self;
 }
 
-AppointmentsController.prototype.fetchEvents = function (startDate, endDate) {
+AppointmentsController.prototype.fetchEvents = function (startDate, endDate, clientId) {
   //startDate and endDate are expected to be moment instances. 
   if (!startDate) {
     return;
@@ -252,6 +262,10 @@ AppointmentsController.prototype.fetchEvents = function (startDate, endDate) {
       + "(StartDate: [* TO " + endingDateRange + "] AND (EndDate: [[NULL_VALUE]] OR EndDate: [" + beginningDateRange + " TO *]))"
     + ")"
   ;
+
+  if (clientId) {
+    q = `(${q}) AND ClientId:"${clientId}"`;
+  }
 
   console.log(q);
   var query = encodeURI(q),
@@ -305,6 +319,16 @@ AppointmentsController.prototype.fetchEvents = function (startDate, endDate) {
       });
   }
 }
+
+AppointmentsController.prototype.lookupClients = function(searchTerm, callback) {
+  searchTerm = prepareFilterString(searchTerm);
+  $.ajax({
+    dataType: "json",
+    url: `/api/d/index?id=${encodeURI("clients/byName")}&$filter=Name:*${encodeURI(searchTerm)}*`
+  }).done(callback)
+  .fail(() => { toastr.error("Failed to return clients")});
+}
+
 AppointmentsController.prototype.addAppointment = function(eventData) {
   //Trim the time specification off of the input value as this causes the date to be adjusted to the local timezone which may result in a change in the day
   eventData.Date = moment(eventData.Date, "YYYY-MM-DD").format("M/D/YYYY");

@@ -30,6 +30,10 @@ function ScheduleSimpleView(params) {
     return false;
   }
 
+  self.dateControlBreak = function(context) {
+    self.resetControlBreaks();
+    return context.date;
+  }
   self.resetControlBreaks = function() {
     level1BreakHold = undefined;
   }

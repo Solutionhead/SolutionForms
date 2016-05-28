@@ -1,15 +1,43 @@
-﻿<div class="btn-group" role="group">
-  <button class="btn btn-default" data-bind="command: newEvent">
-    <span class="glyphicon glyphicon-calendar"></span> Add Appointment
-  </button>
-  <button type="button" class="btn btn-default" data-bind="click: printReport">
-    <span class="glyphicon glyphicon-print"></span> Daily Reports
-  </button>
+﻿
+<div class="well well-sm">
+  <div class="btn-toolbar" role="toolbar">
+    <div class="btn-group" role="group">
+      <div class="input-group">
+        <input type="text" class="form-control" data-bind="datepicker: 'M/D/YYYY', value: startDateFilter" aria-describedby="date-addon" />
+      </div>
+    </div>
+    <div class="btn-group col-sm-5 col-md-6" role="group">
+      <div class="input-group">
+        <span class="input-group-addon" id="date-addon">
+          <span class="glyphicon glyphicon-user"></span>
+        </span>
+        <input class="form-control"
+               data-bind="jqAuto: { value: customerFilter, source: lookupClients, labelProp: 'Name', valueProp: 'Id', delay: 500, autoFocus: true }"
+               placeholder="Customer" />
+        <span class="input-group-btn">
+          <button data-bind="command: searchAppointmentsCommand" class="btn btn-default">Filter</button>
+        </span>
+      </div>
+    </div>
+  </div>
 </div>
 
-<input type="text" class="form-control" data-bind="datepicker: 'M/D/YYYY', value: startDateFilter" />
+<div class="panel panel-default">
+  <div class="panel-heading">
+    <div class="btn-group" role="group">
+      <button class="btn btn-default" data-bind="command: newEvent">
+        <span class="glyphicon glyphicon-plus"></span> Add Appointment
+      </button>
+      <button type="button" class="btn btn-default" data-bind="click: printReport">
+        <span class="glyphicon glyphicon-print"></span> Daily Reports
+      </button>
+    </div>
+  </div>
 
-<appointments-day-view params="options: appointmentsDayViewOptions, exports: appointmentsByDayViewModel"></appointments-day-view>
+  <div class="panel-body">
+    <appointments-day-view params="options: appointmentsDayViewOptions, exports: appointmentsByDayViewModel"></appointments-day-view>
+  </div>
+</div>
 
 <section data-bind="modal: showModal" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-lg">
@@ -23,7 +51,7 @@
       </div>
       <div class="modal-footer">
         <div class="pull-left">
-          <input type="button" data-bind="command: saveAsyncCommand" class="btn btn-primary" value="Save and close"/>
+          <input type="button" data-bind="command: saveAsyncCommand" class="btn btn-primary" value="Save and close" />
 
           <!-- ko ifnot: isCurrentEventNew -->
           <!-- ko ifnot: isCurrentEventRecurring -->
