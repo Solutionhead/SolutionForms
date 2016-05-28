@@ -53,7 +53,12 @@ function AppointmentsController() {
 
   self.searchAppointmentsCommand = ko.command({
     execute: fetchEvents
-  }); 
+  });
+  self.clearClientFilterCommand = ko.command({
+    execute: () => { self.customerFilter(null); },
+    canExecute: () => { return self.customerFilter() != undefined && self.customerFilter() !== ''}
+  });
+
   var startDate = ko.pureComputed(() => {
     var date = self.startDateFilter();
     if (date == undefined) self.selectedEvent(null);
