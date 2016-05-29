@@ -46,7 +46,7 @@ function AppointmentsController() {
       self.showModal(apt != undefined);
     }
   }
-
+   
   self.appointmentEditorConfig = {
     appointmentData: self.selectedEvent
   }
@@ -73,7 +73,7 @@ function AppointmentsController() {
 
     var date = self.endDateFilter();
     return date == undefined ?
-      moment(startDate()).add(1, 'd') : 
+      startDate() : 
       moment(date, 'MM/DD/YYYYH');
   });
 
@@ -255,7 +255,7 @@ AppointmentsController.prototype.fetchEvents = function (startDate, endDate, cli
 
   var self = this,
     beginningDateRange = startDate.format("YYYY-MM-DD"),
-    endingDateRange = endDate.format("YYYY-MM-DD"),
+    endingDateRange = moment(endDate).add(1, 'd').format("YYYY-MM-DD"),
     lastRequest = self.__lastFetchEventsXhr;
 
   var q =
