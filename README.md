@@ -9,11 +9,11 @@ To set up your dev environment to test this app, you will need to perform two si
 	1. Open `hosts` file at `C:\Windows\System32\drivers\etc`
 	2. Add the following lines to the and of the file:
 
-```
-127.0.0.1		www.solutionforms.local
-127.0.0.1		solutionforms.local
-127.0.0.1		test.solutionforms.local
-```
+	```
+	127.0.0.1		www.solutionforms.local
+	127.0.0.1		solutionforms.local
+	127.0.0.1		test.solutionforms.local
+	```
 
 2. Change the application's binding configuration to handle all requests to the assigned port.
 	1. Open the applicationhost.config file found in the `.vs/config` folder of the solution's root directory.
