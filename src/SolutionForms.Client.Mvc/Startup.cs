@@ -19,10 +19,6 @@ using Stripe;
 
 namespace SolutionForms.Client.Mvc
 {
-    public class StripeHelper
-    {
-        public string PublishableApiKey { get; set; }
-    }
     public class Startup
     {
         public Startup(IHostingEnvironment env)
@@ -79,6 +75,15 @@ namespace SolutionForms.Client.Mvc
                 return new StripeHelper
                 {
                     PublishableApiKey = pubKey
+                };
+            });
+
+            services.AddSingleton(p =>
+            {
+                var accessKey = Configuration["beta:accessKey"];
+                return new BetaAccessHelper
+                {
+                    BetaAccessKey = accessKey
                 };
             });
 
@@ -155,5 +160,15 @@ namespace SolutionForms.Client.Mvc
                     FromEmailAddress = smtp["fromEmail"]
                 });
         }
+    }
+
+    public class StripeHelper
+    {
+        public string PublishableApiKey { get; set; }
+    }
+
+    public class BetaAccessHelper
+    {
+        public string BetaAccessKey { get; set; }
     }
 }
