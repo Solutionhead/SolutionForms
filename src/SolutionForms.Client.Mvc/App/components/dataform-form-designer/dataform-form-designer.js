@@ -1,13 +1,5 @@
 ﻿require('ko.bs.collapse');
 require('ko.sortable');
-
-// KendoUI resources
-//require('ko.kendo');
-//require('kendoui/kendo.ui.core.min');
-//require('kendoui/kendo.multiselect.min');
-//require('kendoui-styles/kendo.bootstrap.min.css');
-//require('kendoui-styles/kendo.common-bootstrap.min.css');
-
 var base = require('viewModels/dataformFieldsDesigner'),
   toastr = require('toastr'),
   page = require('page');
@@ -18,8 +10,6 @@ function split(val) {
 function extractLast(term) {
   return split(term).pop();
 }
-
-
 
 function DataformDesignerViewModel(params) {
   if (!(this instanceof DataformDesignerViewModel)) { return new DataformDesignerViewModel(params); }

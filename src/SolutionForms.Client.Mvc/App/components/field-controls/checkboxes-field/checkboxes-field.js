@@ -1,7 +1,4 @@
-﻿var base = require('controls/basicEntryField');
-
-function CheckboxesFieldViewModel(params) {
-    if (params == undefined || params.context == undefined) throw new Error('Requires argument params.context');
+﻿function CheckboxesFieldViewModel(params) {
     if (!(this instanceof CheckboxesFieldViewModel)) { return new CheckboxesFieldViewModel(params); }
 
     var self = this,
@@ -10,11 +7,7 @@ function CheckboxesFieldViewModel(params) {
 
     self.userResponse = ko.observableArray([]);
 
-    base.call(this, params, true);
-
     self.options = ko.observableArray(ko.unwrap(settings.options) || []);
-
-    params.context(self);
 
     self.setValue = function (val) {
         self.userResponse(val || []);
@@ -23,10 +16,8 @@ function CheckboxesFieldViewModel(params) {
     return self;
 }
 
-CheckboxesFieldViewModel.prototype = base.prototype;
-
 module.exports = {
-    viewModel: CheckboxesFieldViewModel,
-    template: require('./dataform-checkboxes-field.html'),
-    synchronous: true,
-}
+  name: "Checkboxes",
+  viewModel: CheckboxesFieldViewModel,
+  template: require('./checkboxes-field.html')
+};

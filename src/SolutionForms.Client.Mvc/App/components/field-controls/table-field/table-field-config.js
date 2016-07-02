@@ -1,4 +1,4 @@
-﻿var base = require('controls/dataform-table-field/dataform-table-field').viewModel;
+﻿//var base = require('controls/table-field/table-field').viewModel;
 
 function SubFormFieldConfigViewModel(params) {
     if (!(this instanceof SubFormFieldConfigViewModel)) { return new SubFormFieldConfigViewModel(params); }
@@ -14,7 +14,7 @@ function SubFormFieldConfigViewModel(params) {
     settings.fields = self.fields;
 }
 
-SubFormFieldConfigViewModel.prototype = base.prototype;
+//SubFormFieldConfigViewModel.prototype = base.prototype;
 
 SubFormFieldConfigViewModel.prototype.constructFieldsForConfig = function (params) {
     var settings = ko.unwrap(params.input.settings);
@@ -30,5 +30,5 @@ SubFormFieldConfigViewModel.prototype.constructFieldsForConfig = function (param
 
 module.exports = {
     viewModel: SubFormFieldConfigViewModel,
-    template: require('./dataform-table-field-config.html')
+    template: require('./table-field-config.html')
 }

@@ -1,4 +1,4 @@
-var webpack = require('webpack'), path = require('path');
+var webpack = require('./webpack.config'), path = require('path');
 
 module.exports = function(config) {
   config.set({
@@ -12,9 +12,11 @@ module.exports = function(config) {
 
     basePath: '',
     frameworks: ['tap'],
-    files: ['App/tenant_customizations/**/Tests/*.js'],
+    files: ['Tests/*.js'],
+    //files: ['Tests/*.js', 'App/tenant_customizations/**/Tests/*.js'],
 
     preprocessors: {
+      'Tests/**/*.js': ['webpack', 'sourcemap'],
       'App/tenant_customizations/**/Tests/**/*.js': ['webpack', 'sourcemap']
     },
 
@@ -23,22 +25,18 @@ module.exports = function(config) {
         fs: 'empty'
       },
 
-      resolve: {
-        alias: {
-          moment: lib('moment/min/moment.min'),
-        }
-      },
+      resolve: webpack.resolve,
 
       devtool: 'inline-source-map',
 
       module: {
-        loaders: [
+        loaders: webpack.module.loaders.concat([
           {
             test: /\.js$/,
             exclude: /(node_modules|bower_components)/,
             loader: 'babel-loader'
           }
-        ]
+        ])
       }
     },
 
@@ -56,10 +54,6 @@ module.exports = function(config) {
     logLevel: config.LOG_INFO,
     autoWatch: true,
     browsers: ['Chrome'],
-    singleRun: false,
-  })
+    singleRun: false
+  });
 };
-
-function localPath(loc) { return path.join(__dirname, loc || ''); }
-function appDir(loc) { return path.join(localPath('App'), loc || ''); }
-function lib(loc) { return path.join(localPath('wwwroot/lib'), loc || ''); }

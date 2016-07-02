@@ -1,12 +1,9 @@
-﻿var base = require('controls/basicEntryField');
-require('koExtenders/knockout.extenders.moment');
+﻿import 'koExtenders/knockout.extenders.moment';
 
 function DateFieldViewModel(params) {
   if(!(this instanceof DateFieldViewModel)) { return new DateFieldViewModel(params); }
 
   var self = this;
-
-  base.call(this, params, true);
 
   self.formatMode = ko.observable(DateFieldViewModel.prototype.FORMAT_MODES.Floating);
   self.selectedDate = ko.observable().extend({ moment: 'M/D/YYYY' });
@@ -19,12 +16,11 @@ function DateFieldViewModel(params) {
     }
   });
 
-  params.context(self);
+  //params.context(self);
 
   return self;
 }
 
-DateFieldViewModel.prototype = base.prototype;
 DateFieldViewModel.prototype.getFormattedValue = function() {
   switch(this.formatMode()) {
     case DateFieldViewModel.prototype.FORMAT_MODES.Floating:
@@ -42,7 +38,7 @@ DateFieldViewModel.prototype.FORMAT_MODES = {
 }
 
 module.exports = {
+  name: 'Date',
   viewModel: DateFieldViewModel,
-  template: require('./dataform-date-field.html'),
-  synchronous: true,
-}
+  template: require('./date-field.html')
+};

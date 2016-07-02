@@ -1,5 +1,5 @@
-﻿var base = require('controls/basicEntryField'),
-  _toArray = require('lodash/fp/toArray');
+﻿import core from 'App/core';
+import _toArray from 'lodash/toArray';
 
 function SelectFieldViewModel(params) {
     if (!(this instanceof SelectFieldViewModel)) { return new SelectFieldViewModel(params); }
@@ -8,8 +8,6 @@ function SelectFieldViewModel(params) {
         input = ko.unwrap(params.input) || {},
         settings = ko.unwrap(input.settings) || input;
 
-    base.call(this, params, true);
-    
     self.optionsCaption = ko.pureComputed(function () {
         return ko.unwrap(settings.displayDefaultSelection)
             ? ko.unwrap(settings.defaultSelectionText) || ' '
@@ -31,14 +29,8 @@ function SelectFieldViewModel(params) {
       input.valueContext.subscribe(self.setValue);
     }
 
-    if (ko.isWritableObservable(params.context)) {
-      params.context(self);
-    }
-
     return self;
 }
-
-SelectFieldViewModel.prototype = base.prototype;
 
 SelectFieldViewModel.prototype.OPTION_SOURCES = {
     selfDefined: { display: 'Enter values here', value: 'selfDefined' },
@@ -113,7 +105,7 @@ SelectFieldViewModel.prototype.getSourceOptions = function () {
 }
 
 module.exports = {
-    viewModel: SelectFieldViewModel,
-    template: require('./dataform-select-field.html'),
-    synchronous: true,
-}
+  name: 'Select from list',
+  viewModel: SelectFieldViewModel,
+  template: require('./select-field.html')
+};

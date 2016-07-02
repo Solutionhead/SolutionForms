@@ -1,7 +1,4 @@
-﻿var base = require('controls/basicEntryField'),
-    Field = require('models/formFieldLive');
-
-function TableFieldViewModel(params) {
+﻿function TableFieldViewModel(params) {
     if (!(this instanceof TableFieldViewModel)) { return new TableFieldViewModel(params); }
 
     var self = this, 
@@ -19,8 +16,6 @@ function TableFieldViewModel(params) {
             return responseObj;
         });
     });
-
-    base.call(this, params, true);
 
     self.addNewItem = ko.command({
         execute: function () {
@@ -48,7 +43,7 @@ function TableFieldViewModel(params) {
         self.rows(mapped);
     }
 
-    params.context(self);
+    //params.context(self);
 
     function constructItemContext(values) {
         return {
@@ -58,8 +53,6 @@ function TableFieldViewModel(params) {
     return self;
 }
 
-TableFieldViewModel.prototype = base.prototype;
-
 TableFieldViewModel.prototype.constructFields = function (fields, values) {
     return ko.utils.arrayMap(fields || [], function (f) {
         return new Field(f.config, values && values[f.config.exportName]);
@@ -67,7 +60,7 @@ TableFieldViewModel.prototype.constructFields = function (fields, values) {
 }
 
 module.exports = {
-    viewModel: TableFieldViewModel,
-    template: require('./dataform-table-field.html'),
-    synchronous: true,
-}
+  viewModel: TableFieldViewModel,
+  name : "Table",
+  template: require('./table-field.html')
+};
