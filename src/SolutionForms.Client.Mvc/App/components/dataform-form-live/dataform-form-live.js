@@ -83,7 +83,7 @@ function DataFormLive(params) {
   // NOTE: It appears that the intention of this was to enable 
   // setting the form's values directly from an external source.
   // However, the below implementation appears incorrect as it is 
-  // causing a fetch rather than directly setting the values as expected.d
+  // causing a fetch rather than directly setting the values as expected.
     //__disposables.push(ko.computed(function() {
     //  var docId = ko.unwrap(params.documentValues);
     //  docId != undefined && self.loadDocumentData(docId);

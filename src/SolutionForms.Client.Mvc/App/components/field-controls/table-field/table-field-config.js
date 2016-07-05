@@ -1,20 +1,18 @@
-﻿//var base = require('controls/table-field/table-field').viewModel;
+﻿import fieldsHelper from 'viewModels/dataformFieldsDesigner';
 
-function SubFormFieldConfigViewModel(params) {
-    if (!(this instanceof SubFormFieldConfigViewModel)) { return new SubFormFieldConfigViewModel(params); }
+function SubFormFieldConfigViewModel(field, params) {
+    if (!(this instanceof SubFormFieldConfigViewModel)) { return new SubFormFieldConfigViewModel(field, params); }
 
     var self = this,
         settings = params.input.settings.peek() || {};
 
     self.constructFieldsForConfig(params);
 
-    base.call(self, params);
-
-    self.addNewItem.execute();
     settings.fields = self.fields;
+
+    params.input.settings(settings);
 }
 
-//SubFormFieldConfigViewModel.prototype = base.prototype;
 
 SubFormFieldConfigViewModel.prototype.constructFieldsForConfig = function (params) {
     var settings = ko.unwrap(params.input.settings);
@@ -24,11 +22,7 @@ SubFormFieldConfigViewModel.prototype.constructFieldsForConfig = function (param
 
     params.input.fields = mappedFields;
 
-    var fieldsHelper = require('viewModels/dataformFieldsDesigner');
     fieldsHelper.call(this, params);
 }
 
-module.exports = {
-    viewModel: SubFormFieldConfigViewModel,
-    template: require('./table-field-config.html')
-}
+module.exports = SubFormFieldConfigViewModel;

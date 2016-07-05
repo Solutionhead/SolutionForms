@@ -1,4 +1,6 @@
-﻿function TableFieldViewModel(params) {
+﻿import Field from 'models/formFieldLive';
+
+function TableFieldViewModel(params) {
     if (!(this instanceof TableFieldViewModel)) { return new TableFieldViewModel(params); }
 
     var self = this, 
@@ -42,9 +44,7 @@
         });
         self.rows(mapped);
     }
-
-    //params.context(self);
-
+  
     function constructItemContext(values) {
         return {
             members: self.constructFields(settings.fields, values)

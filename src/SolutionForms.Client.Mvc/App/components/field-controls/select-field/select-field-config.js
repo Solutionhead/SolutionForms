@@ -1,8 +1,8 @@
 ﻿var selectFieldComponentFactory = require('controls/select-field/select-field');
 var loadDataSourceOptions = $.ajax('/api/datasources');
 
-function SelectFieldConfigViewModel(params) {
-    if (!(this instanceof SelectFieldConfigViewModel)) return new SelectFieldConfigViewModel(params);
+function SelectFieldConfigViewModel(field, params) {
+    if (!(this instanceof SelectFieldConfigViewModel)) return new SelectFieldConfigViewModel(field, params);
 
     var self = this,
         settings = params.input.settings.peek() || {},

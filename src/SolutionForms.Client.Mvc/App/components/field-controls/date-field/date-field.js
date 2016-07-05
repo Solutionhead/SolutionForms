@@ -1,4 +1,4 @@
-﻿import 'koExtenders/knockout.extenders.moment';
+﻿import 'bindings/datepicker';
 
 function DateFieldViewModel(params) {
   if(!(this instanceof DateFieldViewModel)) { return new DateFieldViewModel(params); }
@@ -15,8 +15,6 @@ function DateFieldViewModel(params) {
       self.selectedDate(value);
     }
   });
-
-  //params.context(self);
 
   return self;
 }

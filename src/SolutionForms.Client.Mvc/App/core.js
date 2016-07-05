@@ -15,8 +15,8 @@ module.exports = (function() {
         var ctor;
 
         if (component.viewModel == null) {
-          component.viewModel = FieldBase;
-          ctor = FieldBase;
+          component.viewModel = function() { return FieldBase.apply({}, arguments);}
+          ctor = component.viewModel;
         } else {
           component.viewModel = extend(FieldBase, component.viewModel);
           ctor = buildInheritanceConstructor(FieldBase, component.viewModel);
@@ -56,7 +56,6 @@ module.exports = (function() {
         var ctor;
         if (configuration.viewModel == null) {
           configuration.viewModel = liveComponent.viewModel;
-          configuration.template = liveComponent.template;
           ctor = liveComponent.__factory;
         } else {
           configuration.viewModel = extend(liveComponent.viewModel, configuration.viewModel);
@@ -65,6 +64,7 @@ module.exports = (function() {
             return configuration.viewModel(field, params);
           };
         }
+        configuration.template = configuration.template || "<div></div>";
 
         ko.components.register(`${componentName}-config`, {
           viewModel: {
@@ -128,6 +128,12 @@ function FieldBase(params) {
     
   if (ko.isWritableObservable(params.context)) {
     params.context(self);
+  }
+
+  if (!(typeof self.setValue === "function")) {
+    self.setValue = function(val) {
+      self.userResponse(val || ko.unwrap(this.defaultUserResponse));
+    }
   }
 
   self.dispose = dispose;

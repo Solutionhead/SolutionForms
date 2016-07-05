@@ -5,16 +5,14 @@
         input = ko.unwrap(params.input) || {},
         settings = ko.unwrap(input.settings) || {};
 
-    self.userResponse = ko.observableArray([]);
+    self.userResponse = ko.observableArray(CheckboxesFieldViewModel.prototype.defaultUserResponse);
 
     self.options = ko.observableArray(ko.unwrap(settings.options) || []);
-
-    self.setValue = function (val) {
-        self.userResponse(val || []);
-    }
-
+  
     return self;
 }
+
+CheckboxesFieldViewModel.prototype.defaultUserResponse = [];
 
 module.exports = {
   name: "Checkboxes",

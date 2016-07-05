@@ -1,5 +1,4 @@
-﻿import core from 'App/core';
-import _toArray from 'lodash/toArray';
+﻿import _toArray from 'lodash/toArray';
 
 function SelectFieldViewModel(params) {
     if (!(this instanceof SelectFieldViewModel)) { return new SelectFieldViewModel(params); }

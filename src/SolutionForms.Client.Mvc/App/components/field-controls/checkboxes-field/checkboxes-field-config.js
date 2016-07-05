@@ -1,6 +1,4 @@
-﻿var checkboxesComponentFactory = require('controls/checkboxes-field/checkboxes-field');
-
-function CheckboxesFieldConfigViewModel(field, params) {
+﻿function CheckboxesFieldConfigViewModel(field, params) {
     if (!(this instanceof CheckboxesFieldConfigViewModel)) return new CheckboxesFieldConfigViewModel(field, params);
 
     var self = this,
@@ -53,10 +51,6 @@ CheckboxesFieldConfigViewModel.prototype.addOption = function (label, value) {
 };
 
 module.exports = CheckboxesFieldConfigViewModel;
-//module.exports = {
-//    viewModel: CheckboxesFieldConfigViewModel,
-//    template: require('./checkboxes-field-config.html')
-//}
 
 
 function CheckboxOptionViewModel(optionLabel, optionValue) {
