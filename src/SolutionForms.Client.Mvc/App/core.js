@@ -116,7 +116,7 @@ function FieldBase(params) {
   params = params || {};
   const self = this;
   const input = params.input || {};
-  self.settings = input.settings || {};
+  self.settings = ko.unwrap(input.settings) || {};
 
   if (!ko.isObservable(self.userResponse)) {
     // input.valueContext is optionally used by the form-field ui component

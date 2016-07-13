@@ -16,9 +16,9 @@ function SelectFieldViewModel(params) {
   
     var baseSetValue = self.setValue.bind(self);
     self.setValue = function(value) {
-        switch (self.settings.optionSource) {
+        switch (settings.optionSource) {
             case SelectFieldViewModel.prototype.OPTION_SOURCES.dataSource.value:
-                return self.setSelectedOptionsForDataSource.call(self, value);
+                return baseSetValue(self.setSelectedOptionsForDataSource.call(self, value, settings, baseSetValue));
             default:
                 return baseSetValue(value);
         }
@@ -36,37 +36,37 @@ SelectFieldViewModel.prototype.OPTION_SOURCES = {
     dataSource: { display: 'From another data source', value: 'dataSource' }
 }
 
-SelectFieldViewModel.prototype.setSelectedOptionsForDataSource = function (value) {
+SelectFieldViewModel.prototype.setSelectedOptionsForDataSource = function (value, settings, valueObservable) {
     //#region private functions
 
     // Because all entities are created with the Id property, 
     // we can use the Id member when searching for matching options
     // from the local data source.
     function findOptionByKey(opts, key) {
-        var match = ko.utils.arrayFirst(opts, function (o) {
-          return (self.settings.optionDataSourceValueMember != undefined 
-            ? o.optionValue : o.optionValue.Id) === key;
-        });
-        return match == undefined ? null : match.optionValue;
+      const match = ko.utils.arrayFirst(opts, function (o) {
+        return (settings.optionDataSourceValueMember != undefined 
+          ? o.optionValue : o.optionValue.Id) === key;
+      });
+      return match == null ? null : match.optionValue;
     }
 
     //#endregion
 
     var self = this;
     if (value == undefined) {
-      base.prototype.setValue.call(self, undefined);
+      valueObservable(undefined);
       return;
     }
     
-    var key = self.settings.optionDataSourceValueMember != undefined 
+    var key = settings.optionDataSourceValueMember != undefined 
       ? value : value.Id,
       options = self.options() || [];
 
     if (options.length) {
-        base.prototype.setValue.call(self, findOptionByKey(options, key));
+      valueObservable(findOptionByKey(options, key));
     } else {
         var optionsSubscription = self.options.subscribe(function (opts) {
-            base.prototype.setValue.call(self, findOptionByKey(opts, key));
+          valueObservable(findOptionByKey(opts, key));
             optionsSubscription.dispose();
             optionsSubscription = null;
         });
