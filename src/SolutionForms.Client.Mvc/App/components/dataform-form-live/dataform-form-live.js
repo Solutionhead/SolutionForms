@@ -75,9 +75,13 @@ function DataFormLive(params) {
     }));
     self.parseListeners();
 
+    var lastDocId;
     __disposables.push(ko.computed(function() {
-      var docId = ko.unwrap(params.documentId);
-      docId != undefined && self.loadDocumentData(docId);
+      const docId = self.documentId();
+      if (docId != undefined && lastDocId !== docId) {
+        self.loadDocumentData(docId);
+        lastDocId = docId;
+      }
     }));
 
   // NOTE: It appears that the intention of this was to enable 
