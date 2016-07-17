@@ -4,6 +4,7 @@ namespace SolutionForms.Service.Providers.Enums
     {
         DuplicateTenantDomainExists,
         TenantCreated,
-        Error
+        Error,
+        InvalidBetaAccessKey
     }
 }

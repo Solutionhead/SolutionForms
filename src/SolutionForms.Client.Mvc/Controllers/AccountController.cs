@@ -19,7 +19,9 @@ namespace SolutionForms.Client.Mvc.Controllers
     [AllowAnonymous]
     public class AccountController : Controller
     {
-        public AccountController(AuthenticationService<ApplicationUser> authService)
+        private readonly BetaAccessHelper _betaAccessHelper;
+
+        public AccountController(AuthenticationService<ApplicationUser> authService, BetaAccessHelper betaAccessHelper)
         {
             if (authService == null)
             {
@@ -28,6 +30,7 @@ namespace SolutionForms.Client.Mvc.Controllers
 
             UserManager = authService.UserAccountService;
             SignInManager = authService;
+            _betaAccessHelper = betaAccessHelper;
 
             //_logger = logger;
         }
@@ -55,7 +58,11 @@ namespace SolutionForms.Client.Mvc.Controllers
         public async Task<IActionResult> RegisterTenant(RegisterTenantViewModel model)
         {
             if (!ModelState.IsValid) { return View(); }
-            
+            if(model.BetaAccessKey != _betaAccessHelper.BetaAccessKey)
+            {
+                return UnsuccessfulTenantCreation(CreateTenantResult.InvalidBetaAccessKey);
+            }
+
             var tenantProvider = HttpContext.ApplicationServices.GetService(typeof(TenantProvider)) as TenantProvider;
             var result = await tenantProvider.CreateTenantAsync(new CreateTenantParameters
             {
@@ -82,6 +89,11 @@ namespace SolutionForms.Client.Mvc.Controllers
                 case CreateTenantResult.DuplicateTenantDomainExists:
                     ModelState.AddModelError("", "Sorry, this URL is not available.");
                     break;
+
+                case CreateTenantResult.InvalidBetaAccessKey:
+                    ModelState.AddModelError("", "The supplied Beta Access Key was invalid.");
+                    break;
+
                 default:
                     ModelState.AddModelError("",
                         "An error has occurred while attempting to create your organization. Please try again later.");

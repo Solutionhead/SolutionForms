@@ -5,6 +5,10 @@ namespace SolutionForms.Client.Mvc.ViewModels.Account
     public class RegisterTenantViewModel
     {
         [Required]
+        [Display(Name = "Beta Access Key")]
+        public string BetaAccessKey { get; set; }
+
+        [Required]
         [EmailAddress]
         [Display(Name = "Email")]
         public string Email { get; set; }
