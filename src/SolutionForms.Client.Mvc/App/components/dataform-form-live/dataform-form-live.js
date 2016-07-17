@@ -15,9 +15,10 @@ function DataFormLive(params) {
     self.subscriptions = [];
     self.plugins = ko.observableArray([]);
 
+    var documentId = ko.observable(ko.unwrap(params.documentId));
     self.documentId = ko.pureComputed(function() {
-      const id = ko.unwrap(params.documentId);
-      return id == null ? null : id.toLowerCase() === 'new' ? null : id;
+      const id = documentId();
+      return id == null || id.toLowerCase() === 'new' ? null : id;
     });
 
     self.documentValues = ko.pureComputed(function() {
@@ -45,8 +46,8 @@ function DataFormLive(params) {
               toastr.success('Save completed successfully');
               if (self.documentId() == null && arguments[0].Id != null) {
                 //assumes that the arguments[0] is the results of the ajax call
-                self.documentId(arguments[0].Id);
-                page.replace(`/Forms/${self.formId}/${self.documentId}`);
+                documentId(arguments[0].Id);
+                page.replace(`/Forms/${ko.unwrap(self.formId)}/${ko.unwrap(self.documentId)}`);
               }
               self.notifyListenersAsync('submitCompleted', self);
               complete();
