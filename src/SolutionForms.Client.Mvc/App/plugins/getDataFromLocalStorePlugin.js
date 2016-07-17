@@ -6,10 +6,13 @@ function GetDataFromLocalStorePlugin() {
 
     var plugin = this;
 
-    plugin.fetch = function (args) {
-        var entityName = ko.unwrap(args.entityName);
-        var id = args.id;
-        return $.ajax('/api/d/' + entityName + '/' + (id == undefined ? '' : id));
+    plugin.fetch = function(args) {
+      var entityName = ko.unwrap(args.entityName);
+      var id = args.id;
+      return $.ajax({
+        url: '/api/d/' + entityName + '/' + (id == undefined ? '' : id),
+        cache: false
+      });
     }
 
     return plugin;
