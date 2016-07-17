@@ -1,4 +1,5 @@
-﻿@model dynamic
+﻿@using SolutionForms.Client.Mvc.Helpers
+@model dynamic
 
 @{
     ViewBag.Title = "Form Designer";
@@ -9,5 +10,5 @@
 
 @section Scripts
 {
-    <script src="~/js/build/dataform-designer.bundle.js"></script>
+    <script src="~/js/build/dataform-designer.bundle.js?@ScriptHelpers.VersionQueryStringParam"></script>
 }

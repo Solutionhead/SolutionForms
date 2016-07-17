@@ -1,9 +1,10 @@
-﻿@model ManagePaymentViewModel
+﻿@using SolutionForms.Client.Mvc.Helpers
+@model ManagePaymentViewModel
 
 @section scripts
 {
   <script type="text/javascript" src="https://js.stripe.com/v2"></script>
-  <script type="text/javascript" src="~/js/build/admin-payment.bundle.js"></script>
+  <script type="text/javascript" src="~/js/build/admin-payment.bundle.js?@ScriptHelpers.VersionQueryStringParam"></script>
   <script type="text/javascript">
     Stripe.setPublishableKey("@Model.ApiKey");
   </script>

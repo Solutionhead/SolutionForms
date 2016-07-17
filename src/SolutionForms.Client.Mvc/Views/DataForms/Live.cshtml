@@ -1,4 +1,5 @@
-﻿<div class="panel" style="margin-top: 10px;">
+﻿@using SolutionForms.Client.Mvc.Helpers
+<div class="panel" style="margin-top: 10px;">
   <!-- ko if: activeComponent -->
   <section data-bind="component: activeComponent"></section>
   <!-- /ko -->
@@ -6,5 +7,5 @@
 
 @section Scripts
 {
-    <script src="~/js/build/dataform-live.bundle.js"></script>
+    <script src="~/js/build/dataform-live.bundle.js?@ScriptHelpers.VersionQueryStringParam"></script>
 }
