@@ -14,6 +14,10 @@
 
 CheckboxesFieldViewModel.prototype.defaultUserResponse = [];
 
+CheckboxesFieldViewModel.prototype.setValue = function(val) {
+  this.userResponse(val || []);
+}
+
 module.exports = {
   name: "Checkboxes",
   viewModel: CheckboxesFieldViewModel,

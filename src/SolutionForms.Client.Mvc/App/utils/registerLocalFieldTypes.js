@@ -27,7 +27,7 @@ export function registerLocalFieldTypes(loadConfig) {
     }
   });
 
-  const defaultFieldName = 'text-input';
+  const defaultFieldName = 'text-field';
   var defaultField = fields[defaultFieldName];
   if (defaultField == null) {
     throw new Error(`Default field type, '${defaultFieldName}' was not found.`);
@@ -36,8 +36,6 @@ export function registerLocalFieldTypes(loadConfig) {
   }
 
   ko.utils.arrayForEach(_keys(fields), (key) => {
-    console.log(key);
-    
     const field = fields[key];
     const f = req(field.viewModel);
 
@@ -53,7 +51,7 @@ export function registerLocalFieldTypes(loadConfig) {
 
     core.Field.register(key, {
       viewModel: f.viewModel,
-      isDefaultFieldType: key === 'text-input',
+      isDefaultFieldType: key === defaultFieldName,
       template: field.template != null ? req(field.template) : f.template,
       name: f.name
     });

@@ -13,9 +13,10 @@ if (!ko.components.isRegistered('form-field')) {
   ko.components.register('form-field', require('components/form-field/form-field'));
 }
 
-var moment = require('moment');
-var locationTopic = "new-client_location_changed";
-var newClientHasKeyTopic = "new-client_has-key_changed";
+const moment = require('moment');
+const locationTopic = "new-client_location_changed";
+const newClientHasKeyTopic = "new-client_has-key_changed";
+const clientNotesTopic = "new-client_client-notes";
 
 function AppointmentEditor(params) {
   if (!(this instanceof AppointmentEditor)) {
@@ -108,6 +109,14 @@ function AppointmentEditor(params) {
     });
     remainingHacks.push(hack2);
 
+    var hack3 = ko.computed(function () {
+      var f = eventEditor.getFieldContextByName('Notes');
+      if (!f) { return; }
+      __disposables.push(f.subscribeTo(clientNotesTopic));
+      cleanupHacks(hack3);
+    });
+    remainingHacks.push(hack3);
+
     function cleanupHacks(hack) {
       ko.utils.arrayRemoveItem(remainingHacks, hack);
       hack.dispose();
@@ -145,6 +154,9 @@ function AppointmentEditor(params) {
 
       vm.getFieldContextByName('Address')
         .publishOn(locationTopic);
+
+      vm.getFieldContextByName('Notes')
+        .publishOn(clientNotesTopic);
 
       vm.getFieldContextByName('HaveKey')
         .publishOn(newClientHasKeyTopic);
@@ -248,12 +260,10 @@ AppointmentEditor.prototype.saveAppointmentAsync = function(id, initialValues) {
     self.recurrenceEditorExport().buildDto() :
     null;
 
-  var $dfd = $.Deferred();
-
   if (self.enterNewCustomer()) {
     //todo check validation on customer object
     var customerData = self.newClientVm().buildDto();
-    $dfd = $.ajax("/api/d/clients", {
+    return $.ajax("/api/d/clients", {
       data: ko.toJSON(customerData),
       dataType: 'json',
       contentType: 'application/json',
@@ -262,11 +272,9 @@ AppointmentEditor.prototype.saveAppointmentAsync = function(id, initialValues) {
       //todo: write test for this assignment after creation of new client
       event.ClientId = response.Id;
       toastr.success(`New Customer Added: ${customerData.Name}`);
-      $dfd.done(() => self.postOrPutEvent(id, event));
-      self.newClientVm().setFieldValues({});
+      return self.postOrPutEvent(id, event)
+        .done(() => self.newClientVm().setFieldValues({}));
     }).fail(() => { toastr.error("We were unable to create new the client. The appointment could not be added.", "Appointment Not Added") });
-    
-    return $dfd;
   }
   const client = self.selectedCustomer() || {};
   event.ClientId = client.Id;

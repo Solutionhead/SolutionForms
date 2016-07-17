@@ -77,7 +77,15 @@ DynamicFormUIViewModel.prototype.initializeFromConfig = function (jsonConfig) {
     self.displayMode = getTemplateNameForFieldType;
   }).call(self);
 
+  // For future use, components could be loaded from tenant customizations or from a global marketplace.
+  // The customizations should evenutally enforce that the tenant id is specified systematically so, 
+  // rather than, `customizations\my-organization\my-customization`, the path could read `customizations\my-customization` 
+  // and the platform would then be able to insert the dependency on the current tenant id. This would prevent tenants to 
+  // effectively steal eachother's customizations.
   function loadComponent(path) {
+    // Note: webpack is currently dependent on `customizations` being hardcoded in the path. Without it, the customizations 
+    // will not be included in the bundle. However, this also means that all tenant customizations are bundled which is not
+    // what we want!
     var componentFactory = require('customizations/' + path);
     if (componentFactory && componentFactory.componentName && !ko.components.isRegistered(componentFactory.componentName)) {
       componentFactory.synchronous = true; // enforce all components to be rendered synchronously to ensure proper order
