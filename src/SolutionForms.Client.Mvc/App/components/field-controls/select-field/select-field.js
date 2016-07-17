@@ -1,5 +1,4 @@
-﻿var base = require('controls/basicEntryField'),
-  _toArray = require('lodash/fp/toArray');
+﻿import _toArray from 'lodash/toArray';
 
 function SelectFieldViewModel(params) {
     if (!(this instanceof SelectFieldViewModel)) { return new SelectFieldViewModel(params); }
@@ -8,8 +7,6 @@ function SelectFieldViewModel(params) {
         input = ko.unwrap(params.input) || {},
         settings = ko.unwrap(input.settings) || input;
 
-    base.call(this, params, true);
-    
     self.optionsCaption = ko.pureComputed(function () {
         return ko.unwrap(settings.displayDefaultSelection)
             ? ko.unwrap(settings.defaultSelectionText) || ' '
@@ -19,9 +16,9 @@ function SelectFieldViewModel(params) {
   
     var baseSetValue = self.setValue.bind(self);
     self.setValue = function(value) {
-        switch (self.settings.optionSource) {
+        switch (settings.optionSource) {
             case SelectFieldViewModel.prototype.OPTION_SOURCES.dataSource.value:
-                return self.setSelectedOptionsForDataSource.call(self, value);
+                return baseSetValue(self.setSelectedOptionsForDataSource.call(self, value, settings, baseSetValue));
             default:
                 return baseSetValue(value);
         }
@@ -31,51 +28,45 @@ function SelectFieldViewModel(params) {
       input.valueContext.subscribe(self.setValue);
     }
 
-    if (ko.isWritableObservable(params.context)) {
-      params.context(self);
-    }
-
     return self;
 }
-
-SelectFieldViewModel.prototype = base.prototype;
 
 SelectFieldViewModel.prototype.OPTION_SOURCES = {
     selfDefined: { display: 'Enter values here', value: 'selfDefined' },
     dataSource: { display: 'From another data source', value: 'dataSource' }
 }
 
-SelectFieldViewModel.prototype.setSelectedOptionsForDataSource = function (value) {
+SelectFieldViewModel.prototype.setSelectedOptionsForDataSource = function (value, settings, valueObservable) {
     //#region private functions
 
     // Because all entities are created with the Id property, 
     // we can use the Id member when searching for matching options
     // from the local data source.
     function findOptionByKey(opts, key) {
-        var match = ko.utils.arrayFirst(opts, function (o) {
-          return (self.settings.optionDataSourceValueMember != undefined 
-            ? o.optionValue : o.optionValue.Id) === key;
-        });
-        return match == undefined ? null : match.optionValue;
+      const match = ko.utils.arrayFirst(opts, function (o) {
+        return (settings.optionDataSourceValueMember != undefined 
+          ? o.optionValue : o.optionValue.Id) === key;
+      });
+      return match == null ? null : match.optionValue;
     }
 
     //#endregion
 
     var self = this;
     if (value == undefined) {
-      base.prototype.setValue.call(self, undefined);
+      valueObservable(undefined);
       return;
     }
     
-    var key = self.settings.optionDataSourceValueMember != undefined 
+    var key = settings.optionDataSourceValueMember != undefined 
       ? value : value.Id,
       options = self.options() || [];
 
     if (options.length) {
-        base.prototype.setValue.call(self, findOptionByKey(options, key));
+      valueObservable(findOptionByKey(options, key));
     } else {
         var optionsSubscription = self.options.subscribe(function (opts) {
-            base.prototype.setValue.call(self, findOptionByKey(opts, key));
+          valueObservable(findOptionByKey(opts, key));
             optionsSubscription.dispose();
             optionsSubscription = null;
         });
@@ -113,7 +104,7 @@ SelectFieldViewModel.prototype.getSourceOptions = function () {
 }
 
 module.exports = {
-    viewModel: SelectFieldViewModel,
-    template: require('./dataform-select-field.html'),
-    synchronous: true,
-}
+  name: 'Select from list',
+  viewModel: SelectFieldViewModel,
+  template: require('./select-field.html')
+};

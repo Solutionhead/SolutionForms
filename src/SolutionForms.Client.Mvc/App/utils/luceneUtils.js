@@ -3,7 +3,3 @@
   filterString = filterString.replace("-", "\\-");
   return filterString.toLowerCase();
 }
-
-export function foo() {
-  // just a test
-}

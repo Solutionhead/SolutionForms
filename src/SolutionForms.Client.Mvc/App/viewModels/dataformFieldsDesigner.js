@@ -1,5 +1,5 @@
-﻿var FieldContext = require('models/formFieldDesigner'),
-    inputTypes = require('App/fieldTypes');
+﻿import core from 'App/core';
+var FieldContext = require('models/formFieldDesigner');
 
 function DataformFieldsDesigner(params) {
     var self = this,
@@ -89,9 +89,9 @@ function parseInputConfig(configValues) {
 function buildInputInternalTypeOptions() {
   var opts = [];
 
-    for (var prop in inputTypes) {
-        if (inputTypes.hasOwnProperty(prop)) {
-            opts.push(inputTypes[prop]);
+    for (let prop in core.Fields) {
+        if (core.Fields.hasOwnProperty(prop)) {
+            opts.push(core.Fields[prop]);
         }
     }
 

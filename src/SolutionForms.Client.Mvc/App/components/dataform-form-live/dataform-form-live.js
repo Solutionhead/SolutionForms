@@ -1,5 +1,4 @@
-﻿require('App/fieldTypes'); //register field type components
-require('koValidation');
+﻿require('koValidation');
 var toastr = require('toastr'),
   _ = require('underscore'),
   page = require('page');
@@ -17,7 +16,8 @@ function DataFormLive(params) {
     self.plugins = ko.observableArray([]);
 
     self.documentId = ko.pureComputed(function() {
-      return ko.unwrap(params.documentId);
+      const id = ko.unwrap(params.documentId);
+      return id == null ? null : id.toLowerCase() === 'new' ? null : id;
     });
 
     self.documentValues = ko.pureComputed(function() {
@@ -43,10 +43,10 @@ function DataFormLive(params) {
           self.notifyListenersAsync('submit', data, self)
             .done(function() {
               toastr.success('Save completed successfully');
-              if (self.documentId == undefined) {
+              if (self.documentId() == null && arguments[0].Id != null) {
                 //assumes that the arguments[0] is the results of the ajax call
-                self.documentId = arguments[0].Id;
-                page.replace('/Forms/' + self.formId + '/' + self.documentId);
+                self.documentId(arguments[0].Id);
+                page.replace(`/Forms/${self.formId}/${self.documentId}`);
               }
               self.notifyListenersAsync('submitCompleted', self);
               complete();
@@ -75,15 +75,23 @@ function DataFormLive(params) {
     }));
     self.parseListeners();
 
+    var lastDocId;
     __disposables.push(ko.computed(function() {
-      var docId = ko.unwrap(params.documentId);
-      docId != undefined && self.loadDocumentData(docId);
+      const docId = self.documentId();
+      if (docId != undefined && lastDocId !== docId) {
+        self.loadDocumentData(docId);
+        lastDocId = docId;
+      }
     }));
 
-    __disposables.push(ko.computed(function() {
-      var docId = ko.unwrap(params.documentValues);
-      docId != undefined && self.loadDocumentData(docId);
-    }));
+  // NOTE: It appears that the intention of this was to enable 
+  // setting the form's values directly from an external source.
+  // However, the below implementation appears incorrect as it is 
+  // causing a fetch rather than directly setting the values as expected.
+    //__disposables.push(ko.computed(function() {
+    //  var docId = ko.unwrap(params.documentValues);
+    //  docId != undefined && self.loadDocumentData(docId);
+    //}));
   
     self.dispose = dispose;
   

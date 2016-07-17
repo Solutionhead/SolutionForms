@@ -1,4 +1,4 @@
-﻿var inputTypes = require('App/fieldTypes');
+﻿import core from 'App/core';
 
 function DataformFieldViewModel(input) {
     if (!(this instanceof DataformFieldViewModel)) return new DataformFieldViewModel(input);
@@ -6,7 +6,7 @@ function DataformFieldViewModel(input) {
 
     var self = this;
     self.displayName = ko.observable(values.displayName).extend({ required: true });
-    self.inputType = ko.observable(values.inputType || inputTypes.textField.componentName).extend({ required: true });
+    self.inputType = ko.observable(values.inputType || core.defaultFieldName).extend({ required: true });
     self.configTemplateName = ko.pureComputed(function() {
         var inputType = this.inputType();
         return inputType

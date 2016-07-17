@@ -1,10 +1,11 @@
-﻿var $ = require('jquery'),
+﻿import * as registrationHelper from 'App/utils/registerLocalFieldTypes';
+var $ = require('jquery'),
     emptyContainerName = 'empty-container',
     defaultContainerName = 'default-container',
     toastr = require('toastr'),
     formsService = require('services/dataFormsService');
 
-require('../fieldTypes');
+registrationHelper.registerLocalFieldTypes();
 if (!ko.components.isRegistered(emptyContainerName)) {
   ko.components.register(emptyContainerName, require('containers/empty-container/empty-container'));
 }
