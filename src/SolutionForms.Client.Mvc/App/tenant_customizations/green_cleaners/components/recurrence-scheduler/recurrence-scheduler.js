@@ -31,7 +31,7 @@ function RecurrenceSchedulerViewModel(params) {
   self.weeklyRecurrenceDays = ko.observableArray(self.isWeekly() && values.daysOfWeek || []);
   self.endDate = ko.observable(values.endDate).extend({ moment: 'M/D/YYYY' });
   self.startDate = ko.observable(values.startDate).extend({ moment: 'M/D/YYYY' });
-  self.monthlyByDay = ko.observable(self.isMonthly() && values.daysOfWeek);
+  self.monthlyByDay = ko.observable(self.isMonthly() && values.dayssetOfWeek);
   self.monthlyByDate = ko.observable(values.dayOfMonth);
   self.monthlyRecurrenceOption = ko.observable();
   self.Exceptions = values.Exceptions;
@@ -67,7 +67,7 @@ function RecurrenceSchedulerViewModel(params) {
     }
   });
 
-  self.startDate.subscribe(self.setRecurrenceDefaults);
+  self.startDate.subscribe(self.setRecurrenceDefaults.bind(self));
 
   function buildWeeklyRecurrenceSummary() {
     var text = 'Every ';
