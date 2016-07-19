@@ -1,6 +1,6 @@
 {
   "userSecretsId": "aspnet5-SolutionForms.Client.Mvc-64f3f333-0d20-44d5-bbb0-3ea737af4135",
-  "version": "1.1.2-*",
+  "version": "1.2.0-*",
   "compilationOptions": {
     "emitEntryPoint": true
   },
