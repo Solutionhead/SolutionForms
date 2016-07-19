@@ -1,5 +1,14 @@
 ﻿<div class="panel" style="margin-top: 10px;">
-  <button data-bind="click: initNewEntry" class="btn btn-default">Create New</button>
+  <button data-bind="command: initNewEntryCommand" class="btn btn-default">Create New</button>
 
-  <div data-bind="component: activeComponent"></div>
+  <section data-bind="visible: showTableView">
+    <div data-bind="component: {name: 'data-table', params: dataTableViewModel}"></div>
+  </section>
+
+  <section data-bind="visible: showDetailsView" style="display: none">
+    <div data-bind="component: {name: 'details-editor', params: detailsEditorViewModel}"></div>
+
+    <button class="btn btn-primary" data-bind="command: saveCommandAsync">Save</button>
+    <button class="btn" data-bind="command: closeDetailsCommand">Close</button>
+  </section>
 </div>

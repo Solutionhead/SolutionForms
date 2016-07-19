@@ -1,8 +1,6 @@
 ﻿@using SolutionForms.Client.Mvc.Helpers
 <div class="panel" style="margin-top: 10px;">
-  <!-- ko if: activeComponent -->
-  <section data-bind="component: activeComponent"></section>
-  <!-- /ko -->
+  <div data-bind="component: { name: 'data-form', params: $data }"></div>
 </div>
 
 @section Scripts

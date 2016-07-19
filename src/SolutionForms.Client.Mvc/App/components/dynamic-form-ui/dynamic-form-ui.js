@@ -109,7 +109,7 @@ DynamicFormUIViewModel.prototype.setFieldValues = function (data) {
 
   if (typeof vals === "string") { vals = ko.utils.parseJson(vals) || {}; }
   ko.utils.arrayForEach(this.fields(), function (f) {
-    f.context().setValue(vals[f.exportName]);
+    f.setValue(vals[f.exportName]);
   });
 }
 DynamicFormUIViewModel.prototype.getFieldByName = function (fieldName) {
@@ -124,7 +124,7 @@ DynamicFormUIViewModel.prototype.getFieldContextByName = function (fieldName) {
 }
 DynamicFormUIViewModel.prototype.setFieldValue = function (fieldName, value) {
   var field = this.getFieldByName(fieldName);
-  field && field.context().setValue(value);
+  field && field.setValue(value);
 }
 DynamicFormUIViewModel.prototype.getFieldValue = function (fieldName) {
   var field = this.getFieldByName(fieldName);

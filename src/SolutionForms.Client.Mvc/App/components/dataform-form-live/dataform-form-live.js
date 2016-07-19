@@ -1,7 +1,7 @@
-﻿require('koValidation');
+﻿//NOTE: This component is obsolete. It is still being reference by dataformDesignerViewModel and should be replaced by dataentry-form-view.
+require('koValidation');
 var toastr = require('toastr'),
-  _ = require('underscore'),
-  page = require('page');
+  _ = require('underscore');
 
 if (!ko.components.isRegistered('dynamic-form')) {
   ko.components.register('dynamic-form', require('components/dynamic-form-ui/dynamic-form-ui'));
@@ -29,40 +29,42 @@ function DataFormLive(params) {
       return ko.unwrap(params.config) || {};
     });
 
+    self.formCommands = {
+      saveCommandAsync: ko.asyncCommand({
+        execute: function (complete) {
+          try {
+            var data = self.dynamicFormUIExport().buildDto();
+            data.documentId = self.documentId();
+
+            self.notifyListenersAsync('submit', data, self)
+              .done(function() {
+                toastr.success('Save completed successfully');
+                if (self.documentId() == null && arguments[0].Id != null) {
+                  //assumes that the arguments[0] is the results of the ajax call
+                  documentId(arguments[0].Id);
+                  //page.replace(`/Forms/${ko.unwrap(self.formId)}/${ko.unwrap(self.documentId)}`);
+                }
+                self.notifyListenersAsync('submitCompleted', self);
+                complete();
+              }).fail(function(xhr) {
+                toastr.error(xhr.message, 'Failed to Save');
+                complete();
+              });
+          } catch (e) {
+            complete();
+          }
+        }
+      })
+    }
+
     self.dynamicFormUIExport = ko.observable();
     self.fields = ko.pureComputed(function() {
       var formVm = self.dynamicFormUIExport();
       return formVm ? formVm.fields() : [];
     });
     
-    self.saveCommandAsync = ko.asyncCommand({
-      execute: function (complete) {
-        try {
-          var data = self.dynamicFormUIExport().buildDto();
-          data.documentId = self.documentId();
-
-          self.notifyListenersAsync('submit', data, self)
-            .done(function() {
-              toastr.success('Save completed successfully');
-              if (self.documentId() == null && arguments[0].Id != null) {
-                //assumes that the arguments[0] is the results of the ajax call
-                documentId(arguments[0].Id);
-                page.replace(`/Forms/${ko.unwrap(self.formId)}/${ko.unwrap(self.documentId)}`);
-              }
-              self.notifyListenersAsync('submitCompleted', self);
-              complete();
-            }).fail(function(xhr) {
-              toastr.error(xhr.message, 'Failed to Save');
-              complete();
-            });
-        } catch (e) {
-          complete();
-        }
-      }
-    });
-
     self.isRendered = ko.pureComputed(function () {
-      return self.dynamicFormUIExport() && self.dynamicFormUIExport().isReady();
+      return self.dynamicFormUIExport() && self.dynamicFormUIExport().isReady() && true;
     });
 
     self.ready = ko.pureComputed(function() {
@@ -70,29 +72,34 @@ function DataFormLive(params) {
         && self.isRendered() === true;
     });
 
+    //// Load document data on init if documentId is supplied to the constructor
+    //// NOTE: do this before the below computed watches are executed.
+    //if (documentId.peek() != null) {
+    //  self.loadDocumentData(documentId.peek());
+    //}
+
     var __disposables = [];
     __disposables.push(ko.computed(function() {
       self.initFromConfig(ko.unwrap(params.config));
     }));
     self.parseListeners();
 
-    var lastDocId;
+    var lastDocLoaded;
     __disposables.push(ko.computed(function() {
-      const docId = self.documentId();
-      if (docId != undefined && lastDocId !== docId) {
+      const docId = ko.unwrap(params.documentId);
+      if (docId != null && docId !== lastDocLoaded /* && documentId.peek() !== docId */) {
+        lastDocLoaded = docId;
         self.loadDocumentData(docId);
-        lastDocId = docId;
+        documentId(docId);
       }
     }));
 
-  // NOTE: It appears that the intention of this was to enable 
-  // setting the form's values directly from an external source.
-  // However, the below implementation appears incorrect as it is 
-  // causing a fetch rather than directly setting the values as expected.
-    //__disposables.push(ko.computed(function() {
-    //  var docId = ko.unwrap(params.documentValues);
-    //  docId != undefined && self.loadDocumentData(docId);
-    //}));
+    __disposables.push(ko.computed(function() {
+      const values = ko.unwrap(params.documentValues) || {};
+      self.setFieldValues(values);
+      documentId(values.Id);
+      lastDocLoaded = values.Id;
+    }));
   
     self.dispose = dispose;
   
@@ -196,7 +203,8 @@ DataFormLive.prototype.loadDocumentData = function (documentId) {
       id: documentId,
       entityName: ko.unwrap(self.formId),
       form: self
-    }).done(function() {
+    }).done(function (data) {
+      self.setFieldValues(data);
       self.notifyListenersAsync('loaded', self);
     }).fail(function() {
       toastr.error("Error: " + arguments[2]);
@@ -206,6 +214,13 @@ DataFormLive.prototype.loadDocumentData = function (documentId) {
 DataFormLive.prototype.setOrCreateObservable = function (name, value) {
   if (ko.isWritableObservable(this[name])) this[name](value);
   else this[name] = ko.observable(value);
+}
+
+DataFormLive.prototype.setFieldValues = function (values) {
+  const form = this.dynamicFormUIExport();
+  if (form) {
+    form.setFieldValues(values);
+  }
 }
 
 module.exports = {

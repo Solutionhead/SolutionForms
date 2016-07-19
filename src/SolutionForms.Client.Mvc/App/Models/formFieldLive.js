@@ -31,7 +31,7 @@ Field.prototype.DEFAULTS = {
 
 Field.prototype.setValue = function (val) {
     var input = this;
-    if (input.context() == undefined) {
+    if (input.context.peek() == undefined) {
         var sub = input.context.subscribe(function(ctx) {
             setContextValue(ctx, val);
             sub.dispose();

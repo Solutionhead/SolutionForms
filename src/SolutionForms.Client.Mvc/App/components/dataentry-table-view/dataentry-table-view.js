@@ -2,15 +2,6 @@
 var fetchPlugin = require('plugins/getDataFromLocalStorePlugin')(),
     page = require('page');
 
-//require('kendoCss/kendo.common.min.css');
-//require('kendoCss/kendo.default.min.css');
-//require('kendoCss/kendo.default.mobile.min.css');
-//require('kendoCss/kendo.bootstrap.min.css');
-//require('kendoCss/kendo.bootstrap.mobile.min.css');
-//require('kendoScripts/jquery.min');
-//require('kendoScripts/kendo.grid.min');
-//require('koKendo');
-
 function DataEntryTable(params) {
     if (!(this instanceof DataEntryTable)) return new DataEntryTable(params);
 
@@ -20,15 +11,41 @@ function DataEntryTable(params) {
     self.formFields = ko.observableArray([]);
     self.records = ko.observableArray([]);
 
-    self.parseConfig(params.config);
+  const indexedKeys = ko.pureComputed(() => {
+    var i = 0, dictionary = {};
+    ko.utils.arrayMap(self.records(), (r) => {
+      dictionary[r.Id] = i++;
+    });
 
-    self.navigateToDetails = navigateToDetails;
-    
-    function navigateToDetails(item) {
-        page('/Forms/' + self.formId() + '/' + item.Id);
-    }
+    return dictionary;
+  });
 
-    return self;
+  self.parseConfig(params.config);
+
+    self.navigateToDetails = function(item) {
+      if (typeof params.onItemSelected === "function") {
+        params.onItemSelected(item);
+      }
+    };
+
+  if (ko.isWritableObservable(params.exports)) {
+    params.exports({
+      records: self.records,
+      getIndexForKey: getIndexForKey,
+      updateItemByKey: updateItemByKey,
+      insertItemAtIndex: self.insertItemAtIndex.bind(self)
+    });
+  }
+
+  return self;
+
+  function getIndexForKey(key) {
+    return indexedKeys()[key] || -1;
+  }
+  function updateItemByKey(key, values) {
+    const index = getIndexForKey(key);
+    this.records.splice(index, 1, values);
+  }
 }
 
 DataEntryTable.prototype.parseConfig = function (input) {
@@ -51,7 +68,9 @@ DataEntryTable.prototype.parseConfig = function (input) {
 
     this.formFields((values.fields || []).slice(0, 5));
 }
-
+DataEntryTable.prototype.insertItemAtIndex = function(index, values) {
+  this.records.splice(index, 0, values);
+}
 module.exports = {
     template: require('./dataentry-table-view.html'),
     viewModel: DataEntryTable
