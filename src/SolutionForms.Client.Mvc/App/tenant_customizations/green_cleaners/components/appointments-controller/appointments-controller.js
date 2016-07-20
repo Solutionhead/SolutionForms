@@ -304,7 +304,8 @@ AppointmentsController.prototype.fetchEvents = function (startDate, endDate, cli
 
     return $.ajax({
       url: `/api/d/index?id=appointments%2FbyDateRange&$filter=${cursor.query}&$top=${cursor.pageSize}&$skip=${cursor.index}&$includes=ClientId`,
-      dataType: 'json'
+      dataType: 'json',
+      cache: false
     })
       .done((data) => {
         ko.utils.arrayPushAll(cursor.results, data);
@@ -329,7 +330,8 @@ AppointmentsController.prototype.lookupClients = function(searchTerm, callback) 
   searchTerm = prepareFilterString(searchTerm);
   $.ajax({
     dataType: "json",
-    url: `/api/d/index?id=${encodeURI("clients/byName")}&$filter=Name:*${encodeURI(searchTerm)}*`
+    url: `/api/d/index?id=${encodeURI("clients/byName")}&$filter=Name:*${encodeURI(searchTerm)}*`,
+    cache: false
   }).done(callback)
   .fail(() => { toastr.error("Failed to return clients")});
 }
