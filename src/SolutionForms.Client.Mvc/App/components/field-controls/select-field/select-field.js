@@ -5,7 +5,7 @@ function SelectFieldViewModel(params) {
 
     var self = this,
         input = ko.unwrap(params.input) || {},
-        settings = ko.unwrap(input.settings) || input;
+        settings = ko.toJS(input.settings) || input;
 
     self.optionsCaption = ko.pureComputed(function () {
         return ko.unwrap(settings.displayDefaultSelection)
@@ -76,9 +76,9 @@ SelectFieldViewModel.prototype.initOptions = function(settings) {
     var optionSource = settings.optionSource || SelectFieldViewModel.prototype.OPTION_SOURCES.selfDefined.value,
         self = this;
 
+    var options = [];
     switch (optionSource) {
         case SelectFieldViewModel.prototype.OPTION_SOURCES.dataSource.value:
-            self.options = ko.observableArray([]);
             var labelProperty = settings.optionDataSourceLabelMember;
             var hasValueMember = settings.hasOwnProperty('optionDataSourceValueMember');
 
@@ -91,11 +91,13 @@ SelectFieldViewModel.prototype.initOptions = function(settings) {
                         }
                     }));
                 });
-            return;
+            break;
         case SelectFieldViewModel.prototype.OPTION_SOURCES.selfDefined.value:
         default:
-            self.options = ko.observableArray(ko.unwrap(settings.options) || []);
+            options = ko.unwrap(settings.options);
     }
+
+    self.options = ko.observableArray(options || []);
 }
 SelectFieldViewModel.prototype.getSourceOptions = function () {
     return window['__option_sources__'] || (window['__option_sources__'] = ko.utils.arrayMap(_toArray(SelectFieldViewModel.prototype.OPTION_SOURCES), function(o) {

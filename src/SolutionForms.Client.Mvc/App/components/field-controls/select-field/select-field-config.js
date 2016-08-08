@@ -1,4 +1,4 @@
-﻿var selectFieldComponentFactory = require('controls/select-field/select-field');
+﻿//var selectFieldComponentFactory = require('controls/select-field/select-field');
 var loadDataSourceOptions = $.ajax('/api/datasources');
 
 function SelectFieldConfigViewModel(field, params) {
@@ -8,6 +8,7 @@ function SelectFieldConfigViewModel(field, params) {
         settings = params.input.settings.peek() || {},
         isInitialized = ko.observable(false);
 
+    self.options = field.options;
     self.optionToAdd = ko.observable();
     self.optionToAdd.subscribe(function (value) {
         if (value != undefined && value != '') {
@@ -19,15 +20,15 @@ function SelectFieldConfigViewModel(field, params) {
     self.optionsSource = ko.observable(settings.optionSource);
     self.optionDataSourceEntityName = ko.observable(settings.optionDataSourceEntityName);
     self.optionDataSourceLabelMember = ko.observable(settings.optionDataSourceLabelMember);
-    self.sourceOptions = selectFieldComponentFactory.viewModel.prototype.getSourceOptions();
+    self.sourceOptions = field.getSourceOptions();
     self.displaySelfOptions = ko.pureComputed(function () {
         var val = self.optionsSource();
-        return val === selectFieldComponentFactory.viewModel.prototype.OPTION_SOURCES.selfDefined.value
+        return val === field.OPTION_SOURCES.selfDefined.value
             || val === ''
             || val == undefined;
     });
     self.displayDataSourcesOptions = ko.pureComputed(function () {
-        return self.optionsSource() === selectFieldComponentFactory.viewModel.prototype.OPTION_SOURCES.dataSource.value;
+        return self.optionsSource() === field.OPTION_SOURCES.dataSource.value;
     });
     self.dataSourceOptions = ko.observableArray(window['__dataSources__'] || []);
     self.displayDefaultSelection = ko.observable(settings.displayDefaultSelection || false);
@@ -67,19 +68,19 @@ function SelectFieldConfigViewModel(field, params) {
     var mappedOptions = ko.utils.arrayMap(settings.options || [], function (o) {
         return new SelectOptionViewModel(o.optionLabel, o.optionValue);
     });
-    
 
-    selectFieldComponentFactory.viewModel.call(self, {
-        context: params.context,
-        input: {
-            settings: {
-                options: mappedOptions,
-                optionSource: self.optionsSource,
-                optionDataSourceEntityName: self.optionDataSourceEntityName,
-                optionDataSourceLabelMember: self.optionDataSourceLabelMember
-            }
-        }
-    });
+  //field.options(mappedOptions);
+    //selectFieldComponentFactory.viewModel.call(self, {
+    //    context: params.context,
+    //    input: {
+    //        settings: {
+    //            options: mappedOptions,
+    //            optionSource: self.optionsSource,
+    //            optionDataSourceEntityName: self.optionDataSourceEntityName,
+    //            optionDataSourceLabelMember: self.optionDataSourceLabelMember
+    //        }
+    //    }
+    //});
 
     settings.optionSource = self.optionsSource;
     settings.optionDataSourceEntityName = self.optionDataSourceEntityName;
@@ -98,7 +99,7 @@ function SelectFieldConfigViewModel(field, params) {
 }
 
 SelectFieldConfigViewModel.prototype.addOption = function (label, value) {
-    var opt = new SelectOptionViewModel(label || '', value);
+    var opt = new SelectOptionViewModel(label || '', value || null);
     this.options.push(opt);
     return opt;
 };

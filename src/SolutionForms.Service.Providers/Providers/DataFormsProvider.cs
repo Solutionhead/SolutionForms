@@ -167,14 +167,39 @@ namespace SolutionForms.Service.Providers.Providers
                     .WhereEquals("@metadata.Raven-Entity-Name", entityName)
                     .UsingDefaultOperator(QueryOperator.And);
 
-                queryParams
-                    .Where(param => string.Equals(param.Key, "$filter", StringComparison.OrdinalIgnoreCase))
-                    .ToList()
-                    .ForEach(filterParam => { query.Where(filterParam.Value); });
+                AppendQueryStringParams(query, queryParams);
 
                 var queryResult = await query.QueryResultAsync();
                 return queryResult.Results.Select(r => JObject.Parse(r.ToJsonDocument().DataAsJson.ToString()));
             }
+        }
+
+        private static void AppendQueryStringParams(IAsyncDocumentQuery<dynamic> query, IEnumerable<KeyValuePair<string, string>> queryParams)
+        {
+            queryParams.ForEach(q =>
+            {
+                switch (q.Key.ToLowerInvariant())
+                {
+                    case "$top":
+                        int pageSize;
+                        if (int.TryParse(q.Value, out pageSize))
+                        {
+                            query.Take(pageSize);
+                        }
+                        break;
+
+                    case "$skip":
+                        int skipCount;
+                        if (int.TryParse(q.Value, out skipCount))
+                        {
+                            query.Skip(skipCount);
+                        }
+                        break;
+                    case "$filter":
+                        query.Where(q.Value);
+                        break;
+                }
+            });
         }
 
         public async Task<IEnumerable<JObject>> GetDataEntriesByIndexName(string tenant, string indexName,
