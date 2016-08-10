@@ -84,6 +84,7 @@ namespace SolutionForms.Service.Providers.Providers
                 doc.AuthorizedClaims = dataform.AuthorizedClaims?.ToArray() ?? new string[0];
                 doc.DataSourceId = dataform.DataSourceId;
                 doc.RestrictDataAccessByOwner = dataform.RestrictDataAccessByOwner;
+                doc.LinkOnHomePage = dataform.LinkOnHomePage;
 
                 if (!string.IsNullOrWhiteSpace(dataform.NewDataSourceName))
                 {
@@ -105,7 +106,8 @@ namespace SolutionForms.Service.Providers.Providers
                 Plugins = dataform.Plugins,
                 AuthorizedClaims = dataform.AuthorizedClaims as string[],
                 DataSourceId = dataform.DataSourceId,
-                RestrictDataAccessByOwner = dataform.RestrictDataAccessByOwner
+                RestrictDataAccessByOwner = dataform.RestrictDataAccessByOwner,
+                LinkOnHomePage = dataform.LinkOnHomePage
             };
 
             using (var session = _documentStore.OpenAsyncSession(tenant))

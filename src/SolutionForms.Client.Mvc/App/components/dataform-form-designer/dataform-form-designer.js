@@ -28,6 +28,7 @@ function DataformDesignerViewModel(params) {
   self.authorizedClaims = ko.observable();
   self.claimsOptions = ko.observableArray(values.authorizedClaims || []);
   self.restrictDataAccessByOwner = ko.observable(false);
+  self.linkOnHomePage = ko.observable(true);
 
   self.isNewDataSource = ko.computed(function () {
     return self.dataSourceId() == undefined;
@@ -52,6 +53,7 @@ function DataformDesignerViewModel(params) {
       self.loadCustomizations(formConfig); // must be lodaded before fields are set or the selected option will not be set
       self.plugins(formConfig.plugins);
       self.customizations(formConfig.components);
+      self.linkOnHomePage(formConfig.linkOnHomePage);
       
       self.fields(formConfig.fields);
 
@@ -127,7 +129,7 @@ DataformDesignerViewModel.prototype = base.prototype;
 DataformDesignerViewModel.prototype.defaultValues = {
   title: "Untitled form",
   fields: [],
-  plugins: ['initializeFormValuesPlugin', 'saveToLocalDocumentStorePlugin'],
+  plugins: ['getDataFromLocalStorePlugin', 'saveToLocalDocumentStorePlugin'],
   components: []
 };
 DataformDesignerViewModel.prototype.parseInputConfig = function (configValues) {
@@ -157,7 +159,8 @@ DataformDesignerViewModel.prototype.buildConfig = function () {
     fields: self.buildFieldsConfigExport(),
     plugins: self.plugins(),
     components: self.customizations(),
-    restrictDataAccessByOwner: self.restrictDataAccessByOwner()
+    restrictDataAccessByOwner: self.restrictDataAccessByOwner(),
+    linkOnHomePage: self.linkOnHomePage()
 };
   return config;
 }
