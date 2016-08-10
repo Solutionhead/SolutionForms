@@ -9,8 +9,7 @@ function LookupField(params) {
   const value = ko.observable();
 
   this.lookupValues = ko.pureComputed(() => lookupSource());
-  const init = self.buildLookupOptionsAsync(config, lookupSource)
-    .done(() => self.lookupValues.notifySubscribers());
+  const init = self.buildLookupOptionsAsync(config, lookupSource);
 
   this.value = self.userResponse;
   this.delay = config.delay;
@@ -51,7 +50,7 @@ LookupField.prototype.findOptionById = function (id){
 LookupField.prototype.buildLookupOptionsAsync = function(options, recipientObservable, skipCount) {
   const dataSourceName = options.dataSourceName;
   if (!dataSourceName) {
-    return;
+    return $.Deferred().reject();
   }
   
   const labelProperty = options.labelProperty;

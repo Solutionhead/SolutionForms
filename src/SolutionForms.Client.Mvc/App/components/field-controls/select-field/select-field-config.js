@@ -68,20 +68,7 @@ function SelectFieldConfigViewModel(field, params) {
     var mappedOptions = ko.utils.arrayMap(settings.options || [], function (o) {
         return new SelectOptionViewModel(o.optionLabel, o.optionValue);
     });
-
-  //field.options(mappedOptions);
-    //selectFieldComponentFactory.viewModel.call(self, {
-    //    context: params.context,
-    //    input: {
-    //        settings: {
-    //            options: mappedOptions,
-    //            optionSource: self.optionsSource,
-    //            optionDataSourceEntityName: self.optionDataSourceEntityName,
-    //            optionDataSourceLabelMember: self.optionDataSourceLabelMember
-    //        }
-    //    }
-    //});
-
+  
     settings.optionSource = self.optionsSource;
     settings.optionDataSourceEntityName = self.optionDataSourceEntityName;
     settings.optionDataSourceLabelMember = self.optionDataSourceLabelMember;
