@@ -12,7 +12,7 @@
             <tr data-bind="click: $parent.navigateToDetails">
                 <td><i class="fa fa-link"></i></td>
                 <!-- ko foreach: { data: $parent.formFields, as: 'field' } -->
-                <td data-bind="text: record[field.exportName] | fit:75"></td>
+                <td data-bind="text: (field.settings && field.settings.optionDataSourceLabelMember ? record[field.exportName][field.settings.optionDataSourceLabelMember] : record[field.exportName]) | fit:75"></td>
                 <!-- /ko -->
             </tr>
         </tbody>

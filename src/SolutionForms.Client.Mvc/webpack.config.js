@@ -14,6 +14,7 @@ module.exports = {
     'core': ['ko',
       bower('knockout-postbox/build/knockout-postbox'),
       bower('knockout.punches/knockout.punches'),
+      localScripts('knockout-projections'),
       localScripts('kolite-local/knockout.command'),
       bower('bootstrap/dist/js/bootstrap'),
       'toastr',

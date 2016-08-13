@@ -172,7 +172,8 @@ namespace SolutionForms.Service.Providers.Providers
                 AppendQueryStringParams(query, queryParams);
 
                 var queryResult = await query.QueryResultAsync();
-                return queryResult.Results.Select(r => JObject.Parse(r.ToJsonDocument().DataAsJson.ToString()));
+                var jsonResult = queryResult.Results;
+                return jsonResult.Select(r => JObject.Parse(r.ToJsonDocument().DataAsJson.ToString()));
             }
         }
 
@@ -232,6 +233,15 @@ namespace SolutionForms.Service.Providers.Providers
                     query, includes
                 );
 
+            var jsonResult = includes.Length > 0 
+                ? MapIncludes(queryResult, includes) 
+                : queryResult.Results;
+            return jsonResult.Select(r => JObject.Parse(r.ToJsonDocument().DataAsJson.ToString()));
+            ;
+        }
+
+        private static IEnumerable<RavenJObject> MapIncludes(QueryResult queryResult, string[] includes)
+        {
             var jsonResult = queryResult.Results;
             if (queryResult.Includes != null && queryResult.Includes.Count > 0)
             {
@@ -245,10 +255,9 @@ namespace SolutionForms.Service.Providers.Providers
                     });
                 });
             }
-
-            return jsonResult.Select(r => JObject.Parse(r.ToJsonDocument().DataAsJson.ToString()));
-            ;
+            return jsonResult;
         }
+
 
         public async Task<DataEntryCreatedReturn> CreateDataEntryAsync(string tenant, string entityName, object values,
             ApplicationUser ownerUser, bool awaitIndexing = false)
