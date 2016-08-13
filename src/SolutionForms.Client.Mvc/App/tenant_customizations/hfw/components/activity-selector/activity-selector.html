@@ -1,0 +1,18 @@
+﻿<div class="form-group">
+  <label class="control-label" for="wellness-area">Wellness Area</label>
+  <select class="form-control" data-bind="options: wellnessAreas, value: model.wellnessArea, optionsCaption: ' '" id="wellness-area"></select>
+</div>
+
+<div class="form-group">
+  <label class="control-label" for="category">Category</label>
+  <select class="form-control" data-bind="options: filteredDistinctCategories, value: model.category, optionsCaption: ' '" id="category"></select>
+</div>
+
+<div class="form-group">
+  <label class="control-label" for="activity">Activity</label>
+  <select class="form-control" data-bind="options: filteredActivities, value: model.activity, optionsValue: 'Id', optionsText: 'Name', optionsCaption: ' '" id="activity"></select>
+</div>
+
+{{ #foreach: activityQualifiers }}
+<div>{{ Quantity }} {{ Units }} = {{ Points }} points</div>
+{{ /foreach }}

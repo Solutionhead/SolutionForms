@@ -197,7 +197,7 @@ DataformDesignerViewModel.prototype.loadCustomizations = function (config) {
     typeOptionsToAdd = [];
 
   ko.utils.arrayForEach(pluginsSourceTemp, function (src) {
-    var plugin = require('customizations/' + src + '-config');
+    var plugin = require(`customizations/${ src }-config`);
     plugin.synchronous = true;
     plugin.config.template = plugin.config.template || '<div></div>';
 
