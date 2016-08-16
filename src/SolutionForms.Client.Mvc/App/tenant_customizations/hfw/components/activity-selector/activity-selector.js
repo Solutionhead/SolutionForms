@@ -16,6 +16,7 @@ function ActivitySelector(params) {
     wellnessArea: ko.observable(),
     category: ko.observable(),
     activity: ko.observable(),
+    activityQualifier: ko.observable(),
   }
 
   self.wellnessAreas = activities
@@ -61,8 +62,18 @@ function ActivitySelector(params) {
 
   const init = $.when([ loadActivities(), loadActivityQualifiers() ]);
 
+  if (ko.isWritableObservable(params.exports)) {
+    params.exports({
+      selectedActivity: this.model.activityQualifier,
+      resetActivity: resetActivity.bind(self),
+    });
+  }
+
   return self;
   
+  function resetActivity() {
+    self.model.activity(null);
+  }
   function distinctFilter(cache) {
     return (val) => isDistinct(val, cache);
   }

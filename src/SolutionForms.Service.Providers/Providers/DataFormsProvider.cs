@@ -199,7 +199,11 @@ namespace SolutionForms.Service.Providers.Providers
                         }
                         break;
                     case "$filter":
-                        query.Where(q.Value);
+                        var filterVals = q.Value.Split(':');
+                        query.WhereEquals(filterVals[0], filterVals[1]);
+                        break;
+                    case "$transformwith":
+                        query.SetResultTransformer(q.Value);
                         break;
                 }
             });

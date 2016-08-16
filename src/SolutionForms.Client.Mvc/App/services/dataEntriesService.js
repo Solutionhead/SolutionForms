@@ -1,28 +1,83 @@
-﻿export function getAllRecordsFromDataSourceAsync(entityName, pageSize) {
-  pageSize = pageSize || defaultOptions.queryPageSize;
-
-  const queryFn = function fetchPage(skip, take) {
-    return fetchDataAsync(buildApiRouteForEntityName(entityName), skip, take);
+﻿export function getAllRecordsFromDataSourceAsync(entityName, options) {
+  if (typeof options === 'number') {
+      options = {
+          queryPageSize: options
+      };
   }
 
-  return fetchAllDataPagesAsync(queryFn, pageSize);
+  const queryOptions = $.extend({}, defaultOptions, options);
+
+  const queryFn = function fetchPage(skip, take) {
+    return fetchDataAsync(buildApiRouteForEntityName(entityName, options), skip, take);
+  }
+
+  return fetchAllDataPagesAsync(queryFn, queryOptions.queryPageSize);
 }
 
 export function getDataByDataSourceName(dataSourceName, options) {
   options = $.extend({}, defaultOptions, options);
 
   //todo: enable retrieval from local cached data
-  return fetchDataAsync(buildApiRouteForEntityName(dataSourceName), options.skipCount, options.queryPageSize);
+  return fetchDataAsync(buildApiRouteForEntityName(dataSourceName, options));
 }
 
-function buildApiRouteForEntityName(entityName) {
-  return `/api/d/${ entityName }`;
+export function createAsync(entityName, values, awaitIndexing) {
+  const opts = {};
+  if ( awaitIndexing === true ) {
+    opts.awaitIndexing = true;
+  }
+  const url = buildApiRouteForEntityName( entityName, opts );
+
+  return $.ajax( url, {
+    data: values,
+    dataType: 'json',
+    type: 'POST',
+    contentType: 'application/json'
+  });
+}
+
+function buildApiRouteForEntityName(entityName, options) {
+  return `/api/d/${ entityName }${ buildQueryStringOptions( options ) }`;
+}
+
+function buildQueryStringOptions(options) {
+  if (options == null) return '';
+
+  var qs = '';
+  if ( options.filter ) {
+    qs = appendQueryStringParam(qs, '$filter', options.filter);
+  }
+  if ( options.skipCount ) {
+    qs = appendQueryStringParam(qs, '$skip', options.skipCount);
+  }
+  if ( options.queryPageSize ) {
+    qs = appendQueryStringParam(qs, '$top', options.queryPageSize);
+  }
+  if ( options.transformWith ) {
+    qs = appendQueryStringParam(qs, '$transformWith', options.transformWith);
+  }
+  if ( options.awaitIndexing ) {
+    qs = appendQueryStringParam( qs, 'awaitIndexing', options.awaitIndexing );
+  }
+
+  return qs.length ? `?${ qs }` : '';
+}
+
+function appendQueryStringParam(qs, key, val) {
+  qs = qs || '';
+  if (qs.length) {
+    qs += '&';
+  }
+  qs += `${ key }=${ val }`;
+  return qs;
 }
 
 function fetchDataAsync(apiRoute, skip, take) {
   skip = skip || defaultOptions.skipCount;
   take = take || defaultOptions.queryPageSize;
-  return $.ajax(`${ apiRoute }${ apiRoute.indexOf('?') === -1 ? '?' : '&' }$skip=${ skip }&$top=${ take }`);
+  return $.ajax(`${ apiRoute }${ apiRoute.indexOf('?') === -1 ? '?' : '&' }$skip=${ skip }&$top=${ take }`, {
+      cache: false
+  });
 }
 
 function fetchAllDataPagesAsync(queryFn, pageSize, skipCount, dfd, resultContainer) {

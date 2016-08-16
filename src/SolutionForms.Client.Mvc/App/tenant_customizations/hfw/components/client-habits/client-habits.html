@@ -1,0 +1,33 @@
+﻿<button class="btn btn-primary pull-right" type="button" data-bind="command: initNewHabit">
+  <i class="fa fa-plus"></i> New Habit
+</button>
+
+{{ #foreach: clientHabits }}
+  {{ #if: $parent.controlBreak( 0, activity['Wellness Area'] ) }}<h2>{{ activity['Wellness Area']}}</h2> {{ /if }}
+  {{ #if $parent.controlBreak( 1, activity.Category ) }}<h3>{{ activity.Category }}</h3> {{ /if }}
+  <div>
+    {{ activity.Name }} x
+    {{ qualifier.Quantity }} {{ qualifier.Units }} @
+    {{ qualifier['Point Value'] }} point(s)
+  </div>
+{{ /foreach }}
+
+<!-- ASSIGNMENT MODAL -->
+<div data-bind="modal: showAssignmentUI" class="modal fade modal-lg" id="habit-assignment" tabindex="-1" role="dialog" aria-labelledby="habit-assignment-label" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="habit-assignment-label">{{ clientName }}</h4>
+      </div>
+      <div class="modal-body">
+        <habit-assignment params="client: client, exports: habitAssignmentVm"></habit-assignment>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary" data-bind="command: createClientHabitAsync">Start Habit</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- /ASSIGNMENT MODAL -->
