@@ -22,7 +22,8 @@ function LookupField(params) {
         if (val == null) {
           val = null;
         } else if (config.valueProperty == null) {
-          val = self.findOptionById(val.Id);
+          val = self.findOptionById(val.Id) || { optionValue: null };
+          val = val.optionValue;
         }
         value(val);
       });

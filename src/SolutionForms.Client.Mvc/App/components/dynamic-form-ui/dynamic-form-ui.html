@@ -2,7 +2,7 @@
 
 <script id="form-field-template" type="text/html">
   <div class="form-group" data-bind="validationElement: validationElement()">
-    <label class="col-sm-2" data-bind="text: displayName"></label>
+    <label class="control-label col-sm-2" data-bind="text: displayName"></label>
     <div class="col-sm-10" data-bind="component: { name: inputType, params: { input: $data, context: context, parentContext: $parent } }"></div>
     <div data-bind="if: helpText" class="col-sm-10 col-sm-offset-2"><span class="help-block" data-bind="text: helpText"></span></div>
     <div class="sr-only" data-bind="validationMessage: validationElement()"></div>
@@ -10,6 +10,6 @@
 </script>
 
 <script id="form-container-template" type="text/html">
-  <div class="row" data-bind="component: { name: inputType, params: { input: $data, context: context, parentContext: $parent } }"></div>
+  <div data-bind="component: { name: inputType, params: { input: $data, context: context, parentContext: $parent } }"></div>
 </script>
 
