@@ -2,9 +2,11 @@
   "version": "1.0.0-*",
   "description": "SolutionForms.Service.Providers Class Library",
   "authors": [ "Vinney" ],
-  "tags": [ "" ],
-  "projectUrl": "",
-  "licenseUrl": "",
+  "packOptions": {
+    "tags": [ "" ],
+    "licenseUrl": "",
+    "repository": {}
+  },
   "frameworks": {
     "net451": {
       "dependencies": {
@@ -19,9 +21,9 @@
   "dependencies": {
     "BrockAllen.MembershipReboot": "8.4.0",
     "BrockAllen.MembershipReboot.WebHost": "7.1.0",
-    "Microsoft.AspNet.Authentication.Cookies": "1.0.0-rc1-final",
-    "Microsoft.AspNet.Http.Abstractions": "1.0.0-rc1-final",
-    "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0-rc1-final",
+    "Microsoft.AspNetCore.Authentication.Cookies": "1.0.0",
+    "Microsoft.AspNetCore.Http.Abstractions": "1.0.0",
+    "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0",
     "RavenDB.Database": "3.0.30115",
     "Stripe.net": "6.3.2"
   }

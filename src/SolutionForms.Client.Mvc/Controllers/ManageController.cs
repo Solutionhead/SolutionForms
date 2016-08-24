@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using BrockAllen.MembershipReboot;
-using Microsoft.AspNet.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using SolutionForms.Client.Mvc.Models;
 using SolutionForms.Client.Mvc.Services;
 using SolutionForms.Client.Mvc.ViewModels.Manage;

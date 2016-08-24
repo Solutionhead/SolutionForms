@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Microsoft.AspNet.Http.Authentication;
+using Microsoft.AspNetCore.Http.Authentication;
 using SolutionForms.Client.Mvc.Models;
 
 namespace SolutionForms.Client.Mvc.ViewModels.Manage

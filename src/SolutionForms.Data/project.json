@@ -2,9 +2,11 @@
   "version": "1.0.0-*",
   "description": "SolutionForms.Data Class Library",
   "authors": [ "Vinney" ],
-  "tags": [ "" ],
-  "projectUrl": "",
-  "licenseUrl": "",
+  "packOptions": {
+    "tags": [ "" ],
+    "licenseUrl": "",
+    "repository": { }
+  },
   "frameworks": {
     "net451": {
       "dependencies": {

@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using BrockAllen.MembershipReboot;
-using Microsoft.AspNet.Authorization;
-using Microsoft.AspNet.Http.Features;
-using Microsoft.AspNet.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
 using SolutionForms.Client.Mvc.Attributes;
 using SolutionForms.Client.Mvc.Helpers;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
@@ -59,7 +59,7 @@ namespace SolutionForms.Client.Mvc.Controllers
         {
             var result = await _dataFormsProvider.GetDataEntryByKeyAsync(Tenant, id);
             return result == null 
-                ? HttpNotFound() as IActionResult 
+                ? NotFound() as IActionResult 
                 : Ok(result);
         }
 
@@ -80,7 +80,7 @@ namespace SolutionForms.Client.Mvc.Controllers
             var response = await _dataFormsProvider.UpdateDataEntryAsync(Tenant, entityName, id, values, userAccount, awaitIndexing ?? false);
             if (response == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
             return Ok(new {});
         }

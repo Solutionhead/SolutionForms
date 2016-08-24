@@ -1,13 +1,13 @@
-﻿using Microsoft.AspNet.Http;
+using Microsoft.AspNetCore.Http;
 
 namespace SolutionForms.Client.Mvc.Helpers
 {
     public static class HttpContextExtensions
     {
-        public static T GetApplicationService<T>(this HttpContext context)
-            where T : class
+        public static T GetService<T>(this HttpContext context)
+            where T: class
         {
-            return context.ApplicationServices.GetService(typeof(T)) as T;
+            return context.RequestServices.GetService(typeof(T)) as T;
         }
     }
 }

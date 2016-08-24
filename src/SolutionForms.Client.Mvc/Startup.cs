@@ -1,10 +1,9 @@
 ﻿using BrockAllen.MembershipReboot;
-using Microsoft.AspNet.Authentication.Cookies;
-using Microsoft.AspNet.Authorization;
-using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Hosting;
-using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Mvc.Filters;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -12,7 +11,6 @@ using Newtonsoft.Json.Serialization;
 using SolutionForms.Client.Mvc.Authorization;
 using SolutionForms.Client.Mvc.Helpers;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
-using SolutionForms.Client.Mvc.Services;
 using SolutionForms.Service.Providers.Middleware;
 using SolutionForms.Service.Providers.Models;
 using Stripe;
@@ -23,31 +21,30 @@ namespace SolutionForms.Client.Mvc
     {
         public Startup(IHostingEnvironment env)
         {
-            // Set up configuration sources.
             var builder = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true);
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddEnvironmentVariables();
 
             if (env.IsDevelopment())
             {
                 builder.AddUserSecrets();
             }
 
-            builder.AddEnvironmentVariables();
             Configuration = builder.Build();
-
             AutoMapperConfig.Configure();
+
             StripeConfiguration.SetApiKey(Configuration["stripe:private_key"]);
         }
 
-        public IConfigurationRoot Configuration { get; set; }
+        public IConfigurationRoot Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
-            services.AddAuthentication(); 
-            services.AddAuthorization();
+            services.AddAuthentication();
 
             services.AddMvc(config =>
             {
@@ -56,12 +53,13 @@ namespace SolutionForms.Client.Mvc
                     .Build();
                 config.Filters.Add(new AuthorizeFilter(policy));
 
+
 #if RELEASE
                 // this causes issues when running the app locally, currently there appears to be an isse VS 2015 debugging a website with SSL
-                config.Filters.Add(new Microsoft.AspNet.Mvc.RequireHttpsAttribute());
+                config.Filters.Add(new Microsoft.AspNetCore.Mvc.RequireHttpsAttribute());
 #endif
             }).AddJsonOptions(opt => opt.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver());
-            
+
             services.AddAuthorization(options =>
             {
                 options.AddPolicy(AuthorizationPolicies.AppOwner, policy => policy.RequireClaim(AuthorizationPolicies.AppOwner));
@@ -88,9 +86,6 @@ namespace SolutionForms.Client.Mvc
             });
 
             ConfigureMembershipReboot(services);
-            
-            services.AddTransient<IEmailSender, AuthMessageSender>();
-            services.AddTransient<ISmsSender, AuthMessageSender>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -101,16 +96,13 @@ namespace SolutionForms.Client.Mvc
 
             if (env.IsDevelopment())
             {
-                app.UseBrowserLink();
                 app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
+                app.UseBrowserLink();
             }
             else
             {
                 app.UseExceptionHandler("/Home/Error");
             }
-
-            app.UseIISPlatformHandler(options => options.AuthenticationDescriptions.Clear());
 
             app.UseStaticFiles();
 
@@ -118,12 +110,12 @@ namespace SolutionForms.Client.Mvc
             {
                 CookieAuthenticationOptions = new CookieAuthenticationOptions
                 {
-
                     LoginPath = new PathString("/Account/Login"),
                     AutomaticAuthenticate = true,
                     AutomaticChallenge = true,
                 },
-                ConnectionString = Configuration["Data:Raven:ConnectionString"]
+                //ConnectionString = "Url=http://solutionforms.southcentralus.cloudapp.azure.com:8080;domain=solutionforms;user=solutionhead;password=XBf%hxTmr,6eX,Pt%tF6D"
+                ConnectionString = Configuration["ConnectionStrings:Raven"]
             });
 
             app.UseTenantResolver();
@@ -136,39 +128,30 @@ namespace SolutionForms.Client.Mvc
             });
         }
 
-        // Entry point for the application.
-        public static void Main(string[] args) => WebApplication.Run<Startup>(args);
-        
         public void ConfigureMembershipReboot(IServiceCollection services)
         {
             var confg = Configuration.GetSection("membershipReboot");
             var smtp = Configuration.GetSection("smtp");
             services.Configure<SecuritySettings>(confg);
-            
-            services.ConfigureSolutionFormsProviders(new ApplicationAccountInformation(
+
+            var accountConfig = new ApplicationAccountInformation(
                 new PathString("/Account/Login/"),
                 new PathString("/Account/Activate/"),
                 new PathString("/Account/CancelAccountVerification/"),
                 new PathString("/Account/ResetPassword/")
-                ), new StmpDeliveryConfig
-                {
-                    Host = smtp["host"],
-                    Port = int.Parse(smtp["port"]),
-                    EnableSsl = bool.Parse(smtp["enableSsl"]),
-                    UserName = Configuration["smtp-username"],
-                    Password = Configuration["smtp-password"],
-                    FromEmailAddress = smtp["fromEmail"]
-                });
+                );
+
+            var smtpConfig = new StmpDeliveryConfig
+            {
+                Host = smtp["host"],
+                Port = int.Parse(smtp["port"]),
+                EnableSsl = bool.Parse(smtp["enableSsl"]),
+                UserName = Configuration["smtp-username"],
+                Password = Configuration["smtp-password"],
+                FromEmailAddress = smtp["fromEmail"]
+            };
+
+            services.ConfigureSolutionFormsProviders(accountConfig, smtpConfig);
         }
-    }
-
-    public class StripeHelper
-    {
-        public string PublishableApiKey { get; set; }
-    }
-
-    public class BetaAccessHelper
-    {
-        public string BetaAccessKey { get; set; }
     }
 }

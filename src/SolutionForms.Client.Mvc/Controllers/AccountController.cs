@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using BrockAllen.MembershipReboot;
-using Microsoft.AspNet.Authorization;
-using Microsoft.AspNet.Mvc;
-using Microsoft.AspNet.Http.Features;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http.Features;
 using SolutionForms.Client.Mvc.Helpers;
 using SolutionForms.Client.Mvc.ViewModels.Account;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
@@ -63,7 +63,7 @@ namespace SolutionForms.Client.Mvc.Controllers
                 return UnsuccessfulTenantCreation(CreateTenantResult.InvalidBetaAccessKey);
             }
 
-            var tenantProvider = HttpContext.ApplicationServices.GetService(typeof(TenantProvider)) as TenantProvider;
+            var tenantProvider = HttpContext.GetService<TenantProvider>();
             var result = await tenantProvider.CreateTenantAsync(new CreateTenantParameters
             {
                 OrganizationName = model.OrganizationName,
@@ -132,7 +132,7 @@ namespace SolutionForms.Client.Mvc.Controllers
                 return View("LoginTenant");
             }
 
-            var tenantProvider = HttpContext.ApplicationServices.GetService(typeof(TenantProvider)) as TenantProvider;
+            var tenantProvider = HttpContext.GetService<TenantProvider>();
             var tenantExists = await tenantProvider.LookupTenantByDomainAsync(model.TenantDomain);
             if (!tenantExists)
             {

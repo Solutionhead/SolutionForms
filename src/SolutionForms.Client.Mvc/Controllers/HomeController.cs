@@ -1,6 +1,6 @@
-﻿using Microsoft.AspNet.Authorization;
-using Microsoft.AspNet.Http.Features;
-using Microsoft.AspNet.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
 
 namespace SolutionForms.Client.Mvc.Controllers

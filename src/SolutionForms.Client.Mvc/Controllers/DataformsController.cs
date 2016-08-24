@@ -2,8 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Http.Features;
-using Microsoft.AspNet.Mvc;
+using Microsoft.AspNetCore.Mvc;
 using SolutionForms.Client.Mvc.Attributes;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
 using SolutionForms.Client.Mvc.ViewModels.DataForms;
@@ -40,7 +39,7 @@ namespace SolutionForms.Client.Mvc.Controllers
             var dataForm = await _dataFormsProvider.GetDataFormAsync(Tenant, id);
             if (dataForm == null)
             {
-                return HttpNotFound();
+                return NotFound();
             }
 
             return Json(dataForm);
@@ -51,13 +50,13 @@ namespace SolutionForms.Client.Mvc.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return HttpBadRequest(ModelState);
+                return BadRequest(ModelState);
             }
 
             if (string.IsNullOrWhiteSpace(dataform.DataSourceId) &&
                 string.IsNullOrWhiteSpace(dataform.NewDataSourceName))
             {
-                return HttpBadRequest("Expected dataSourceId value or newDataSourceName.");
+                return BadRequest("Expected dataSourceId value or newDataSourceName.");
             }
 
             await _dataFormsProvider.UpdateDataFormAsync(Tenant, id, dataform);
@@ -70,13 +69,13 @@ namespace SolutionForms.Client.Mvc.Controllers
         {
             if (!ModelState.IsValid)
             {
-                return HttpBadRequest(ModelState);
+                return BadRequest(ModelState);
             }
 
             if (string.IsNullOrWhiteSpace(dataform.DataSourceId) &&
                 string.IsNullOrWhiteSpace(dataform.NewDataSourceName))
             {
-                return HttpBadRequest("Expected entityName value or newDataSourceName.");
+                return BadRequest("Expected entityName value or newDataSourceName.");
             }
 
             var entity = await _dataFormsProvider.CreateDataFormAsync(Tenant, dataform);

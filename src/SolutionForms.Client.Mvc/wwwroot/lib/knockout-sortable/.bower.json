@@ -1,0 +1,32 @@
+{
+  "name": "knockout-sortable",
+  "description": "A Knockout.js binding to connect observableArrays with jQuery UI sortable functionality",
+  "homepage": "https://github.com/rniemeyer/knockout-sortable",
+  "authors": [
+    {
+      "name": "Ryan Niemeyer"
+    }
+  ],
+  "license": "MIT",
+  "main": "./build/knockout-sortable.min.js",
+  "ignore": [
+    "examples",
+    "ext",
+    "reports",
+    "spec",
+    "src",
+    "Gruntfile.js",
+    "package.json",
+    ".gitignore"
+  ],
+  "version": "0.15.0",
+  "_release": "0.15.0",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.15.0",
+    "commit": "f6239d11b56c376b56de1ca2ecf169b341c4b053"
+  },
+  "_source": "https://github.com/rniemeyer/knockout-sortable.git",
+  "_target": "~0.15.0",
+  "_originalSource": "knockout-sortable"
+}

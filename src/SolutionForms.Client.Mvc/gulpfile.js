@@ -37,6 +37,12 @@ gulp.task("min:css", function () {
         .pipe(gulp.dest("."));
 });
 
+gulp.task("copy-modules:js-to-wwwroot", function() {
+  gulp.src(paths.bower_mods + 'jquery-validation/dist/jquery.validate.js')
+    .pipe(uglify())
+    .pipe(gulp.dest(paths.webroot + 'js/lib'));
+});
+
 gulp.task('copy-modules:css-to-wwwroot', function () {
     gulp.src(paths.bower_mods + 'jquery-ui/themes/base/all.css')
         .pipe(concat(paths.webroot + 'css/jquery-ui-all.min.css'))
@@ -50,6 +56,6 @@ gulp.task('copy-modules:css-to-wwwroot', function () {
         .pipe(gulp.dest(paths.webroot + 'css/'));
 });
 
-gulp.task("copy", ["copy-modules:css-to-wwwroot"])
+gulp.task("copy", ["copy-modules:css-to-wwwroot", "copy-modules:js-to-wwwroot"]);
 
 gulp.task("min", ["min:css"]);

@@ -3,39 +3,37 @@
   "version": "1.0.0-*",
   "description": "SolutionForms.Tests Class Library",
   "authors": [ "Roman" ],
-  "tags": [ "" ],
-  "projectUrl": "",
-  "licenseUrl": "",
+  "packOptions": {
+    "tags": [ "" ],
+    "licenseUrl": "",
+    "repository": {}
+  },
 
   "dependencies": {
     "Stripe.net": "6.3.2",
-    "xunit": "2.1.0",
-    "xunit.runner.dnx": "2.1.0-rc1-build204",
+    "xunit": "2.2.0-beta2-build3300",
+    "dotnet-test-xunit": "2.2.0-preview2-build1029",
     "Microsoft.Extensions.Configuration.FileProviderExtensions": "1.0.0-rc1-final",
-    "Microsoft.Extensions.Configuration.Json": "1.0.0-rc1-final",
-    "Microsoft.Extensions.Configuration.UserSecrets": "1.0.0-rc1-final",
-    "Microsoft.Extensions.SecretManager": "1.0.0-rc1-final",
-    "SecretManager": "1.0.0-beta5",
-    "AutoMapper": "4.2.1"    
+    "Microsoft.Extensions.Configuration.Json": "1.0.0",
+    "AutoMapper": "4.2.1"
   },
+
+  "tools": {
+    "Microsoft.AspNetCore.Server.IISIntegration.Tools": "1.0.0-preview2-final",
+    "Microsoft.Extensions.SecretManager.Tools": "1.0.0-preview2-final",
+  },
+
+  "testRunner": "xunit",
+
   "commands": {
     "test": "xunit.runner.dnx"
   },
 
   "frameworks": {
-    "dnx451": {
+    "net451": {
       "dependencies": {
         "Moq": "4.2.1510.2205",
         "SolutionForms.Client.Mvc": "1.0.0-*"
-      }
-    },
-    "dnxcore50": {
-      "dependencies": {
-        "Microsoft.CSharp": "4.0.1-beta-23516",
-        "System.Collections": "4.0.11-beta-23516",
-        "System.Linq": "4.0.1-beta-23516",
-        "System.Runtime": "4.0.21-beta-23516",
-        "System.Threading": "4.0.11-beta-23516"
       }
     }
   }

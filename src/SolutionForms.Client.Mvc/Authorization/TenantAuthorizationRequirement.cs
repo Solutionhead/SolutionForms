@@ -1,6 +1,7 @@
 using System.Linq;
+using System.Threading.Tasks;
 using BrockAllen.MembershipReboot;
-using Microsoft.AspNet.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using SolutionForms.Client.Mvc.Helpers;
 
 namespace SolutionForms.Client.Mvc.Authorization
@@ -13,19 +14,20 @@ namespace SolutionForms.Client.Mvc.Authorization
         {
             _allowedRoles = allowedRoles;
         }
-
-        protected override void Handle(AuthorizationContext context, TenantAuthorizationRequirement requirement)
+        
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, TenantAuthorizationRequirement requirement)
         {
             if (context.User.HasClaim(AuthorizationPolicies.AppOwner) || context.User.IsInRole("admin"))
             {
                 context.Succeed(requirement);
-                return;
             }
 
-            if (_allowedRoles.Any(context.User.HasClaim))
+            else if (_allowedRoles.Any(context.User.HasClaim))
             {
                 context.Succeed(requirement);
             }
+
+            return Task.FromResult(false);
         }
     }
 }
