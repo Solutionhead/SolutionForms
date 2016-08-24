@@ -1,9 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Http.Features;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 
 namespace SolutionForms.Client.Mvc.Middleware.Multitenancy
@@ -21,7 +19,7 @@ namespace SolutionForms.Client.Mvc.Middleware.Multitenancy
 
         public async Task Invoke(HttpContext context)
         {
-            using (_logger.BeginScopeImpl("TenantResolverMiddleware"))
+            using (_logger.BeginScope("TenantResolverMiddleware"))
             {
                 var tenant = new Tenant
                 {

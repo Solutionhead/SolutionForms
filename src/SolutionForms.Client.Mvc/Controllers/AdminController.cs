@@ -2,9 +2,9 @@
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using BrockAllen.MembershipReboot;
-using Microsoft.AspNet.Authorization;
-using Microsoft.AspNet.Http.Features;
-using Microsoft.AspNet.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Mvc;
 using SolutionForms.Client.Mvc.Attributes;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
 using SolutionForms.Client.Mvc.Models;
@@ -105,7 +105,7 @@ namespace SolutionForms.Client.Mvc.Controllers
                 return View("Error");
             }
 
-            var paymentProvider = HttpContext.GetApplicationService<PaymentProvider>();
+            var paymentProvider = HttpContext.GetService<PaymentProvider>();
             var result = await paymentProvider.GetPaymentInformationAsync(tenant);
             var response = result.Map().To<PaymentInformationResponse>();
             return Json(response);            
@@ -120,7 +120,7 @@ namespace SolutionForms.Client.Mvc.Controllers
                 return View("Error");
             }
 
-            var paymentProvider = HttpContext.GetApplicationService<PaymentProvider>();
+            var paymentProvider = HttpContext.GetService<PaymentProvider>();
             var parameters = request.Map().To<SetPaymentInformationParameters>();
             var result = await paymentProvider.SetPaymentInformationAsync(tenant, parameters);
             return Ok(result);

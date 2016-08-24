@@ -1,12 +1,10 @@
 using System;
-using System.Net.Configuration;
 using BrockAllen.MembershipReboot;
 using BrockAllen.MembershipReboot.WebHost;
-using Microsoft.AspNet.Authentication.Cookies;
-using Microsoft.AspNet.Builder;
-using Microsoft.AspNet.Http;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.OptionsModel;
+using Microsoft.Extensions.Options;
 using SolutionForms.Data.Contexts;
 using SolutionForms.Service.Providers.Configuration;
 using SolutionForms.Service.Providers.MembershipRebootUtilities;
@@ -34,7 +32,7 @@ namespace SolutionForms.Service.Providers.Middleware
                 AutomaticAuthenticate = true,
                 AutomaticChallenge = true,
                 AuthenticationScheme = MembershipRebootApplicationConstants.AuthenticationType,
-                CookieSecure = configuration?.CookieAuthenticationOptions?.CookieSecure ?? CookieSecureOption.SameAsRequest
+                CookieSecure = configuration?.CookieAuthenticationOptions?.CookieSecure ?? CookieSecurePolicy.SameAsRequest
             });
             AutoMapperConfiguration.ConfigureMappings();
         }
@@ -44,6 +42,7 @@ namespace SolutionForms.Service.Providers.Middleware
     {
         public static void ConfigureSolutionFormsProviders(this IServiceCollection services, ApplicationAccountInformation appAccountInformation, StmpDeliveryConfig smtpConfig)
         {
+            services.AddTransient<IHttpContextAccessor, HttpContextAccessor>();
             services.AddSingleton(p => RavenContext.DocumentStore);
             //services.AddSingleton(p => new MembershipRebootConfiguration<ApplicationUser>(p.GetService<IOptions<SecuritySettings>>().Value));
             services.AddSingleton(p =>

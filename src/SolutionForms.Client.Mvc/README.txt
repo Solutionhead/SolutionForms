@@ -13,7 +13,7 @@
 	b. Find the `site` node with the name "SolutionForms.Client.Mvc" (search text: <site name="SolutionForms.Client.Mvc")
 	c. Remove the "localhost" specification from the bindings child node. 
 		* The original node looks like `<binding protocol="http" bindingInformation="*:52794:localhost" />` OR `<binding protocol="http" bindingInformation="*:52794:solutionforms.local" />`
-		* After modifications the node looks like <binding protocol="http" bindingInformation="*:52794:solutionforms.local" />
+		* After modifications the node looks like <binding protocol="http" bindingInformation="*:52794:" />
 		* **NOTE: Don't change the port number! Visual Studio may have issued a different port number. Keep the port number issued.**
 		
 3. If IIS is currently running, stop it by right-clicking the icon in the task tray and clicking Exit.
