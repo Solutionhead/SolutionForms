@@ -22,5 +22,7 @@ namespace SolutionForms.Data.Models
         /// Describes how the field will be rendered in the UI.
         /// </summary>
         public string FieldType { get; set; }
+
+        public string FieldContainerType { get; set; }
     }
 }

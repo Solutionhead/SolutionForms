@@ -67,7 +67,7 @@ namespace SolutionForms.Client.Mvc.Controllers
         public async Task<IActionResult> Post(string entityName, [FromBody]object values, bool? awaitIndexing = false)
         {
             var userAccount = _userAccountService.GetByUsername(Tenant, User.Identity.Name);
-            //todo: ensure that the current user is authorized to creation of the current entity type
+            //todo: ensure that the current user is authorized to creation of the current entity type -- note: it's possible that the call is creating a record for a new entity type for which there is no pre-existing document collection or authorization rule.
             var response = await _dataFormsProvider.CreateDataEntryAsync(Tenant, entityName, values, userAccount, awaitIndexing ?? false);
             return CreatedAtRoute(new { controller=  "DataForms", action = "Live", formId = entityName, recordKey = response.Key }, response.Entity);
         }

@@ -171,6 +171,10 @@ DynamicFormUIViewModel.prototype.resetForm = function() {
 }
 
 function getTemplateNameForFieldType(fieldData) {
+  if (fieldData.fieldContainerType) {
+    return fieldData.fieldContainerType;
+  }
+
   switch(fieldData.fieldType) {
     case "container" :
       return 'form-container-template';

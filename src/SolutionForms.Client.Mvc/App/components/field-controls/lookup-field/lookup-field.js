@@ -55,6 +55,7 @@ LookupField.prototype.buildLookupOptionsAsync = function(options, recipientObser
   }
   
   const labelProperty = options.labelProperty;
+  const labelTransformer = options.transformWith;
   const valueProperty = options.valueProperty;
   const queryPageSize = options.pageSize;
   const $dfd = $.Deferred();
@@ -65,7 +66,7 @@ LookupField.prototype.buildLookupOptionsAsync = function(options, recipientObser
   return $dfd;
 
   function fetchPage(skipCount) {
-    $.ajax(`/api/d/${dataSourceName}?$skip=${skipCount}&$top=${queryPageSize}`)
+    $.ajax(`/api/d/${dataSourceName}?$skip=${skipCount}&$top=${queryPageSize}&$transformWith=${labelTransformer}`)
       .done(function(data) {
         const mapped = ko.utils.arrayMap(data || [], function(item) {
           return {

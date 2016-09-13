@@ -12,6 +12,7 @@ function LookupFieldConfig(field, params) {
   this.dataSourceName = ko.observable(config.dataSourceName);
   this.labelProperty = ko.observable(config.labelProperty);
   this.valueProperty = ko.observable(config.valueProperty);
+  this.transformWith = ko.observable(config.transformWith);
 
   //todo: replace with number field control
   this.delayInMS = ko.pureComputed({
@@ -35,6 +36,7 @@ function LookupFieldConfig(field, params) {
   config.dataSourceName = self.dataSourceName;
   config.labelProperty = self.labelProperty;
   config.valueProperty = self.valueProperty;
+  config.transformWith = self.transformWith;
   params.input.settings(config);
 
   return self;

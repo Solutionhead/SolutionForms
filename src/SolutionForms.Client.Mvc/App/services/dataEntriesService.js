@@ -29,9 +29,23 @@ export function createAsync(entityName, values, awaitIndexing) {
   const url = buildApiRouteForEntityName( entityName, opts );
 
   return $.ajax( url, {
-    data: values,
+    data: typeof values === "object" ? ko.toJSON(values) : values,
     dataType: 'json',
     type: 'POST',
+    contentType: 'application/json'
+  });
+}
+
+export function deleteAsync(entityName, awaitIndexing) {
+  const opts = {};
+  if ( awaitIndexing === true ) {
+    opts.awaitIndexing = true;
+  }
+  const url = buildApiRouteForEntityName( entityName );
+
+  return $.ajax( url, {
+    dataType: 'json',
+    type: 'DELETE',
     contentType: 'application/json'
   });
 }

@@ -199,8 +199,7 @@ namespace SolutionForms.Service.Providers.Providers
                         }
                         break;
                     case "$filter":
-                        var filterVals = q.Value.Split(':');
-                        query.WhereEquals(filterVals[0], filterVals[1]);
+                        query.Where(q.Value);
                         break;
                     case "$transformwith":
                         query.SetResultTransformer(q.Value);

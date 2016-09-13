@@ -48,6 +48,7 @@
 /// <reference path="../app/tenant_customizations/green_cleaners/components/schedule-simple-view/schedule-simple-view-config.js" />
 /// <reference path="../app/tenant_customizations/green_cleaners/models/EventInstance.js" />
 /// <reference path="../app/tenant_customizations/green_cleaners/models/scheduling-models.js" />
+<<<<<<< Updated upstream
 /// <reference path="../app/tenant_customizations/green_cleaners/Tests/appointment-recurrence-utils-tests.js" />
 /// <reference path="../app/tenant_customizations/green_cleaners/utils/appointment-recurrence-utils.js" />
 /// <reference path="../app/tenant_customizations/hfw/components/all-client-activity-overview/all-client-activity-overview.js" />
@@ -56,6 +57,21 @@
 /// <reference path="../app/tenant_customizations/hfw/components/habit-log-entry/habit-log-entry-config.js" />
 /// <reference path="../app/utils/luceneUtils.js" />
 /// <reference path="../app/utils/registerLocalFieldTypes.js" />
+=======
+/// <reference path="../App/tenant_customizations/green_cleaners/Tests/appointment-recurrence-utils-tests.js" />
+/// <reference path="../App/tenant_customizations/green_cleaners/utils/appointment-recurrence-utils.js" />
+/// <reference path="../app/tenant_customizations/hfw/components/activity-selector/activity-selector.js" />
+/// <reference path="../app/tenant_customizations/hfw/components/activity-selector/activity-selector-config.js" />
+/// <reference path="../app/tenant_customizations/hfw/components/all-client-activity-overview/all-client-activity-overview.js" />
+/// <reference path="../app/tenant_customizations/hfw/components/all-client-activity-overview/all-client-activity-overview-config.js" />
+/// <reference path="../app/tenant_customizations/hfw/components/client-habit-assignment/client-habit-assignment.js" />
+/// <reference path="../app/tenant_customizations/hfw/components/client-habits/client-habits.js" />
+/// <reference path="../app/tenant_customizations/hfw/components/client-habits/client-habits-config.js" />
+/// <reference path="../app/tenant_customizations/hfw/components/habit-log-entry/habit-log-entry.js" />
+/// <reference path="../app/tenant_customizations/hfw/components/habit-log-entry/habit-log-entry-config.js" />
+/// <reference path="../app/utils/luceneutils.js" />
+/// <reference path="../app/utils/registerlocalfieldtypes.js" />
+>>>>>>> Stashed changes
 /// <reference path="../app/viewModels/dataformDesignerViewModel.js" />
 /// <reference path="../app/viewModels/dataformFieldConfigViewModel.js" />
 /// <reference path="../app/viewModels/dataformFieldsDesigner.js" />

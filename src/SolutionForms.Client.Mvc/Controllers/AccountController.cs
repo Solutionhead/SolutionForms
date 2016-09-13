@@ -211,7 +211,7 @@ namespace SolutionForms.Client.Mvc.Controllers
             return View(new ActivateAccountViewModel
             {
                 VerificationCode = code,
-                DisplayPasswordConfirmation = !user.HasPassword()
+                DisplayPasswordConfirmation = !user.HasPassword(),
             });
         }
 
@@ -220,13 +220,6 @@ namespace SolutionForms.Client.Mvc.Controllers
         [Route("account/activate/{code}")]
         public IActionResult ActivateAccount(ActivateAccountViewModel model)
         {
-            if (!ModelState.IsValid)
-            {
-                return string.IsNullOrWhiteSpace(model.VerificationCode) 
-                    ? View("Error") 
-                    : View(model);
-            }
-
             var user = UserManager.GetByVerificationKey(model.VerificationCode);
             if (user == null)
             {
@@ -239,7 +232,19 @@ namespace SolutionForms.Client.Mvc.Controllers
                     ? TenantRedirectHelper.RedirectToTenantDomain(user.Tenant, "Index", "Home", Request, Url)
                     : TenantRedirectHelper.RedirectToTenantDomain(user.Tenant, "Login", Request, Url);
             }
-            
+
+            if(user.HasPassword())
+            {
+                ModelState.Remove(nameof(model.ConfirmPassword));
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return string.IsNullOrWhiteSpace(model.VerificationCode) 
+                    ? View("Error") 
+                    : View(model);
+            }
+
             UserManager.VerifyEmailFromKey(model.VerificationCode, model.Password, out user);
             SignInManager.SignIn(user);
 

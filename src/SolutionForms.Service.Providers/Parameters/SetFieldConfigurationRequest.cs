@@ -18,5 +18,7 @@ namespace SolutionForms.Service.Providers.Parameters
         public IDictionary<string, object> Settings { get; set; }
 
         public string FieldType { get; set; }
+
+        public string FieldContainerType { get; set; }
     }
 }
