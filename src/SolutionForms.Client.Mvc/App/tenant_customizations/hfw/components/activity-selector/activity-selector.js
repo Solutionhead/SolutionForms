@@ -45,7 +45,7 @@ function ActivitySelector(params) {
       .done((data) => activities(data));
   }
   function loadActivityQualifiers() {
-    return dataService.getAllRecordsFromDataSourceAsync('activity-qualifiers', 200)
+    return dataService.getAllRecordsFromDataSourceAsync('activityqualifiers', 200)
       .done((data) => {
         var qualifiersByActivity = {};
         ko.utils.arrayForEach(data, (d) => {

@@ -1,0 +1,71 @@
+﻿<section>
+  <fieldset>
+    <div class="bg-info alert alert-dismissible" data-bind="visible: !isNewAppointment() && isRecurringAppointment() && !showRecurrence()">
+      <p>You are editing an exception to a recurring appointment. To edit the master appointment, click the following button:</p>
+      <button class="btn btn-default" data-bind="command: editSeriesCommand">
+        <span class="glyphicon glyphicon-repeat"></span> Edit Series
+      </button>
+    </div>
+
+    <div data-bind="visible: !enableClientEditor()">
+      <div class="form-group">
+        <label class="col-sm-2 control-label">Client</label>
+        <div class="col-sm-10">
+          <p class="form-control-static" data-bind="text: clientName"></p>
+        </div>
+        <div class="col-sm-push-2 col-sm-10">
+          <button type="button" class="btn btn-default btn-xs" data-bind="click: toggleClientEditor">Change client</button>
+        </div>
+      </div>
+    </div>
+
+    <div data-bind="visible: enableClientEditor">
+      <div class="form-fieldset col-sm-offset-2">
+        <div class="form-group">
+          <label class="checkbox-inline">
+            <input type="radio" value="existing" data-bind="checked: clientType" /> Existing Customer
+          </label>
+          <label class="checkbox-inline">
+            <input type="radio" value="new" data-bind="checked: clientType" /> New Customer
+          </label>
+        </div>
+      </div>
+
+      <div data-bind="visible: !enterNewCustomer()">
+        <div class="form-group">
+          <label class="col-sm-2">Client</label>
+          <div class="col-sm-10">
+            <input class="form-control"
+                   data-bind="jqAuto: { value: selectedCustomer, source: lookupClients, labelProp: 'Name', delay: 500, autoFocus: true }" />
+          </div>
+        </div>
+
+        <!--<form-field params="label: 'Client', inputType: 'select-input',
+                  config: { optionDataSourceEntityName: 'clients', optionDataSourceLabelMember: 'Name', optionDataSourceValueMember: 'Id', optionSource: 'dataSource', optionsCaption: 'Select customer...'  },
+                  context: selectedCustomer"></form-field>-->
+      </div>
+
+      <div data-bind="visible: enterNewCustomer">
+        <div class="panel panel-primary">
+          <div class="panel-heading">New Customer</div>
+          <div class="panel-body">
+            <dynamic-form params="formId: 'clients', exports: newClientVm"></dynamic-form>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <dynamic-form params="formId: 'appointments', exports: eventEditorVm"></dynamic-form>
+
+    <!-- ko if: showRepeatButton -->
+    <button class="btn btn-default" data-bind="command: editSeriesCommand">
+      <span class="glyphicon glyphicon-repeat"></span> Repeat
+    </button>
+    <!-- /ko -->
+
+    <div data-bind="if: showRecurrence">
+      <h3>Repeat</h3>
+      <recurrence-scheduler params="input: recurrenceInput, exports: recurrenceEditorExport"></recurrence-scheduler>
+    </div>
+  </fieldset>
+</section>

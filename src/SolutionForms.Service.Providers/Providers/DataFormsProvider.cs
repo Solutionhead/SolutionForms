@@ -85,6 +85,7 @@ namespace SolutionForms.Service.Providers.Providers
                 doc.DataSourceId = dataform.DataSourceId;
                 doc.RestrictDataAccessByOwner = dataform.RestrictDataAccessByOwner;
                 doc.LinkOnHomePage = dataform.LinkOnHomePage;
+                doc.FormType = dataform.FormType;
 
                 if (!string.IsNullOrWhiteSpace(dataform.NewDataSourceName))
                 {
@@ -107,7 +108,8 @@ namespace SolutionForms.Service.Providers.Providers
                 AuthorizedClaims = dataform.AuthorizedClaims as string[],
                 DataSourceId = dataform.DataSourceId,
                 RestrictDataAccessByOwner = dataform.RestrictDataAccessByOwner,
-                LinkOnHomePage = dataform.LinkOnHomePage
+                LinkOnHomePage = dataform.LinkOnHomePage,
+                FormType = dataform.FormType,
             };
 
             using (var session = _documentStore.OpenAsyncSession(tenant))

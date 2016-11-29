@@ -1,0 +1,9 @@
+﻿@using SolutionForms.Client.Mvc.Helpers
+<div class="panel" style="margin-top: 10px;">
+  <div data-bind="component: { name: 'data-form', params: $data }"></div>
+</div>
+
+@section Scripts
+{
+    <script src="~/js/build/dataform-live.bundle.js?@ScriptHelpers.VersionQueryStringParam"></script>
+}

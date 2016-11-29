@@ -1,4 +1,5 @@
-﻿var toastr = require('toastr');
+﻿ko.punches.enableAll();
+var toastr = require('toastr');
 
 if (!ko.components.isRegistered('dynamic-form')) {
   ko.components.register('dynamic-form', require('components/dynamic-form-ui/dynamic-form-ui'));

@@ -1,0 +1,33 @@
+﻿<div class="form-group">
+  <div class="col-sm-2 control-label">Container Type</div>
+  <div class="col-sm-6">
+    <select class="form-control" data-bind="value: containerClass, options: containerClassOptions"></select>
+  </div>
+</div>
+
+<section data-bind="foreach: rows">
+  <h3>Row</h3>
+  <div>
+    <button data-bind="command: $parent.removeCurrentRowCommand">Delete Row</button>
+  </div>
+  <div>
+    <h4>Columns</h4>
+    {{ #foreach: columns }}
+    <div class="form-group">
+      <div class="col-sm-2 control-label">Class Value</div>
+      <div class="col-sm-6">
+        <input data-bind="value: classValue" class="form-control"/>
+      </div>
+    </div>
+
+    <fields-designer params="input: fieldsInput, exports: fieldsExport"></fields-designer>
+
+    <button data-bind="command: $parent.removeCurrentColumnCommand"><i class="fa fa-trash"></i></button>
+    {{ /foreach }}
+  </div>
+  <div>
+    <button data-bind="command: addColumnCommand">Add Column</button>
+  </div>
+</section>
+
+<button data-bind="command: addRowCommand">Add Row</button>

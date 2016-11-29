@@ -1,0 +1,88 @@
+﻿<div>
+  <div class="row title-container">
+    <div class="form-group">
+      <label class="sr-only">Form Title</label>
+      <input type="text" data-bind="value: formTitle" class="form-control input-lg" placeholder="Form Title" />
+    </div>
+  </div>
+  <div class="row desc-container">
+    <div class="form-group">
+      <label class="sr-only">Description</label>
+      <input type="text" data-bind="value: formDescription" class="form-control" placeholder="Form Description" />
+    </div>
+  </div>
+
+  <div class="row dataform-designer-container">
+    <div class="form-horizontal form-fieldset">
+      <div class="form-group">
+        <label class="control-label col-sm-2">Authorization</label>
+        <div class="col-sm-4">
+          <select class="form-control" data-placeholder="Accessible to all users" data-bind="kendoMultiSelect: { data: claimsOptions, value: authorizedClaims, autoClose: false }"></select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row dataform-designer-container">
+    <div class="form-horizontal form-fieldset">
+      <div class="form-group">
+        <label class="col-sm-2 control-label">Data Source</label>
+        <div class="col-sm-4">
+          <select data-bind="value: dataSourceId, options: dataSourceOptions, optionsText: 'name', optionsValue: 'id', optionsCaption: '*New data source'" class="form-control"></select>
+        </div>
+        <div class="col-sm-6" data-bind="visible: isNewDataSource">
+          <input type="text" data-bind="value: newDataSourceName" class="form-control" placeholder="Data source name" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row dataform-designer-container">
+    <div class="form-horizontal form-fieldset">
+      <div class="form-group">
+        <div class="col-sm-10 col-sm-push-2">
+          <div class="checkbox-inline">
+            <label>
+              <input type="checkbox" data-bind="checked: restrictDataAccessByOwner" />
+              Users only have access to the records they create.
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row dataform-designer-container">
+    <div class="form-horizontal form-fieldset">
+      <div class="form-group">
+        <div class="col-sm-10 col-sm-push-2">
+          <div class="checkbox-inline">
+            <label>
+              <input type="checkbox" data-bind="checked: linkOnHomePage" />
+              Include link on home page
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row dataform-designer-container">
+    <div class="form-horizontal form-fieldset">
+      <div class="form-group">
+        <label class="control-label col-sm-2">Container</label>
+        <div class="col-sm-4">
+          <select class="form-control" data-bind="value: containerType, options: containerOptions, optionsText: 'name'"></select>
+        </div>
+        <div class="col-sm-10 col-sm-push-2">
+          <div class="help-block">{{ containerType().description }}</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Fields</h3>
+  <dataform-fields-designer params="{ input: fieldsParams.input, exports: fieldsParams.exports }"></dataform-fields-designer>
+</div>
+
+<button class="btn btn-primary" data-bind="command: saveCommandAsync">Save</button>

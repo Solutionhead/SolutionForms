@@ -1,0 +1,14 @@
+﻿@using SolutionForms.Client.Mvc.Helpers
+@model dynamic
+
+@{
+    ViewBag.Title = "Form Designer";
+}
+
+<h2>@ViewBag.Title</h2>
+<dataform-form-designer params="{ input: config }"></dataform-form-designer>
+
+@section Scripts
+{
+    <script src="~/js/build/dataform-designer.bundle.js?@ScriptHelpers.VersionQueryStringParam"></script>
+}

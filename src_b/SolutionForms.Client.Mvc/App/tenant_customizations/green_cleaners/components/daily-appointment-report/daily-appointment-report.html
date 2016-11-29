@@ -1,0 +1,43 @@
+﻿<!-- ko foreach: appointmentsByTeam -->
+<article title="team-cover-sheet">
+  <hgroup>
+    <h1 data-bind="text: $parent.reportDate"></h1>
+    <h2>{{ teamName }}</h2>
+  </hgroup>
+
+  <table class="table table-striped">
+    <tbody data-bind="foreach: appointments">
+      <tr>
+        <td>
+          <strong>{{ startTime }} - {{ endTime }}</strong><br/>
+          {{ label }}, {{ location }}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</article>
+
+<div class="page-break"></div>
+
+<!-- ko foreach: appointments -->
+<article title="appointment-details">
+  <hgroup>
+    <h1>{{ label }}</h1>
+    <h2>{{ teamName }}</h2>
+    <h3 data-bind="text: $parents[1].reportDate"></h3>
+  </hgroup>
+
+  <section>
+    <p>{{ startTime }} - {{ endTime }}</p>
+    <p>{{ location }}</p>
+  </section>
+
+  <div>
+    <p>{{ clientNotes }}</p>
+  </div>
+
+  <div class="page-break"></div>
+</article>
+<!-- /ko -->
+
+<!-- /ko -->

@@ -1,6 +1,5 @@
 ﻿import * as registrationHelper from 'App/utils/registerLocalFieldTypes';
-ko.components.register('dataform-form-designer', require('components/dataform-form-designer/dataform-form-designer'));
-ko.components.register('dataform-form-live', require('components/dataform-form-live/dataform-form-live'));
+ko.components.register('dataform-form-designer', require('components/dataform-designer/dataform-designer'));
 
 var page = require('page');
 

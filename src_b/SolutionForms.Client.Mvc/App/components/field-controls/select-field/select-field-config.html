@@ -1,0 +1,72 @@
+﻿<div class="form-group">
+    <div class="col-sm-2 control-label">Use default selection</div>
+    <div class="col-sm-4">
+        <input type="checkbox" data-bind="checked: displayDefaultSelection" />
+    </div>
+</div>
+
+<!-- ko if: displayDefaultSelection -->
+<div class="form-group">
+    <div class="col-sm-2 control-label">Caption text</div>
+    <div class="col-sm-4">
+        <input type="text" data-bind="value: defaultSelectionText" class="form-control" />
+    </div>
+</div>
+<!-- /ko -->
+
+<div class="form-group">
+    <div class="col-sm-2 control-label">Options Source</div>
+    <div class="col-sm-4">
+        <select data-bind="value: optionsSource, options: sourceOptions, optionsValue: 'value', optionsText: 'display'" class="form-control"></select>
+    </div>
+</div>
+
+<div class="form-inline" data-bind="if: displaySelfOptions">
+
+    <div class="row">
+        <div class="col-sm-offset-2 col-sm-8">
+            <div class="col-sm-6">Display Text</div>
+            <div class="col-sm-6">Selected Value</div>
+        </div>
+    </div>
+
+    <div data-bind="sortable: options">
+        <div class="row">
+            <div class="col-sm-offset-2 col-sm-8 form-inline">
+                <div class="col-sm-6">
+                    <input type="checkbox" disabled />
+                    <input type="text" data-bind="value: optionLabel, hasFocus: isSelected" class="form-control" onfocus="this.value = this.value;" onclick="this.select(); return false;" />
+                </div>
+                <div class="col-sm-5">
+                    <input type="text" data-bind="value: optionValue" class="form-control" onfocus="this.value = this.value;" onclick="this.select(); return false;" />
+                    <i class="fa fa-close clickable" data-bind="command: $parent.removeOptionCommand, visible: $parent.removeOptionCommand.canExecute"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-sm-offset-2 col-sm-10 form-inline">
+            <div class="col-sm-6">
+                <input type="checkbox" data-bind="command: addNewOptionCommand" style="cursor: pointer" tabindex="-1" disabled="disabled" />
+                <input type="text" data-bind="value: optionToAdd, valueUpdate: 'input', command: addNewOptionCommand" class="form-control" style="cursor: pointer" placeholder="Click to add option" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ko if: displayDataSourcesOptions -->
+<div class="form-group">
+    <div class="col-sm-2 control-label">Data Source</div>
+    <div class="col-sm-6">
+        <select class="form-control" data-bind="value: optionDataSourceEntityName, options: dataSourceOptions, optionsText: 'displayName', optionsValue: 'value', optionsContext: ' '"></select>
+    </div>
+</div>
+
+<div class="form-group">
+    <div class="col-sm-2 control-label">Display Member</div>
+    <div class="col-sm-6">
+        <input type="text" data-bind="value: optionDataSourceLabelMember" class="form-control" />
+    </div>
+</div>
+<!-- /ko -->

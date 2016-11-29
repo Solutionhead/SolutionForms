@@ -1,0 +1,29 @@
+﻿@model TenantLoginViewModel
+
+@{
+  ViewData["Title"] = "";
+}
+
+<div class="row">
+  <div class="col-md-8">
+    <section>
+      <div asp-validation-summary="All" class="text-danger"></div>
+      <form method="POST" class="form-horizontal" asp-controller="Account" asp-action="LoginTenant">
+        <div>Enter your organization's <strong>Solution Forms domain.</strong>
+        </div>
+
+        <div class="input-group">
+          <input type="text" class="form-control input-lg" id="domain" asp-for="TenantDomain"/>
+          <span class="input-group-btn">
+            <button type="submit" class="btn btn-primary btn-lg">Continue</button>
+          </span>
+        </div>
+      </form>
+    </section>
+  </div>
+</div>
+
+
+@section Scripts {
+  @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+}

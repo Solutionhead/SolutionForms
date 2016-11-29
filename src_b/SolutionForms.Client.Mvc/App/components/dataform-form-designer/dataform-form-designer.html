@@ -1,0 +1,155 @@
+﻿<div class="container">
+  <div class="row title-container">
+    <div class="form-group">
+      <label class="sr-only">Form Title</label>
+      <input type="text" data-bind="value: formTitle" class="form-control input-lg" placeholder="Form Title" />
+    </div>
+  </div>
+  <div class="row desc-container">
+    <div class="form-group">
+      <label class="sr-only">Description</label>
+      <input type="text" data-bind="value: formDescription" class="form-control" placeholder="Form Description" />
+    </div>
+  </div>
+
+  <div class="row dataform-designer-container">
+    <div class="form-horizontal form-fieldset">
+      <div class="form-group">
+        <label class="control-label col-sm-2">Authorization</label>
+        <div class="col-sm-4">
+          <select class="form-control" data-placeholder="Accessible to all users" data-bind="kendoMultiSelect: { data: claimsOptions, value: authorizedClaims, autoClose: false }"></select>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row dataform-designer-container">
+    <div class="form-horizontal form-fieldset">
+      <div class="form-group">
+        <label class="col-sm-2 control-label">Data Source</label>
+        <div class="col-sm-4">
+          <select data-bind="value: dataSourceId, options: dataSourceOptions, optionsText: 'name', optionsValue: 'id', optionsCaption: '*New data source'" class="form-control"></select>
+        </div>
+        <div class="col-sm-6" data-bind="visible: isNewDataSource">
+          <input type="text" data-bind="value: newDataSourceName" class="form-control" placeholder="Data source name" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row dataform-designer-container">
+    <div class="form-horizontal form-fieldset">
+      <div class="form-group">
+        <div class="col-sm-10 col-sm-push-2">
+          <div class="checkbox-inline">
+            <label>
+              <input type="checkbox" data-bind="checked: restrictDataAccessByOwner"/>
+              Users only have access to the records they create.
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Fields</h3>
+
+  <section data-bind="sortable: fields()" class="designer-fields-container">
+    <div data-bind="css: { 'active': isActive, 'preview': !isActive() }" class="row dataform-designer-container dataform-designer-container-editor">
+      <div class="col-sm-2 col-sm-push-10 col-lg-1 col-lg-push-11 field-controls">
+        <i class="fa fa-trash-o btn btn-default" data-bind="command: $parent.removeItemCommand"></i>
+        <i class="fa fa-edit btn btn-default" data-bind="click: $parent.activateField"></i>
+      </div>
+      <div class="col-sm-10 col-sm-pull-2 col-lg-11 col-lg-pull-1">
+        <div data-bind="visible: isActive">
+          <div class="dataform-desiger-field-widget">
+            <div data-bind="template: { name: 'field-config-template', data: config }"></div>
+            <button class="btn btn-primary" data-bind="click: $parent.finishEditingField">Done</button>
+
+            <div class="checkbox-inline">
+              <label>
+                <input type="checkbox" data-bind="checked: config().isRequired" />
+                Required
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <!-- ko if: config().inputType() -->
+        <!-- the below with binding causes live element to be rebuilt when the config value is changed -->
+        <div data-bind="visible: !isActive(), click: $parent.activateField" class="dataform-designer-container">
+          <div class="form-fieldset" data-bind="with: config">
+            <div class="form-horizontal">
+              <div class="form-group">
+                <label class="col-sm-2 control-label" data-bind="text: displayName"></label>
+                <div class="col-sm-10" data-bind="component: { name: inputType, params: { input: $data, context: ko.observable() } }"></div>
+                <div data-bind="if: helpText" class="col-sm-10 col-sm-offset-2"><span class="help-block" data-bind="text: helpText"></span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- /ko -->
+      </div>
+    </div>
+  </section>
+
+</div>
+
+
+<div class="btn-group">
+  <button class="btn btn-default" data-bind="command: addItemCommand">Add item</button>
+  <button class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+    <span class="caret"></span>
+    <span class="sr-only">Toggle Dropdown</span>
+  </button>
+  <ul class="dropdown-menu" role="menu">
+    <li><a href="command: addItemCommand">Text</a></li>
+    <li><a href="command: addItemCommand">Paragraph Text</a></li>
+  </ul>
+</div>
+<button class="btn btn-primary" data-bind="command: saveCommandAsync">Save</button>
+
+<!-- BEGIN TEMPLATES -->
+<script type="text/html" id="field-config-template">
+  <div class="dataform-div">
+    <div class="form-horizontal">
+      <div class="form-group">
+        <label class="col-sm-2 control-label">Field Label</label>
+        <div class="col-sm-10">
+          <input type="text" data-bind="value: displayName" class="form-control" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">Input Type</label>
+        <div class="col-sm-10">
+          <select type="text" data-bind="value: inputType, options: $parents[1].inputTypeOptions, optionsText: 'name', optionsValue: 'componentName'" class="form-control"></select>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="col-sm-2 control-label">Help Text</label>
+        <div class="col-sm-10">
+          <input type="text" data-bind="value: helpText" class="form-control" />
+        </div>
+      </div>
+
+      <!-- ko if: configTemplateName -->
+      <section data-bind="component: { name: configTemplateName, params: { input: $data, context: ko.observable() } }"></section>
+      <!-- /ko -->
+
+      <section style="margin: 10px 0">
+        <a href=".advanced-settings" data-bind="collapse: { scopeTo: 'parent' }" aria-expanded="false" aria-controls="advanced-settings"><span class="caret"></span> Advanced settings</a>
+        <div class="container bg-info advanced-settings collapse">
+          <h3>Advanced Controls</h3>
+
+          <div class="form-group">
+            <label class="col-sm-2 control-label" for="dataNameInput">Output Name</label>
+            <div class="col-sm-10">
+              <input type="text" data-bind="value: exportName" id="dataNameInput" class="form-control" aria-describedby="dataNameHelpBlock" />
+              <span id="dataNameHelpBlock" class="help-block">The name of the field on the data object passed to output event listeners.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</script>

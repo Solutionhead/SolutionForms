@@ -34,5 +34,10 @@ namespace SolutionForms.Service.Providers.Parameters
         public ICollection<string> Components { get; set; }
 
         public bool LinkOnHomePage { get; set; }
+
+        /// <summary>
+        /// The name of the container component used to display the form in live mode.
+        /// </summary>
+        public string FormType { get; set; }
     }
 }

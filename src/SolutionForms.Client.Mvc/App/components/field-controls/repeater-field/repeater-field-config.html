@@ -1,0 +1,20 @@
+﻿<div class="form-group">
+  <div class="col-sm-2 control-label">Data Source</div>
+  <div class="col-sm-6">
+    <select class="form-control" data-bind="value: dataSource, options: dataSourceOptions, optionsText: 'displayName', optionsValue: 'value', optionsCaption: ' '"></select>
+  </div>
+</div>
+
+{{ #foreach: groupOptions }}
+<div class="form-group">
+  <div class="col-sm-2 control-label">Group</div>
+  <div class="col-sm-6">
+    <input class="form-control" data-bind="value: value" />
+  </div>
+  <div class="col-sm-2">
+    <button class="form-control" data-bind="command: $parent.removeGroupOption"><i class="fa fa-trash"></i></button>
+  </div>
+</div>
+{{ /foreach }}
+
+<input type="button" class="btn btn-default" value="Add Group" data-bind="command: addGroupOption" />
