@@ -12,13 +12,13 @@ module.exports = {
     'dataform-live': 'viewModels/dataformLiveViewModel',
     'admin-payment': 'viewModels/managePaymentsViewModel',
     'core': ['ko',
-      bower('knockout-postbox/build/knockout-postbox'),
-      bower('knockout.punches/knockout.punches'),
+      nodeModules('knockout-postbox/build/knockout-postbox'),
+      nodeModules('knockout-punches/knockout.punches'),
       localScripts('knockout-projections'),
       localScripts('kolite-local/knockout.command'),
-      bower('bootstrap/dist/js/bootstrap'),
+      nodeModules('bootstrap/dist/js/bootstrap'),
       'toastr',
-      bower('toastr/toastr.css'),
+      nodeModules('toastr/build/toastr.min.css'),
       //note: the page.js package depends on `path-to-regexp` which I couldn't find on bower, after much trying
       localPath('node_modules/page/page'),
       'koValidation'
@@ -49,21 +49,21 @@ module.exports = {
 
       // framework assets
       ko: 'knockout',
-      jquery: bower('jquery/dist/jquery'),
-      'jquery-ui': bower('jquery-ui/ui'),
-      knockout: bower('knockout/dist/knockout.debug'),
+      jquery: nodeModules('jquery/dist/jquery'),
+      'jquery-ui': nodeModules('jquery-ui/ui/widgets'),
+      knockout: nodeModules('knockout/build/output/knockout-latest.debug'),
 
       // other 3rd party utilities
-      koValidation: bower('Knockout-Validation/Dist/knockout.validation'),
+      koValidation: nodeModules('knockout-validation/dist/knockout-validation'),
       'ko.bs.collapse': localScripts('knockout-bootstrap-collapse-local/knockout.bootstrap.collapse'),
-      'ko.sortable': bower('knockout-sortable/build/knockout-sortable'),
-      'kendoui': bower('kendo-ui-core/js'),
-      'kendoui-core': bower('kendo-ui-core/js/kendo.core.min'),
-      'kendoui-styles': bower('kendo-ui-core/styles/'),
-      'underscore': bower('underscore/underscore-min'),
-      moment: bower('moment/min/moment.min'),
-      toastr: bower('toastr/toastr'),
+      'ko.sortable': nodeModules('knockout-sortable/build/knockout-sortable'),
+      //'kendoui': bower('kendo-ui-core/js'),
+      //'kendoui-core': bower('kendo-ui-core/js/kendo.core.min'),
+      //'kendoui-styles': bower('kendo-ui-core/styles/'),
+      moment: nodeModules('moment/moment'),
+      toastr: nodeModules('toastr/build/toastr.min'),
       lodash: nodeModules('lodash'),
+      underscore: 'lodash',
       lib: bower(),
       'local': localScripts(),
     }
@@ -87,9 +87,10 @@ module.exports = {
         { test: /\.css$/, loader: 'style!css?sourceMap' },
         { test: /\.js?$/, loader: 'babel', exclude: /(node_modules|bower_components)/, query: { presets: ['es2015'] } },
 
-        { test: /knockout(\.debug)?\.js$/, loader: 'imports?exports=>false&define=>false!exports?ko' },
+        { test: /knockout-latest(\.debug)?\.js$/, loader: 'imports?exports=>false&define=>false!exports?ko' },
         { test: /knockout\.command\.js/, loader: 'imports?require=>false&define=>false' },
-        { test: /knockout\.validation(\.min)?\.js/, loader: 'imports?require=>false&define=>false' },
+        { test: /knockout-validation\.js/, loader: 'imports?require=>false&define=>false&module=>false&exports=>false' },
+        { test: /ko\.bindings\.js-autocomplete\.js/, loader: 'imports?define=>false' },
 
         // although ko is globally exported, the following modules can handle resolving the ko reference via the require function.
         //{ test: /knockout-postbox(\.min)?\.js$/, loader: 'imports?module=>false&define=>false' },
