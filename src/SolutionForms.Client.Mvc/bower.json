@@ -7,14 +7,19 @@
     "jquery-validation": "1.14.0",
     "jquery-validation-unobtrusive": "3.2.6",
     "jquery-ui": "1.12.0",
-    "knockout": "3.4.0",
-    "knockout-postbox": "^0.5.2",
+    "knockout": "v3.4.2",
+    "knockout-postbox": "v0.6.0",
     "underscore": "^1.8.3",
     "toastr": "~2.1.3",
     "moment": "~2.14.1",
     "knockout-sortable": "~0.15.0",
-    "font-awesome": "~4.6.3",
+    "font-awesome": "v4.7.0",
     "knockout.punches": "~0.5.1",
     "knockout-validation": "~2.0.3"
+  },
+  "resolutions": {
+    "knockout-postbox": "v0.6.0",
+    "font-awesome": "v4.7.0",
+    "knockout": "v3.4.2"
   }
 }

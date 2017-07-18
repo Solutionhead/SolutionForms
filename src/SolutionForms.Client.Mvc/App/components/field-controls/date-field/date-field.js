@@ -1,9 +1,10 @@
 ﻿import 'bindings/datepicker';
+import core from 'App/core';
 
 function DateFieldViewModel(params) {
   if(!(this instanceof DateFieldViewModel)) { return new DateFieldViewModel(params); }
 
-  var self = this;
+  var self = core.FieldBase.call(this, params);
 
   self.formatMode = ko.observable(DateFieldViewModel.prototype.FORMAT_MODES.Floating);
   self.selectedDate = ko.observable().extend({ moment: 'M/D/YYYY' });

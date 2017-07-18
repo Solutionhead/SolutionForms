@@ -1,9 +1,10 @@
-﻿import Field from 'models/formFieldLive';
+﻿import core from 'App/core';
+import Field from 'models/formFieldLive';
 
 function TableFieldViewModel(params) {
     if (!(this instanceof TableFieldViewModel)) { return new TableFieldViewModel(params); }
 
-    var self = this, 
+    var self = core.FieldBase.call(this, params), 
         settings = ko.unwrap(params.input.settings);
 
     self.rows = ko.observableArray([]);

@@ -1,4 +1,5 @@
 ﻿import 'bindings/ko.bindings.jq-autocomplete';
+import core from 'App/core';
 
 function LookupField(params) {
   if (!(this instanceof LookupField)) { return new LookupField(params); }

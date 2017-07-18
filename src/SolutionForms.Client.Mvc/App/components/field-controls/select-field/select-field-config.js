@@ -1,5 +1,4 @@
-﻿//var selectFieldComponentFactory = require('controls/select-field/select-field');
-var loadDataSourceOptions = $.ajax('/api/datasources');
+﻿var loadDataSourceOptions = $.ajax('/api/datasources');
 
 function SelectFieldConfigViewModel(field, params) {
     if (!(this instanceof SelectFieldConfigViewModel)) return new SelectFieldConfigViewModel(field, params);
@@ -93,8 +92,7 @@ SelectFieldConfigViewModel.prototype.addOption = function (label, value) {
 
 module.exports = {
     viewModel: SelectFieldConfigViewModel,
-    template: require('./select-field-config.html'),
-    synchronous: true,
+    template: require('./select-field-config.html')
 }
 
 

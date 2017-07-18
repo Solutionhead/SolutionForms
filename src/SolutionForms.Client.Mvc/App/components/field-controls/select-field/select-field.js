@@ -1,9 +1,10 @@
 ﻿import _toArray from 'lodash/toArray';
+import core from 'App/core';
 
 function SelectFieldViewModel(params) {
     if (!(this instanceof SelectFieldViewModel)) { return new SelectFieldViewModel(params); }
 
-    var self = this,
+    var self = core.FieldBase.call(this, params),
         input = ko.unwrap(params.input) || {},
         settings = ko.toJS(input.settings) || input;
 

@@ -1,11 +1,11 @@
-﻿var base = require('viewModels/dataformFieldsDesigner');
-ko.components.register('fields-designer', require('components/dataform-fields-designer/dataform-fields-designer'));
+﻿ko.components.register('fields-designer', require('components/dataform-fields-designer/dataform-fields-designer'));
 
-function BootstrapColLayoutConfig(field, params) {
-  if (!(this instanceof BootstrapColLayoutConfig)) { return new BootstrapColLayoutConfig(field, params); }
-
+function BootstrapGridLayoutConfig(field, params) {
+  if (!(this instanceof BootstrapGridLayoutConfig)) { return new BootstrapGridLayoutConfig(field, params); }
+  
   var self = this,
-      settings = params.input.settings.peek();
+    settings = params.input.rawSettings || {},
+    config = params.input.config;
 
   self.containerClassOptions = ['container', 'container-fluid'];
 
@@ -25,15 +25,27 @@ function BootstrapColLayoutConfig(field, params) {
     }
   });
 
-  settings.containerClass = self.containerClass;
-  settings.contents = ko.pureComputed(function() {
-    return ko.utils.arrayMap(self.rows() || [], r => {
-      var conf = r.exportConfig();
-      return conf;
-    });
-  });
+  ////this appears to be messing up the preview view!!
+  //settings.containerClass = self.containerClass;
+  //settings.contents = ko.pureComputed(function() {
+  //  return ko.utils.arrayMap(self.rows() || [], r => {
+  //    var conf = r.exportConfig();
+  //    return conf;
+  //  });
+  //});
+  //params.input.settings(settings);
 
-  params.input.settings(settings);
+  config.asContainer() // asFieldSet()
+    .withSettings(() => ({
+      containerClass: self.containerClass,
+      contents: ko.pureComputed(function() {
+        return ko.utils.arrayMap(self.rows() || [], r => {
+          var conf = r.exportConfig();
+          return conf;
+        });
+      })
+    }));
+
 }
 
 function RowConfig(values) {
@@ -76,10 +88,12 @@ function ColumnConfig(values) {
   return self;
 }
 ColumnConfig.prototype.exportConfig = function() {
+  const fields = this.fieldsExport();
+  
   return {
     classValue: this.classValue(),
-    contents: this.fieldsExport().exportFieldsConfig()
+    contents: fields && fields.fieldsConfig() || []
   };
 }
 
-module.exports = BootstrapColLayoutConfig;
+module.exports = BootstrapGridLayoutConfig;

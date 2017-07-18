@@ -3,8 +3,8 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://solutionforms.local:50933/",
-      "sslPort": 0
+      "applicationUrl": "https://solutionforms.local:44392/",
+      "sslPort": 44392
     }
   },
   "profiles": {

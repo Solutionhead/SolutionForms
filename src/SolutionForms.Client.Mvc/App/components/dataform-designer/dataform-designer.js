@@ -1,8 +1,8 @@
-﻿ko.punches.enableAll();
+﻿import core from 'App/core';
+ko.punches.enableAll();
 require('ko.bs.collapse');
 require('ko.sortable');
 ko.components.register('dataform-fields-designer', require('components/dataform-fields-designer/dataform-fields-designer'));
-//var base = require('viewModels/dataformFieldsDesigner'),
 var toastr = require('toastr'),
   page = require('page');
 function split(val) {
@@ -201,7 +201,7 @@ DataformDesignerViewModel.prototype.buildConfig = function () {
     restrictDataAccessByOwner: self.restrictDataAccessByOwner(),
     linkOnHomePage: self.linkOnHomePage(),
     formType: self.containerType().value
-};
+  };
   return config;
 }
 DataformDesignerViewModel.prototype.dispose = function () {
@@ -231,34 +231,27 @@ DataformDesignerViewModel.prototype.loadClaimOptions = function () {
   });
 }
 DataformDesignerViewModel.prototype.loadCustomizations = function (config) {
-  // plugins
-  var me = this;
-  var pluginsSourceTemp = config.components || [],
-    typeOptionsToAdd = [];
+  ko.utils.arrayForEach(config.components || [], function (src) {
+    var componentLive = require(`customizations/${src}`);
+    if (componentLive && !core.Field.isRegistered(componentLive.componentName)) {
+      core.Field.register(componentLive.componentName, componentLive);
+    }
 
-  ko.utils.arrayForEach(pluginsSourceTemp, function (src) {
-    var plugin = require(`customizations/${ src }-config`);
-    plugin.synchronous = true;
-    plugin.config.template = plugin.config.template || '<div></div>';
+    try {
+      var componentConfig = require(`customizations/${src}-config`);
+      componentConfig.config.template = componentConfig.config.template || '<div></div>';
+    } catch (ex) {
+      // prevent failure on page for element without customization
+      var fallback = componentLive;
+      componentConfig = { };
+    }
 
-    ko.components.register(
-      plugin.componentName + '-config',
-      plugin.config);
-
-    ko.components.register(
-      plugin.componentName,
-      plugin);
-
-    typeOptionsToAdd.push({
-      name: plugin.name,
-      componentName: plugin.componentName
-    });
+    componentConfig.synchronous = true;
+    core.Field.registerFieldConfig(componentLive.componentName, componentConfig);
   });
-
-  ko.utils.arrayPushAll(me.fieldsParams.inputTypeOptions(), typeOptionsToAdd);
-  me.fieldsParams.inputTypeOptions.notifySubscribers();
 }
 module.exports = {
   viewModel: DataformDesignerViewModel,
-  template: require('./dataform-designer.html')
+  template: require('./dataform-designer.html'),
+  synchronous: true
 }

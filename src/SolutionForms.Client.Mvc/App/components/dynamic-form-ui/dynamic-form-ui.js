@@ -1,6 +1,7 @@
 ﻿var Field = require('models/formFieldLive'),
   formsService = require('services/dataFormsService'),
   setFormValuesPlugin = require('plugins/initializeFormValuesPlugin');
+import core from 'App/core';
 
 /**
  * Dynamicly generates form controls based on a given configuration object.
@@ -17,7 +18,7 @@ function DynamicFormUIViewModel(params) {
   self.fields = ko.observableArray([]);
 
   ko.computed(function() {
-    self.initializeFromConfig(ko.unwrap(params.config));
+    self.initializeFromConfig.call(self, ko.unwrap(params.config));
   });
 
   ko.computed(function() {
@@ -25,12 +26,14 @@ function DynamicFormUIViewModel(params) {
     formId && self.loadFormById(formId);
   });
 
+  var rendered = ko.observable(false);
   self.isReady = ko.computed(function () {
-    var nonReady = self.fields().length && ko.utils.arrayFirst(self.fields(), function(f) {
-      return f.context() == undefined;
-    });
-    return nonReady === null;
+    return rendered() && self.fields().length && ko.utils.arrayFirst(self.fields(), function (f) {
+      return ko.unwrap(f.context) == null;
+    }) == null;
   });
+
+  setTimeout(function () { rendered(true); }, 0);
 
   if (ko.isWritableObservable(params.exports)) {
     params.exports({
@@ -70,8 +73,8 @@ DynamicFormUIViewModel.prototype.initializeFromConfig = function (jsonConfig) {
     self.formId = form.id;
     self.formDescription = form.description;
     
-    self.setOrCreateObservable('fields', ko.utils.arrayMap(form.fields || [], 
-      (f) => { return new Field(f); }),
+    self.setOrCreateObservable('fields',
+      ko.utils.arrayMap(form.fields || [], (f) => { return new Field(f); }),
       (vals) => { return ko.observableArray(vals || []); });
 
     self.displayMode = getTemplateNameForFieldType;
@@ -84,12 +87,22 @@ DynamicFormUIViewModel.prototype.initializeFromConfig = function (jsonConfig) {
   // effectively steal eachother's customizations.
   function loadComponent(path) {
     // Note: webpack is currently dependent on `customizations` being hardcoded in the path. Without it, the customizations 
-    // will not be included in the bundle. However, this also means that all tenant customizations are bundled which is not
-    // what we want!
+    // will not be included in the bundle. However, this also means that all tenant customizations are bundled 
+    // which is NOT what we want!
+
+
     var componentFactory = require('customizations/' + path);
-    if (componentFactory && componentFactory.componentName && !ko.components.isRegistered(componentFactory.componentName)) {
-      componentFactory.synchronous = true; // enforce all components to be rendered synchronously to ensure proper order
-      ko.components.register(componentFactory.componentName, componentFactory);
+
+    if (componentFactory) {
+        if (!componentFactory.componentName) {
+            console.log('Warning: `componentName` is missing form component definion. Ensure that the component module exports includes this property which should contain the value of the custom companent name.');
+            return;
+        }
+
+        if (!core.Field.isRegistered(componentFactory.componentName)) {
+          componentFactory.synchronous = true; // enforce all components to be rendered synchronously to ensure proper rendering order
+          ko.components.register(componentFactory.componentName, componentFactory);
+        }
     }
   }
 }

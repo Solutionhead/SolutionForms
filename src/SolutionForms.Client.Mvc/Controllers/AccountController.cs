@@ -13,6 +13,7 @@ using SolutionForms.Service.Providers.Providers;
 using SolutionForms.Service.Providers.Enums;
 using SolutionForms.Service.Providers.Parameters;
 using SolutionForms.Service.Providers.Models;
+using Microsoft.Extensions.Logging;
 
 namespace SolutionForms.Client.Mvc.Controllers
 {
@@ -20,8 +21,9 @@ namespace SolutionForms.Client.Mvc.Controllers
     public class AccountController : Controller
     {
         private readonly BetaAccessHelper _betaAccessHelper;
+        private readonly TenantRedirectHelper _tenantRedirectHelper;
 
-        public AccountController(AuthenticationService<ApplicationUser> authService, BetaAccessHelper betaAccessHelper)
+        public AccountController(AuthenticationService<ApplicationUser> authService, BetaAccessHelper betaAccessHelper, ILogger<AccountController> logger)
         {
             if (authService == null)
             {
@@ -32,7 +34,8 @@ namespace SolutionForms.Client.Mvc.Controllers
             SignInManager = authService;
             _betaAccessHelper = betaAccessHelper;
 
-            //_logger = logger;
+            _logger = logger;
+            _tenantRedirectHelper = TenantRedirectHelper.WithLogging(_logger);
         }
 
         public string Tenant => HttpContext.Features.Get<ITenantFeature>().Tenant.Id;
@@ -41,14 +44,15 @@ namespace SolutionForms.Client.Mvc.Controllers
 
         public UserAccountService<ApplicationUser> UserManager { get; }
 
-        //private readonly ILogger _logger;
+        private readonly ILogger _logger;
 
         [HttpGet, AllowAnonymous]
         public IActionResult RegisterTenant()
         {
             if (!string.IsNullOrWhiteSpace(Tenant))
             {
-                return TenantRedirectHelper.RedirectToRootDomain(RouteData.Values, Request, Url);
+                return _tenantRedirectHelper
+                    .RedirectToRootDomain(RouteData.Values, Request, Url);
             }
             
             return View();
@@ -79,7 +83,7 @@ namespace SolutionForms.Client.Mvc.Controllers
                 new Claim(AuthorizationPolicies.AppOwner, "true")
             });
             
-            return TenantRedirectHelper.RedirectToTenantDomain(model.OrganizationDomain, "Login", HttpContext.Request, Url);
+            return _tenantRedirectHelper.RedirectToTenantDomain(model.OrganizationDomain, "Login", HttpContext.Request, Url);
         }
 
         private IActionResult UnsuccessfulTenantCreation(CreateTenantResult result)
@@ -140,7 +144,7 @@ namespace SolutionForms.Client.Mvc.Controllers
                 return Login();
             }
             
-            return TenantRedirectHelper.RedirectToTenantDomain(model.TenantDomain, "Login", HttpContext.Request, Url);
+            return _tenantRedirectHelper.RedirectToTenantDomain(model.TenantDomain, "Login", HttpContext.Request, Url);
         }
         
         //
@@ -204,8 +208,8 @@ namespace SolutionForms.Client.Mvc.Controllers
             if (user.IsAccountVerified)
             {
                 return User.Identity.IsAuthenticated
-                    ? TenantRedirectHelper.RedirectToTenantDomain(user.Tenant, "Index", "Home", Request, Url)
-                    : TenantRedirectHelper.RedirectToTenantDomain(user.Tenant, "Login", Request, Url);
+                    ? _tenantRedirectHelper.RedirectToTenantDomain(user.Tenant, "Index", "Home", Request, Url)
+                    : _tenantRedirectHelper.RedirectToTenantDomain(user.Tenant, "Login", Request, Url);
             }
 
             return View(new ActivateAccountViewModel
@@ -229,8 +233,8 @@ namespace SolutionForms.Client.Mvc.Controllers
             if (user.IsAccountVerified)
             {
                 return User.Identity.IsAuthenticated
-                    ? TenantRedirectHelper.RedirectToTenantDomain(user.Tenant, "Index", "Home", Request, Url)
-                    : TenantRedirectHelper.RedirectToTenantDomain(user.Tenant, "Login", Request, Url);
+                    ? _tenantRedirectHelper.RedirectToTenantDomain(user.Tenant, "Index", "Home", Request, Url)
+                    : _tenantRedirectHelper.RedirectToTenantDomain(user.Tenant, "Login", Request, Url);
             }
 
             if(user.HasPassword())
@@ -248,7 +252,7 @@ namespace SolutionForms.Client.Mvc.Controllers
             UserManager.VerifyEmailFromKey(model.VerificationCode, model.Password, out user);
             SignInManager.SignIn(user);
 
-            return TenantRedirectHelper.RedirectToTenantDomain(user.Tenant, "Index", "Home", Request, Url);
+            return _tenantRedirectHelper.RedirectToTenantDomain(user.Tenant, "Index", "Home", Request, Url);
         }
 
         //

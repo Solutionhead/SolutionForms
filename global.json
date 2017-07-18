@@ -1,9 +1,0 @@
-{
-  "projects": [
-    "src",
-    "test",
-    "wrap"
-  ],
-  "sdk": {
-  }
-}

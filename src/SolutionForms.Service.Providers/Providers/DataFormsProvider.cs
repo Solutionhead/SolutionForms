@@ -230,7 +230,7 @@ namespace SolutionForms.Service.Providers.Providers
                 query.Start = skip;
             }
 
-            var includes = GetQueryStringIncludes(queryParams);
+            var includes = GetQueryStringIncludes(queryParams) ?? new string[0];
 
             var queryResult = await _documentStore.AsyncDatabaseCommands.ForDatabase(tenant)
                 .QueryAsync(
@@ -238,7 +238,7 @@ namespace SolutionForms.Service.Providers.Providers
                     query, includes
                 );
 
-            var jsonResult = includes.Length > 0 
+            var jsonResult = includes.Length > 0
                 ? MapIncludes(queryResult, includes) 
                 : queryResult.Results;
             return jsonResult.Select(r => JObject.Parse(r.ToJsonDocument().DataAsJson.ToString()));

@@ -4,9 +4,7 @@
 
 module.exports = {
   context: localPath('.'),
-  progress: true,
-  color: true,
-
+  
   entry: {
     'dataform-designer': 'viewModels/dataformDesignerViewModel',
     'dataform-live': 'viewModels/dataformLiveViewModel',
@@ -30,7 +28,10 @@ module.exports = {
     chunkFilename: '[id].chunk.js'
   },
   resolve: {
-    fallback: bower(),
+    modules: [
+        bower(),
+        nodeModules()
+    ],
     alias: {
       // application assets
       viewModels: appDir('viewModels'),
@@ -60,7 +61,6 @@ module.exports = {
       'kendoui': bower('kendo-ui-core/js'),
       'kendoui-core': bower('kendo-ui-core/js/kendo.core.min'),
       'kendoui-styles': bower('kendo-ui-core/styles/'),
-      'underscore': bower('underscore/underscore-min'),
       moment: bower('moment/min/moment.min'),
       toastr: bower('toastr/toastr'),
       lodash: nodeModules('lodash'),
@@ -69,9 +69,7 @@ module.exports = {
     }
   },
   plugins: [
-      //https://github.com/webpack/docs/wiki/optimization
-      new webpack.optimize.DedupePlugin(),
-      new webpack.optimize.CommonsChunkPlugin('core', 'core.bundle.js'),
+      new webpack.optimize.CommonsChunkPlugin({ name: 'core', filename: 'core.bundle.js' }),
       new webpack.IgnorePlugin(/\.map$/),
       new webpack.ProvidePlugin({
         $: 'jquery',
@@ -79,17 +77,30 @@ module.exports = {
         'window.jquery': 'jquery',
         'window.jQuery': 'jquery',
         wptoast: new WebpackNotifierPlugin()
+      }),
+      new webpack.LoaderOptionsPlugin({
+          options: {
+              color: true,
+              progress: true
+          }
       })
   ],
   module: {
-    loaders: [
-        { test: /\.html$/, loader: 'raw' },
-        { test: /\.css$/, loader: 'style!css?sourceMap' },
-        { test: /\.js?$/, loader: 'babel', exclude: /(node_modules|bower_components)/, query: { presets: ['es2015'] } },
-
-        { test: /knockout(\.debug)?\.js$/, loader: 'imports?exports=>false&define=>false!exports?ko' },
-        { test: /knockout\.command\.js/, loader: 'imports?require=>false&define=>false' },
-        { test: /knockout\.validation(\.min)?\.js/, loader: 'imports?require=>false&define=>false' },
+    rules: [
+        { test: /\.html$/, loader: 'raw-loader' },
+        { test: /\.css$/, use: ['style-loader', { loader: 'css-loader', options: { sourceMap: true } }] },
+        {
+            test: /\.js?$/, exclude: /(node_modules|bower_components)/,
+            use: {
+                loader: 'babel-loader'
+            }
+        },
+        {
+            test: /knockout(\.debug)?\.js$/,
+            use: [ 'imports-loader?exports=>false&define=>false', 'exports-loader?ko' ]
+        },
+        { test: /knockout\.command\.js/, use: 'imports-loader?define=>false,require=>false' },
+        { test: /knockout\.validation(\.min)?\.js/, use: 'imports-loader?define=>false,require=>false' },
 
         // although ko is globally exported, the following modules can handle resolving the ko reference via the require function.
         //{ test: /knockout-postbox(\.min)?\.js$/, loader: 'imports?module=>false&define=>false' },
@@ -98,14 +109,13 @@ module.exports = {
         //{ test: /knockout-sortable(\.min)?\.js/, loader: 'imports?require=>false&define=>false' },
         //{ test: /knockout-kendo(\.min)?\.js$/, loader: 'imports?require=>false' },
         
-        { test: /kendo\-ui\-core[\///].*\.js$/, loader: 'imports?jQuery=jquery' },
+        { test: /kendo\-ui\-core[\///].*\.js$/, loader: 'imports-loader?jQuery=>jquery' },
         { test: /kendoui\.woff?(\?v=[0-9]\.[0-9](\.[0-9])?)?$/, loader: "file-loader" },
-        { test: /KendoUIGlyphs\.(ttf|woff|eot|svg)(\?\w*)?$/, loader: "url" },
+        { test: /KendoUIGlyphs\.(ttf|woff|eot|svg)(\?\w*)?$/, loader: "url-loader" },
 
-        { test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: "url-loader?limit=10000&minetype=application/font-woff" },
-        { test: /\.(ttf|eot|svg|png|gif|jpe?g)(\?v=[0-9]\.[0-9](\.[0-9])?)?$/, loader: "url" }
-    ],
-    noParse: []
+        { test: /\.woff(2)?(\?v=[0-9]\.[0-9]\.[0-9])?$/, loader: "url-loader", options: { limit: 10000, mimetype: 'application/font-woff' } },
+        { test: /\.(ttf|eot|svg|png|gif|jpe?g)(\?v=[0-9]\.[0-9](\.[0-9])?)?$/, loader: "url-loader" }
+    ]
   },
 
   node: {

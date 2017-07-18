@@ -1,11 +1,13 @@
-﻿<div class="{{ settings.containerClass }}">
-  {{ #foreach: settings.rows }}
+﻿<!-- bootstrap-grid-layout -->
+<div class="{{ containerClass }}">
+  {{ #foreach: contents }}
   <div class="row">
     {{ #foreach: columns }}
-    <div class="{{ settings.class }}">
-      TODO: Render content
+    <div class="{{ classValue }}">
+      <dynamic-form params="config: {fields: contents }"></dynamic-form>
     </div>
-    {{ /forach }}
+    {{ /foreach }}
   </div>
   {{ /foreach }}
 </div>
+<!-- bootstrap-grid-layout -->

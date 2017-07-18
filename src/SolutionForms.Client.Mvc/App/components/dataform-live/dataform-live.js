@@ -1,10 +1,11 @@
-﻿var toastr = require('toastr'),
+﻿ko.punches.enableAll();
+var toastr = require('toastr'),
   _ = require('underscore'),
   formsService = require('services/dataFormsService');
 
 ko.components.register('form-field', require('components/form-field/form-field'));
 
-/* Framework level component which understands how to deserialie the configuration data and pass it into the
+/* Framework level component which understands how to deserialize the configuration data and pass it into the
  * specified UI container.
  */
 function DataFormLive(params) {

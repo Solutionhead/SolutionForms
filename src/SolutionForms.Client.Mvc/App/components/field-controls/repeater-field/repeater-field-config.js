@@ -2,7 +2,6 @@
 // POSSIBLE Functionality Options:
 // - Repeat field values (rather than from separate database call)
 
-//import fieldsHelper from 'viewModels/dataformFieldsDesigner';
 var loadDataSourceOptions = $.ajax('/api/datasources');
 
 function RepeaterFieldConfigViewModel(field, params) {

@@ -20,7 +20,8 @@ function DataformFieldsDesigner(params) {
     self.fields.splice = function(val, index) {
         _fields.splice(new FieldContext(val, index));
     }
-    self.inputTypeOptions = ko.observableArray(buildInputInternalTypeOptions());
+    self.inputTypeOptions = core.Fields;
+    //self.inputTypeOptions = ko.observableArray(buildInputInternalTypeOptions());
 
     self.addItemCommand = ko.command({
         execute: function (type) {
@@ -86,17 +87,17 @@ function parseInputConfig(configValues) {
 
     return $.extend({}, DataformFieldsDesigner.prototype.defaultValues, input);
 }
-function buildInputInternalTypeOptions() {
-  var opts = [];
+//function buildInputInternalTypeOptions() {
+//  var opts = [];
 
-    for (let prop in core.Fields) {
-        if (core.Fields.hasOwnProperty(prop)) {
-            opts.push(core.Fields[prop]);
-        }
-    }
+//    for (let prop in core.Fields) {
+//        if (core.Fields.hasOwnProperty(prop)) {
+//            opts.push(core.Fields[prop]);
+//        }
+//    }
 
-    return opts;
-}
+//    return opts;
+//}
 
 DataformFieldsDesigner.prototype.buildFieldsConfigExport = function () {
     return ko.utils.arrayMap(this.fields()(), function(f) {

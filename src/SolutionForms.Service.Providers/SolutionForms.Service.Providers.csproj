@@ -1,0 +1,35 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>SolutionForms.Service.Providers Class Library</Description>
+    <Authors>Vinney</Authors>
+    <TargetFramework>net451</TargetFramework>
+    <AssemblyName>SolutionForms.Service.Providers</AssemblyName>
+    <PackageId>SolutionForms.Service.Providers</PackageId>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
+    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net451' ">
+    <ProjectReference Include="..\SolutionForms.Data\SolutionForms.Data.csproj" />
+    <PackageReference Include="AutoMapper" Version="4.2.1" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System" />
+    <Reference Include="Microsoft.CSharp" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="BrockAllen.MembershipReboot" Version="8.4.0" />
+    <PackageReference Include="BrockAllen.MembershipReboot.WebHost" Version="7.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="1.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="1.0.2" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="1.0.2" />
+    <PackageReference Include="RavenDB.Database" Version="3.0.30115" />
+    <PackageReference Include="Stripe.net" Version="6.3.2" />
+  </ItemGroup>
+
+</Project>

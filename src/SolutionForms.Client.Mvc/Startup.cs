@@ -53,7 +53,7 @@ namespace SolutionForms.Client.Mvc
                     .Build();
                 config.Filters.Add(new AuthorizeFilter(policy));
 
-
+                //config.Filters.Add(new Microsoft.AspNetCore.Mvc.RequireHttpsAttribute());
 #if RELEASE
                 // this causes issues when running the app locally, currently there appears to be an isse VS 2015 debugging a website with SSL
                 config.Filters.Add(new Microsoft.AspNetCore.Mvc.RequireHttpsAttribute());
@@ -93,6 +93,10 @@ namespace SolutionForms.Client.Mvc
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
+            loggerFactory.AddAzureWebAppDiagnostics(new Microsoft.Extensions.Logging.AzureAppServices.AzureAppServicesDiagnosticsSettings
+            {
+                OutputTemplate = "{Timestamp:yyyy-MM-dd HH:mm:ss zzz} [{Level}] {RequestId}-{SourceContext}: {Message}{NewLine}{Exception}"
+            });
 
             if (env.IsDevelopment())
             {

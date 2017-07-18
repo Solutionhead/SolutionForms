@@ -1,4 +1,4 @@
-﻿//import Field from 'models/formFieldLive';
+﻿import core from 'App/core';
 import * as DataService from 'App/services/dataEntriesService';
 
 function RepeaterFieldViewModel(params) {
@@ -6,7 +6,7 @@ function RepeaterFieldViewModel(params) {
     return new RepeaterFieldViewModel(params);
   }
 
-  var self = this;
+  var self = core.FieldBase.call(this, params);
   self.settings = ko.unwrap(params.input.settings);
 
   self.source = ko.observableArray([]);
@@ -14,12 +14,6 @@ function RepeaterFieldViewModel(params) {
   self.userResponse = ko.pureComputed(function() {
     return ko.utils.arrayMap(self.source(), function(item) {
       return item;
-      //var responseObj = {};
-      //ko.utils.arrayMap(item.members, function(m) {
-      //    var context = m.context();
-      //    responseObj[m.exportName] = context && context.userResponse();
-      //});
-      //return responseObj;
     });
   });
 

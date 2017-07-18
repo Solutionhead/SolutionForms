@@ -1,7 +1,9 @@
-﻿function CheckboxesFieldViewModel(params) {
+﻿import core from 'App/core';
+
+function CheckboxesFieldViewModel(params) {
     if (!(this instanceof CheckboxesFieldViewModel)) { return new CheckboxesFieldViewModel(params); }
 
-    var self = this,
+    var self = core.FieldBase.call(this, params),
         input = ko.unwrap(params.input) || {},
         settings = ko.unwrap(input.settings) || {};
 

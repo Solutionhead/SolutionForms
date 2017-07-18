@@ -9,6 +9,7 @@ var page = require('page');
   };
 
   registrationHelper.registerLocalFieldTypes(true);
+  //registrationHelper.registerTennantCustomComponents(true);
     
   page('/Forms/:id/Designer', loadForm);
   page();
