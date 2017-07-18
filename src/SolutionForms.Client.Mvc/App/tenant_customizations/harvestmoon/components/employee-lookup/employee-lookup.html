@@ -1,0 +1,38 @@
+﻿<style>
+  .scanner-viewport {
+    position: relative;
+  }
+
+  canvas.drawing,
+  canvas.drawingBuffer {
+    position: absolute;
+    left: 0;
+    top: 0;
+  }
+</style>
+
+<div class="input-group">
+  <span class="input-group-addon"><i class="fa fa-id-card"></i></span>
+  {{ #if: displayLookup }}
+  <input class="form-control" placeholder="Search employee by name" data-bind="jqAuto: { value: lookupValue, source: employees, labelProp: 'name' }" />
+  <span class="input-group-btn">
+    <button class="btn btn-default" data-bind="command: toggleModeCommand">
+      <i class="fa fa-list"></i>
+    </button>
+  </span>
+  {{ /endif }}
+
+  {{ #if: displaySelectList }}
+  <select class="form-control" data-bind="options: employees, value: lookupValue, optionsText: 'name', optionsCaption: 'Select employee...'"></select>
+  <span class="input-group-btn">
+    <button class="btn btn-default" data-bind="command: toggleModeCommand">
+      <i class="fa fa-search"></i>
+    </button>
+  </span>
+  {{ /endif }}
+</div>
+
+<!--<button class="btn btn-default pull-right">
+  <i class="fa fa-barcode"></i>
+  <span>Scan Badge</span>
+</button>-->

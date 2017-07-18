@@ -1,0 +1,22 @@
+﻿<div data-bind="component: { name: 'form-field', params: employeeLookupField }"></div>
+
+<section>
+  <h3>Employee Tickets:</h3>
+  <div data-bind="visible: !viewState.displayTicketAssignmentUI()">
+    <button class="btn btn-primary" data-bind="command: commands.toggleTicketAssignmentUIState">Assign Tickets</button>
+  </div>
+
+  <div data-bind="">
+    <div data-bind="component: { name: 'form-field', params: ticketScannerConfig }, visible: viewState.displayTicketAssignmentUI"></div>
+  </div>
+
+  <ol class="list-inline" data-bind="foreach: employeeTickets">
+    <li data-bind="css: { 'bg-warning' : !isSaved, 'img-thumbnail': true }" class="fa-2x">
+      {{ id }}
+      <button data-bind="command: removeTicketCommand" class="btn btn-default btn-xs"><i class="fa fa-times-circle-o"></i></button>
+    </li>
+  </ol>
+  
+  <button class="btn btn-primary" data-bind="command: commands.saveTicketAssignmentCommand">OK</button>
+
+</section>
