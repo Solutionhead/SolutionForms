@@ -14,7 +14,8 @@ function FormField(params) {
   //});
   self.fieldParams = {
     fieldConfig: new Field({
-      settings: params.config
+      settings: params.config,
+      exports: params.fieldContext || null
     }),
     exports: params.exports
   }

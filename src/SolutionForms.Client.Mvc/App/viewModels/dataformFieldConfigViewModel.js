@@ -1,4 +1,5 @@
-﻿import core from 'App/core';
+﻿import moment from 'moment';
+import core from 'App/core';
 
 function DataformFieldViewModel(input) {
     if (!(this instanceof DataformFieldViewModel)) return new DataformFieldViewModel(input);

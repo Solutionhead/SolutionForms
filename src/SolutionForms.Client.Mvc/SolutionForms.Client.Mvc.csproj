@@ -74,4 +74,9 @@
     <DotNetCliToolReference Include="Microsoft.Extensions.SecretManager.Tools" Version="1.0.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="wwwroot\js\ko-extenders\knockout.extenders.moment.js" />
+    <None Include="wwwroot\js\ko-extenders\knockout.extenders.numeric.js" />
+  </ItemGroup>
+
 </Project>

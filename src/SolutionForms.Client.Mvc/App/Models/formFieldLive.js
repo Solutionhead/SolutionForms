@@ -15,7 +15,16 @@
     });
     
     self.setValue = Field.prototype.setValue.bind(self);
+    self.getValue = Field.prototype.getValue.bind(self);
+
     value != undefined && self.setValue(value);
+
+    if (ko.isObservable(input.exports)) {
+      input.exports({
+        setValue: self.setValue,
+        getValue: self.getValue
+      })
+    }
 
     return self;
 }
@@ -48,6 +57,26 @@ Field.prototype.setValue = function (val) {
             context.userResponse(value);
         }
     }
+}
+Field.prototype.getValue = function () {
+  var input = this;
+  if (input.context.peek() == undefined) {
+    var sub = input.context.subscribe(function (ctx) {
+      return getContextValue(ctx);
+      sub.dispose();
+      sub = null;
+    });
+  } else {
+    return getContextValue(input.context());
+  }
+
+  function getContextValue(context) {
+    if (typeof context.getValue === "function") {
+      return context.getValue();
+    } else {
+      return context.userResponse();
+    }
+  }
 }
 
 module.exports = Field;
