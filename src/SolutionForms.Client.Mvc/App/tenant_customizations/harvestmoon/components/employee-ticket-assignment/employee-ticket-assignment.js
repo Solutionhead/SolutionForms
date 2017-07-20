@@ -7,6 +7,10 @@ if (!ko.components.isRegistered('form-field')) {
   ko.components.register('form-field', require('components/form-field/form-field'));
 }
 
+ko.filters.formattedDate = function (value) {
+  return value.toLocaleDateString();
+};
+
 function EmployeeTicketAssignment(params) {
   if (!(this instanceof EmployeeTicketAssignment)) {
     return new EmployeeTicketAssignment(params);
@@ -22,31 +26,15 @@ function EmployeeTicketAssignment(params) {
   this.employeeLookupField = {
     label: 'Employee',
     inputType: 'employee-lookup',
-    exports: ko.observable()
+    exports: ko.observable(),
+    fieldContext: ko.observable(),
   };
   this.ticketScannerConfig = {
     label: '',
     inputType: 'barcode-scanner',
-    //context: scannedBarcodeVm,
     config: {
       "FieldContainerType": "container",
       "captureResultImages": false,
-      //"locator": {
-      //  "halfSample": false,
-      //  "patchSize": "small",
-      //  "debug": {
-      //    showCanvas: true,
-      //    showPatches: true,
-      //    showFoundPatches: true,
-      //    showSkeleton: true,
-      //    showLabels: true,
-      //    boxFromPatches: {
-      //      showTransformed: true,
-      //      showTransformedBox: true,
-      //      showBB: true
-      //    }
-      //  }
-      //}
     },
     exports: barcodeScannerVm
   }
@@ -54,6 +42,7 @@ function EmployeeTicketAssignment(params) {
   this.viewState = {
     displayTicketAssignmentUI: ko.observable(false)
   };
+
   //todo: add validation
   this.commands = {
     toggleTicketAssignmentUIState: ko.command({
@@ -70,47 +59,47 @@ function EmployeeTicketAssignment(params) {
     }),
     saveTicketAssignmentCommand: ko.asyncCommand({
       execute: function (done) {
+        var employee = self.employeeLookupField.exports().userResponse();
+        if (employee == null) {
+          toastr.error("Please select an employee.", "Validation error");
+          done();
+          return $.Deferred();
+        }
+
+        if (self.employeeTickets().length < 1) {
+          toastr.error("Please scan tickets to be assigned.", "Validation error");
+          done();
+          return $.Deferred();
+        }
+        
+
         var tickets = ko.utils.arrayFilter(self.employeeTickets(), (t) => {
           return !t.isSaved;
         });
 
-        self.employeeTickets.filter((t) => { return !t.isSaved; })
-          .map((t) => {
-            var dto = ko.toJS({
-              employee: self.employeeLookupField.exports().userResponse,
-              ticketId: barcodeScannerVm().scannedValue,
-              field: {}, //todo: get field
-              activity: '' //todo: get activity
-            });
-
-            return create('employee-tickets', dto, true)
-              .then(function () {
-                toastr.success(`Ticket ${dto.ticketId} has been assigned to ${dto.employee.name}.`, 'Saved successfully.');
-              });
+        var itemsToSave = ko.utils.arrayFilter(self.employeeTickets(), (t) => { return !t.isSaved; });
+        ko.utils.arrayMap(itemsToSave, (t) => {
+          var dto = ko.toJS({
+            employee: employee,
+            ticketNumber: t.id,
+            productionDate: t.productionDate.toISOString().substring(0, 10),
+            fieldCode: t.fieldCode, //todo: lookup field?
           });
+
+          return create('EmployeeTickets', dto, true)
+            .then(function () {
+              toastr.success(`Ticket ${dto.ticketId} has been assigned to ${dto.employee.name}.`, 'Ticket Assigned Successfully.');
+            });
+        });
 
         $.when.apply($, tickets)
+          .done(function () {
+            self.employeeTickets([]);
+            self.employeeLookupField.fieldContext().setValue(null);
+          })
           .always(function () {
-            //todo: reset form
-            done()
+            done();
           });
-        //ko.utils.arrayForEach(tickets, (t) => {
-
-        //});
-        //var dto = ko.toJS({
-        //  employee: self.employeeLookupField.exports().userResponse,
-        //  ticketId: barcodeScannerVm().scannedValue,
-        //  field: {}, //todo: get field
-        //  activity: '' //todo: get activity
-        //});
-        //create('employee-tickets', dto, true)
-        //  .then(function () {
-        //    toastr.success(`Ticket ${dto.ticketId} has been assigned to ${dto.employee.name}.`, 'Saved successfully.');
-        //    //todo: reset form
-        //  })
-        //  .always(function () {
-        //    done();
-        //  });
       }
     })
   }
@@ -124,25 +113,49 @@ function EmployeeTicketAssignment(params) {
   }
 
   var t = null;
-  this.addTicket = function (ticketId, isSaved) {
-    if (ticketCache[ticketId] != null) {
+  this.addTicket = function (scannedValue, isSaved) {
+    scannedValue = scannedValue || '';
+    var parts = scannedValue.split('+');
+    if (parts.length != 3) { return; }
+
+    var vals = {
+      ticketNum: parts[2],
+      productionDate: parts[0],
+      fieldCode: parts[1]
+    };
+
+    var d = vals.productionDate + '';
+    var year = Number(d.substring(0, 2));
+    year = "20" + year;
+    var dayOfYear = Number(d.substring(2));
+    d = new Date(`${year}-01-01`);
+    d.setDate(d.getDate() + dayOfYear);
+    vals.productionDate = d;
+        
+    if (ticketCache[vals.ticketNum] != null) {
       return;
     }
 
-    t = new Ticket(ticketId, isSaved || false);
+    t = new Ticket(vals, isSaved || false);
     t.removeTicketCommand = ko.command({
       execute: function (t) {
         self.removeTicket(t);
       },
       parent: self
     })
-    ticketCache[ticketId] = t;
+    ticketCache[vals.ticketNum] = t;
     self.employeeTickets.push(t);
   }
 
   var subs = [];
   subs.push(barcodeScannerVm.subscribe(employeeTicketScannerListener));
-  
+
+  setTimeout(function () {
+    if (!self.viewState.displayTicketAssignmentUI()) {
+      self.commands.toggleTicketAssignmentUIState();
+    }
+  },0)
+
   function employeeTicketScannerListener(scannerVm) {
     if (!scannerVm || !scannerVm.scannedValue) return;
 
@@ -167,7 +180,7 @@ function EmployeeTicketAssignment(params) {
 
 EmployeeTicketAssignment.prototype.loadEmployeeTickets = function () {
   var employees = [];
-  fetch('employee-tickets', { '$transformWith': 'EmployeesTickets/Active' })
+  fetch('EmployeeTickets', { '$transformWith': 'EmployeesTickets/Active' })
     .done((r) => {
       ko.utils.arrayPushAll(this.employeeTickets(), ko.utils.arrayMap(r, (d) => {
         return d;
@@ -187,7 +200,9 @@ module.exports = {
   componentName: 'employee-ticket-assignment'
 }
 
-function Ticket(id, isSaved) {
-  this.id = id;
+function Ticket(vals, isSaved) {
+  this.id = vals.ticketNum;
+  this.productionDate = vals.productionDate; //todo: convert from julian
+  this.fieldCode = vals.fieldCode; 
   this.isSaved = isSaved || false;
 }

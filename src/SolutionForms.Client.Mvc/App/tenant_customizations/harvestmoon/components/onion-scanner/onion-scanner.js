@@ -1,59 +1,30 @@
 ﻿import 'bindings/ko.bindings.jq-autocomplete';
-import quaggaPlugin from 'plugins/quaggaBarcodeScannerPlugin';
 import toastr from 'toastr';
+import core from 'App/core';
 
-if (!ko.components.isRegistered('dynamic-form')) {
-  ko.components.register('dynamic-form', require('components/dynamic-form-ui/dynamic-form-ui'));
-}
+//if (!ko.components.isRegistered('dynamic-form')) {
+//  ko.components.register('dynamic-form', require('components/dynamic-form-ui/dynamic-form-ui'));
+//}
 
-if (!ko.components.isRegistered('form-field')) {
-  ko.components.register('form-field', require('components/form-field/form-field'));
-}
-
-const quagga = new quaggaPlugin();
+//if (!ko.components.isRegistered('form-field')) {
+//  ko.components.register('form-field', require('components/form-field/form-field'));
+//}
 
 function OnionScanner(params) {
   if (!(this instanceof OnionScanner)) {
     return new OnionScanner(params);
   }
 
-  var self = this;
-  //this.enterpirseCode = ko.observable();
+  var self = core.FieldBase.call(this, params);
   this.currentEntry = ko.observable(new ProductionEntry());
   
-  // lookup values
-  this.employeesCheckedIn = ko.observableArray([
-    new Employee("5509", "Jose Valdez"),
-    new Employee("5510", "Ricardo Hernandez"),
-    new Employee("5511", "Estevan Estevez")
-  ]);
+  //// lookup values
+  //this.employeesCheckedIn = ko.observableArray([
+  //  new Employee("5509", "Jose Valdez"),
+  //  new Employee("5510", "Ricardo Hernandez"),
+  //  new Employee("5511", "Estevan Estevez")
+  //]);
     
-  
-
-  var workingOnEmployee = false;
-  var lastEmployeeProcessed = null;
-  var workingOnTote = false;
-  var lastToteScanned = null;
-
-  this.employeeBarcodeDetected = function (result) {
-    if (workingOnEmployee) { return; }
-
-    var code = result.codeResult.code;
-    if (!code || code === lastEmployeeProcessed) { return; }
-    lastEmployeeProcessed = code;
-
-    var employee = ko.utils.arrayFirst(self.employeesCheckedIn() || [], (e) => {
-      return e.employeeId === code;
-    });
-
-    if (!employee) {
-      toastr.error(`Barcode is invalid or employee is not checked in at this location. Id scanned "${code}".', 'Employee Not Found`);
-      return;
-    }
-
-    self.currentEntry().employee(employee);
-    self.initToteScanner();
-  }
   this.toteBarcodeDetected = function (result, resultsCollector) {
     var code = result.codeResult.code;
     if (workingOnTote || code === lastToteScanned) {

@@ -1,17 +1,4 @@
-﻿<style>
-  .scanner-viewport {
-    position: relative;
-  }
-
-  canvas.drawing,
-  canvas.drawingBuffer {
-    position: absolute;
-    left: 0;
-    top: 0;
-  }
-</style>
-
-<div data-bind="with: currentEntry">
+﻿<div data-bind="with: currentEntry">
   {{ #ifnot: employee }}
   <section class="panel panel-primary">
     <div class="panel-heading">
@@ -22,40 +9,4 @@
     </div>
   </section>
   {{ /ifnot }}
-
-  {{ #if: employee }}
-  <section>
-    <div class="panel panel-default" data-bind="with: employee">
-      <div class="panel-heading">
-        Employee
-      </div>
-      <div class="panel-body">
-        <h2 class="pull-left">{{ name }} <small>{{ employeeId }}</small></h2>
-        <button data-bind="command: $parents[1].changeEmployeeCommand" class="btn btn-default pull-right"><i class="fa fa-ban"></i> Rescan Employee Ticket</button>
-      </div>
-    </div>
-    {{ #ifnot: tote }}
-    <div class="panel panel-primary">
-      <div class="panel-heading"><h4>Scan Tote</h4></div>
-      <div class="panel-body">
-        <div id="tote-scanner" class="scanner-viewport"></div>
-      </div>
-    </div>
-    {{ /ifnot }}
-
-    {{ #if: tote }}
-    <div class="panel panel-default">
-      <div class="panel-body">
-        <div id="tote-reco-image" data-bind="with: tote" class="thumbnail" style="text-align: center">
-          <img src="{{ imageData }}" />
-          <h4 class="fa-3x">{{ toteKey }}</h4>
-        </div>
-      </div>
-      <div class="panel-footer text-right">
-          <button class="btn btn-default" data-bind="command: $parent.rescanToteCommand"><i class="fa fa-ban"></i> Rescan Image</button>
-      </div>
-    </div>
-    {{ /ifnot }}
-  </section>
-  {{ /if }}
 </div>

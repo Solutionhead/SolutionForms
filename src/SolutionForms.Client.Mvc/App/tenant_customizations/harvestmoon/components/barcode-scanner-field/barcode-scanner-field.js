@@ -4,29 +4,53 @@ import core from 'App/core';
 
 const quagga = new quaggaPlugin();
 
+ko.bindingHandlers.fileUpload = {
+  init: function (element, valueAccessor) {
+    $(element).change(function () {
+      valueAccessor()(element.files[0]);
+    });
+  },
+  update: function (element, valueAccessor) {
+    if (ko.unwrap(valueAccessor()) === null) {
+      $(element).wrap('<form>').closest('form').get(0).reset();
+      $(element).unwrap();
+    }
+  }
+};
+
 function BarcodeScannerField(params) {
   if (!(this instanceof BarcodeScannerField)) {
     return new BarcodeScannerField(params);
   }
 
-  const config = $.extend({}, BarcodeScannerField.prototype.DEFAULT_CONFIG, params.config);
+  const settings = $.extend({}, BarcodeScannerField.prototype.DEFAULT_CONFIG, params.fieldConfig.settings);
 
   var timeout = null;
   var value = ko.observable();
   this.lastToteScanned = null;
   this.workingOnTote = false;
   this.isScannerActive = ko.observable(false);
-  this.userResponse = value; 
+  
+  this.isScannerActive.subscribe(function (val) {
+    console.log(`${getQuaggaConfig().name} ${val ? 'activated' : 'deactivated'}`);
+  })
 
-  var self = core.FieldBase.call(this, config);
+  this.userResponse = value; 
+  var resultsCollector = null;
+
+  var self = core.FieldBase.call(this, settings);
   
   this.config = {
-    displayCapturedImage: config.displayCapturedImage,
-    startScannerOnLoad: config.startScannerOnLoad,
-    scannerTimeoutMS: config.scannerTimeoutMS,
+    displayCapturedImage: settings.displayCapturedImage,
+    startScannerOnLoad: settings.startScannerOnLoad,
+    scannerTimeoutMS: settings.scannerTimeoutMS,
   };
+
+  var liveStreamRequested = ko.observable();
+  var liveStreamSupported = ko.observable();
+
   this.viewState = {
-    uniqueId: 'scanner_div',
+    uniqueId: `scanner_div_${crypto.getRandomValues(new Uint32Array(1))[0]}`,
     showScannerUI: ko.pureComputed(function () {
       return self.isScannerActive();
     }),
@@ -35,11 +59,18 @@ function BarcodeScannerField(params) {
     }),
     showActivationButton: ko.pureComputed(function () {
       return !self.isScannerActive() && self.model.scannedImageSource() == null;
+    }),
+    liveStreamMode: ko.pureComputed(function () {
+      return liveStreamRequested() && liveStreamSupported() && true;
+    }),
+    imageStreamMode: ko.pureComputed(function () {
+      return !self.viewState.liveStreamMode();
     })
   };
   this.model = {
     scannedValue: value,
-    scannedImageSource: ko.observable()
+    scannedImageSource: ko.observable(),
+    uploadImageSource: ko.observable()
   }
   this.commands = {
     stopScannerCommand: ko.command({
@@ -52,11 +83,18 @@ function BarcodeScannerField(params) {
     }),
     activateScannerCommand: ko.command({
       execute: function () {
-        var config = $.extend({}, scannerConfigOptions, params.fieldConfig.settings || {});
-        config.inputStream.target = document.querySelector(`#${self.viewState.uniqueId}`);
-        quagga.init(config);
-        if (config.captureResultImages === true){
-          var resultsCollector = quagga.buildResultsCollector({
+        var config = getQuaggaConfig();
+        navigator.getUserMedia = null; //todo: remove
+        if (config.inputStream.type.toLowerCase() === "livestream") {
+          liveStreamRequested(true);
+          if (!navigator.getUserMedia) {
+            liveStreamSupported(false);
+            config.inputStream.type = "ImageStream";
+          }
+        }
+
+        if (config.captureResultImages !== false) {
+          resultsCollector = quagga.buildResultsCollector({
             capture: true, // keep track of the image producing this result
             capacity: 20,  // maximum number of results to store
             filter: function (codeResult) {
@@ -64,16 +102,38 @@ function BarcodeScannerField(params) {
             }
           });
         }
-        quagga.addHandler('detected', (r) => { self.barcodeDetected(r, resultsCollector); });
+
         self.model.scannedValue(null);
         self.model.scannedImageSource(null);
+        self.model.uploadImageSource(null)
         self.isScannerActive(true);
+
+        quagga.init(config);
+        
+        quagga.addHandler('detected', (r) => { self.barcodeDetected(r, resultsCollector); });
 
         setScannerTimeout();
         setTimeoutListener();
       },
       canExecute: function () {
         return !self.isScannerActive();
+      }
+    }),
+    decodeSingleImageCommand: ko.command({
+      execute: function () {
+        //var input = document.querySelector(`#${self.viewState.uniqueId} input[type=file]`);
+        //if (input.files && input.files.length) {
+        var fileSource = self.model.uploadImageSource();
+        if(fileSource != null) {
+          var config = getQuaggaConfig();
+          //config.src = URL.createObjectURL(input.files[0]);
+          config.src = URL.createObjectURL(fileSource);
+          tryDecodeImage(config);
+        }
+        //tryDecodeImage(getQuaggaConfig(), function () { })
+      },
+      canExecute: function () {
+        return self.viewState.imageStreamMode();
       }
     })
   };
@@ -95,8 +155,43 @@ function BarcodeScannerField(params) {
     })
   }
 
+  self.model.uploadImageSource.subscribe(function (val) {
+    if (val) {
+      var config = getQuaggaConfig();
+      config.src = URL.createObjectURL(val);
+      tryDecodeImage(config);
+    }
+  });
+
+  function getQuaggaConfig() {
+    var config = $.extend({}, scannerConfigOptions, params.fieldConfig.settings.scannerConfig);
+    config.inputStream.target = document.querySelector(`#${self.viewState.uniqueId} .scanner-viewport`);
+    return config;
+  }
+
+  var resolutionOptions = [320, 640, 800, 1280, 1600, 1920];
+  function tryDecodeImage(config) {
+    quagga.decodeSingle(config, function (result) {
+      // progressive retry if barcode reco fails
+      if (!result || !result.codeResult) {
+        var index = ko.utils.arrayIndexOf(resolutionOptions, config.inputStream.size) + 1;
+        if (index >= resolutionOptions.length) {
+          if (config.locator.halfSample === true) {
+            config.locator.halfSample = false;
+            config.inputStream.size = resolutionOptions[0];
+            return tryDecodeImage(config);
+          }
+          toastr.warning('Unable to detect barcode in this image. Please try a different image.');
+          return;
+        }
+
+        config.inputStream.size = resolutionOptions[index];
+        tryDecodeImage(config);
+      }
+    });
+  }
   function setScannerTimeout() {
-    if (self.config.scannerTimeoutMS > 0) {
+    if (self.config.scannerTimeoutMS > 0 && self.viewState.liveStreamMode()) {
       timeout = Date.now() + self.config.scannerTimeoutMS;
     } else {
       timeout = 0;
@@ -120,13 +215,16 @@ function BarcodeScannerField(params) {
 
   self.barcodeDetected = function (result, resultsCollector) {
     setScannerTimeout();
-    if (self.workingOnTote || result.codeResult.code === self.lastToteScanned) {
+    if (!self.isScannerActive() || self.workingOnTote || result.codeResult.code === self.lastToteScanned) {
       return;
     }
 
     var code = result.codeResult.code;
     self.model.scannedValue(code);
-    //self.stopBarcodeScanner();
+
+    if (settings.onBarcodeDetected) {
+      settings.onBarcodeDetected(result.codeResult.code, resultsCollector);
+    }
 
     if (!self.config.displayCapturedImage || resultsCollector == null) {
       return;
@@ -149,12 +247,19 @@ function BarcodeScannerField(params) {
 BarcodeScannerField.prototype.stopBarcodeScanner = function () {
   quagga.stop();
   this.isScannerActive(false);
+  quagga.removeAllHandlers();
+  
+  var viewPortNode = document.querySelector(`#${this.viewState.uniqueId} .scanner-viewport`);
+  while (viewPortNode.firstChild) {
+    viewPortNode.removeChild(viewPortNode.firstChild);
+  }
 }
 
 BarcodeScannerField.prototype.DEFAULT_CONFIG = {
   displayCapturedImage: true,
   startScannerOnLoad: false,
-  scannerTimeoutMS: 30000
+  scannerTimeoutMS: 30000,
+  scannerConfig: {}
 }
 
 const scannerConfigOptions = {
@@ -162,18 +267,7 @@ const scannerConfigOptions = {
   inputStream: {
     name: "Live",
     type: "LiveStream",
-    //target: document.querySelector('#scanner-container'),
-    //size: 400,
-    //area: {
-    //  top: "10%",
-    //  right: "10%",
-    //  bottom: "30%",
-    //  left: "10%"
-    //},
-    //constraints: {
-    //  width: "330",
-    //  height: "200"
-    //}
+    size: 800,
   },
   decoder: {
     readers: ["code_39_reader"],

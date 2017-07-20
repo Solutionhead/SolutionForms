@@ -1,7 +1,16 @@
 ﻿<style>
+  .scanner-container {
+    
+  }
   .scanner-viewport {
     position: relative;
   }
+
+  .scanner-viewport > canvas, .viewport#interactive > video {
+    max-width: 100%;
+    width: 100%;
+  }
+
 
   canvas.drawing,
   canvas.drawingBuffer {
@@ -11,25 +20,35 @@
   }
 </style>
 
-<div class="panel panel-default">
-  <div class="panel-body">
+<div class="row">
+  <div class="panel panel-default" id="{{ viewState.uniqueId }}">
+    <div class="panel-body">
 
-    <div data-bind="visible: viewState.showScannerUI" class="panel panel-primary">
-      <div id="{{ viewState.uniqueId }}" class="scanner-viewport"></div>
+      <div data-bind="visible: viewState.showScannerUI" class="panel panel-primary">
+        <div class="scanner-viewport"></div>
+      </div>
+
+      {{ #if: viewState.liveStreamMode }}
+        <div class="thumbnail" data-bind="visible: viewState.showCapturedImage" style="text-align: center">
+          <img src="{{ model.imageData }}" />
+          <h4 class="fa-3x">{{ model.scannedValue }}</h4>
+        </div>
+        {{ #if: viewState.showActivationButton }}
+        <div>
+          <button class="btn btn-default btn-lg" data-bind="command: commands.activateScannerCommand">
+            <i class="fa fa-barcode"></i> Start Barcode Scanner
+          </button>
+        </div>
+        {{ /if }}
+
+      {{ /if }}
+
+      {{ #if: viewState.imageStreamMode }}
+      <input type="file" accept="image/*" data-bind="fileUpload: model.uploadImageSource" capture="camera" class="form-control" />
+      <!--<button data-bind="command: commands.decodeSingleImageCommand" class="btn btn-default">Identify Barcode</button>-->
+      {{ /if }}
+
+
     </div>
-
-    <div class="thumbnail" data-bind="visible: viewState.showCapturedImage" style="text-align: center">
-      <img src="{{ model.imageData }}" />
-      <h4 class="fa-3x">{{ model.scannedValue }}</h4>
-    </div>
-
-    {{ #if: viewState.showActivationButton }}
-    <div>
-      <button class="btn btn-default btn-lg" data-bind="command: commands.activateScannerCommand">
-        <i class="fa fa-barcode"></i> Start Barcode Scanner
-      </button>
-    </div>
-    {{ /if }}
-
   </div>
 </div>

@@ -12,6 +12,9 @@ class QuaggaBarcodeScannerPlugin {
   //get init(config) { return this.initQuagga(config); }
   stop() { Quagga.stop(); }
   start() { Quagga.start(); }
+  decodeSingle(config, callback) {
+    Quagga.decodeSingle(config, callback);
+  }
 
   init(config) {
     if (typeof config === "string") {
@@ -66,7 +69,7 @@ class QuaggaBarcodeScannerPlugin {
 
     this.handlers[eventName].push(callback);
   }
-  removeQuaggaHandler(eventName, callback) {
+  removeHandler(eventName, callback) {
     this.handlers[eventName] = this.handlers[eventName] || [];
     ko.utils.arrayRemoveItem(this.handlers[eventName], callback);
 
@@ -79,22 +82,27 @@ class QuaggaBarcodeScannerPlugin {
         break;
     }
   }
+  removeAllHandlers() {
+    var self = this;
+
+    removeAllHandlersByEvent('processed');
+    removeAllHandlersByEvent('detected');
+
+    function removeAllHandlersByEvent(event) {
+      if (self.handlers[event] && self.handlers[event].length) {
+        ko.utils.arrayForEach(self.handlers[event], (h) => { self.removeHandler(event, h); })
+      }
+    }
+  }
 
   dispose() {
     if (!this.isInit) { return; }
     var self = this;
 
     Quagga.stop();
-    removeAllHandlersByEvent('processed');
-    removeAllHandlersByEvent('detected');
+    this.removeAllHandlers();
 
     this.isInit = false;
-
-    function removeAllHandlersByEvent(event) {
-      if (self.handlers[event] && self.handlers[event].length) {
-        ko.utils.arrayForEach(self.handlers[event], (h) => { self.removeQuaggaHandler(event, h); })
-      }
-    }
   }
 }
 
