@@ -218,3 +218,4 @@ _Pvt_Extensions/
 ModelManifest.xml
 /src/SolutionForms.Client.Mvc/wwwroot/css/site.min.css
 **/wwwroot/_references.js
+/src/SolutionForms.Client.Mvc/wwwroot/lib

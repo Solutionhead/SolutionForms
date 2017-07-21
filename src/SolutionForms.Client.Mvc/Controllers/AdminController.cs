@@ -13,6 +13,7 @@ using SolutionForms.Service.Providers.Providers;
 using SolutionForms.Service.Providers.Models;
 using SolutionForms.Client.Mvc.Helpers;
 using Stripe;
+using System.Linq;
 
 // For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -90,6 +91,22 @@ namespace SolutionForms.Client.Mvc.Controllers
             {
                 ApiKey = _stripeHelper.PublishableApiKey
             });
+        }
+
+        [Route("/admin/importjson")]
+        public IActionResult ImportJson()
+        {
+            return View();
+        }
+
+        [Route("/admin/importjson"), HttpPost]
+        public IActionResult ImportJson(ImportJsonViewModel viewModel) 
+        {
+            var provider = HttpContext.GetService<DataFormsProvider>();
+            var userAccount = _userAccountService.GetByUsername(Tenant, User.Identity.Name);
+            var result = provider.LoadDataEntriesFromJson(Tenant, viewModel.EntityName, viewModel.JsonData, userAccount).ToList();
+            ViewBag.Message = $"Loaded {result.Count} records into the {viewModel.EntityName} collection.";
+            return View();
         }
 
         #endregion

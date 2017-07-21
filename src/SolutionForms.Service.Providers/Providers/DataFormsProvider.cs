@@ -331,7 +331,6 @@ namespace SolutionForms.Service.Providers.Providers
             string jsonData, ApplicationUser ownerUser)
         {
             var jsonArray = JArray.Parse(jsonData);
-            var maxId = 0;
             using (var bulkInsert = _documentStore.BulkInsert(tenant))
             {
                 foreach (var d in jsonArray.Children<JObject>())
@@ -339,13 +338,7 @@ namespace SolutionForms.Service.Providers.Providers
                     UserIdentityHelper.SetUserIdentity(d, ownerUser);
                     var entity = RavenJObject.Parse(d.ToString());
                     var meta = new RavenJObject {{"Raven-Entity-Name", entityName}};
-                    var id = (string) d["Id"];
-                    var identity =
-                        int.Parse(
-                            id.Substring(
-                                id.IndexOf(_documentStore.Conventions.IdentityPartsSeparator, StringComparison.Ordinal) +
-                                1));
-                    maxId = Math.Max(identity, maxId);
+                    string id = $"{entityName}{_documentStore.Conventions.IdentityPartsSeparator}{_documentStore.DatabaseCommands.NextIdentityFor(entityName)}";
                     bulkInsert.Store(entity, meta, id);
                     yield return new DataEntryCreatedReturn
                     {
@@ -355,7 +348,7 @@ namespace SolutionForms.Service.Providers.Providers
                 }
             }
 
-            _documentStore.DatabaseCommands.SeedIdentityFor(entityName, maxId);
+            _documentStore.DatabaseCommands.SeedIdentityFor(entityName, _documentStore.DatabaseCommands.NextIdentityFor(entityName));
         }
 
         public async Task SeedIdentityForTable(string entityname, long nextId)

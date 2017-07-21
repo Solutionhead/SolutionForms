@@ -17,6 +17,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SolutionForms.Core", "src\S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SolutionForms.Tests", "src\SolutionForms.Tests\SolutionForms.Tests.csproj", "{3DE38D3C-8C34-46F6-9CAD-F036EACBD5EE}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Import", "Import", "{2F531167-9EDC-43C6-95BB-BEA3618F4D59}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SolutionForms.ImportCLI", "src\SolutionForms.ImportCLI\SolutionForms.ImportCLI.csproj", "{0ED27D4E-D646-4D05-9AAF-84AEC57F39EC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -43,6 +47,10 @@ Global
 		{3DE38D3C-8C34-46F6-9CAD-F036EACBD5EE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3DE38D3C-8C34-46F6-9CAD-F036EACBD5EE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3DE38D3C-8C34-46F6-9CAD-F036EACBD5EE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0ED27D4E-D646-4D05-9AAF-84AEC57F39EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0ED27D4E-D646-4D05-9AAF-84AEC57F39EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0ED27D4E-D646-4D05-9AAF-84AEC57F39EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0ED27D4E-D646-4D05-9AAF-84AEC57F39EC}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -53,5 +61,6 @@ Global
 		{AAE36ACF-0DB8-4C27-B7BE-3A4601E71369} = {2ED05F63-61DF-442D-8832-8F13221F4012}
 		{B5710FA7-F2B8-4177-BD64-D1FDEA9B9600} = {2ED05F63-61DF-442D-8832-8F13221F4012}
 		{3DE38D3C-8C34-46F6-9CAD-F036EACBD5EE} = {2ED05F63-61DF-442D-8832-8F13221F4012}
+		{0ED27D4E-D646-4D05-9AAF-84AEC57F39EC} = {2F531167-9EDC-43C6-95BB-BEA3618F4D59}
 	EndGlobalSection
 EndGlobal
