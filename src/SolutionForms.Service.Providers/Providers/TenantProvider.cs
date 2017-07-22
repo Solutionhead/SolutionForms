@@ -19,13 +19,18 @@ namespace SolutionForms.Service.Providers.Providers
             _documentStore = documentStore;
         }
 
-        public async Task<bool> LookupTenantByDomainAsync(string tenantDomain)
+        public async Task<OrganizationReturn> LookupTenantByDomainAsync(string tenantDomain)
         {
             using (var session = _documentStore.OpenAsyncSession())
             {
                 try
                 {
-                    return await LookupTenantByDomainAsync(tenantDomain, session);
+                    var org = (await LookupTenantByDomainAsync(tenantDomain, session));
+                    return org == null ? null : new OrganizationReturn
+                    {
+                        OrganizationName = org.OrganizationName,
+                        TenantDomain = org.OrganizationDomain
+                    };
                 }
                 catch (Exception)
                 {
@@ -45,7 +50,7 @@ namespace SolutionForms.Service.Providers.Providers
             {
                 try
                 {
-                    if(await LookupTenantByDomainAsync(tenant, session))
+                    if(await LookupTenantByDomainAsync(tenant, session) != null)
                     {
                         return CreateTenantResult.DuplicateTenantDomainExists;
                     }
@@ -82,10 +87,11 @@ namespace SolutionForms.Service.Providers.Providers
 
         #region private helpers
 
-        private static async Task<bool> LookupTenantByDomainAsync(string tenantDomain, IAsyncDocumentSession session)
+        private static async Task<Organization> LookupTenantByDomainAsync(string tenantDomain, IAsyncDocumentSession session)
         {
             var search = tenantDomain.ToLowerInvariant();
-            return await session.Query<Organization>().AnyAsync(org => org.OrganizationDomain == search);
+            return await session.Query<Organization>()
+                .FirstOrDefaultAsync(org => org.OrganizationDomain == search);
         }
 
         #endregion

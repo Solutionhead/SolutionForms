@@ -10,6 +10,7 @@ using SolutionForms.Core;
 using SolutionForms.Service.Providers.Parameters;
 using SolutionForms.Service.Providers.Providers;
 using SolutionForms.Service.Providers.Returns;
+using SolutionForms.Client.Mvc.Helpers;
 
 namespace SolutionForms.Client.Mvc.Controllers
 {
@@ -114,16 +115,21 @@ namespace SolutionForms.Client.Mvc.Controllers
         [Route("~/forms")]
         public async Task<ViewResult> Index()
         {
+            var tenantProvider = HttpContext.GetService<TenantProvider>();
+            
             var vm = new DataFormsIndexViewModel
             {
-                Forms = (await _dataFormsProvider.GetDataForms(Tenant, true)).Select(f => new DataFormSummaryViewModel
-                {
-                    Url = Url.Action("Live", new { formId = f.Id }),
-                    AuthorizationClaims = f.AuthorizedClaims,
-                    Description = f.Description,
-                    KeyValue = f.Id,
-                    Title = f.Title
-                })
+                Forms = (await _dataFormsProvider.GetDataForms(Tenant, true))
+                    .OrderBy(f => f.Title)
+                    .Select(f => new DataFormSummaryViewModel
+                    {
+                        Url = Url.Action("Live", new { formId = f.Id }),
+                        AuthorizationClaims = f.AuthorizedClaims,
+                        Description = f.Description,
+                        KeyValue = f.Id,
+                        Title = f.Title
+                    }),
+                OrganizationName = (await tenantProvider.LookupTenantByDomainAsync(Tenant)).OrganizationName
             };
             return View(vm);
         }

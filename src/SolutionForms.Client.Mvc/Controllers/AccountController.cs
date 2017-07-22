@@ -137,14 +137,14 @@ namespace SolutionForms.Client.Mvc.Controllers
             }
 
             var tenantProvider = HttpContext.GetService<TenantProvider>();
-            var tenantExists = await tenantProvider.LookupTenantByDomainAsync(model.TenantDomain);
-            if (!tenantExists)
+            var organization = await tenantProvider.LookupTenantByDomainAsync(model.TenantDomain);
+            if (organization == null)
             {
                 ModelState.AddModelError("", "We couldn't find your organization.");
                 return Login();
             }
             
-            return _tenantRedirectHelper.RedirectToTenantDomain(model.TenantDomain, "Login", HttpContext.Request, Url);
+            return _tenantRedirectHelper.RedirectToTenantDomain(organization.TenantDomain, "Login", HttpContext.Request, Url);
         }
         
         //
