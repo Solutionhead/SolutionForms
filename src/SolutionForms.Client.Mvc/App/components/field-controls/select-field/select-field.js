@@ -17,12 +17,12 @@ function SelectFieldViewModel(params) {
   
     var baseSetValue = self.setValue.bind(self);
     self.setValue = function(value) {
-        switch (settings.optionSource) {
-            case SelectFieldViewModel.prototype.OPTION_SOURCES.dataSource.value:
-                return baseSetValue(self.setSelectedOptionsForDataSource.call(self, value, settings, baseSetValue));
-            default:
-                return baseSetValue(value);
-        }
+      switch (settings.optionSource) {
+        case SelectFieldViewModel.prototype.OPTION_SOURCES.dataSource.value:
+          return self.setSelectedOptionsForDataSource.call(self, value, settings, baseSetValue);
+        default:
+          return baseSetValue(value);
+      }
     }
 
     if (ko.isObservable(input.valueContext)) {
