@@ -339,6 +339,7 @@ namespace SolutionForms.Service.Providers.Providers
                     var entity = RavenJObject.Parse(d.ToString());
                     var meta = new RavenJObject {{"Raven-Entity-Name", entityName}};
                     string id = $"{entityName}{_documentStore.Conventions.IdentityPartsSeparator}{_documentStore.DatabaseCommands.NextIdentityFor(entityName)}";
+                    entity["Id"] = id;
                     bulkInsert.Store(entity, meta, id);
                     yield return new DataEntryCreatedReturn
                     {
