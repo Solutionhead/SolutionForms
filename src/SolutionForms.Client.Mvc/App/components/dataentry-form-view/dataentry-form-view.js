@@ -38,26 +38,24 @@ function DataEntryForm(params) {
     if (docId != null && docId !== lastDocLoaded) {
       lastDocLoaded = docId;
       self.loadDocumentData(docId);
-      //documentId(docId);
     }
   }));
-
-  __disposables.push(ko.computed(function () {
-    const values = ko.unwrap(params.documentValues) || {};
-    self.setFieldValues(values);
-    //documentId(values.Id);
-    lastDocLoaded = values.Id;
-  }));
-
+  
   self.dispose = dispose;
 
   // exports
   if (ko.isWritableObservable(params.exports)) {
     params.exports({
-      buildDto: self.buildDto.bind(self)
+      buildDto: self.buildDto.bind(self),
+      initializeFormValues: initializeFormValues
     });
   }
 
+  function initializeFormValues(values) {
+    values = values || {};
+    self.setFieldValues(values);
+    lastDocLoaded = values.Id;
+  }
 
   function dispose() {
     ko.utils.arrayForEach(__disposables, function (d) {

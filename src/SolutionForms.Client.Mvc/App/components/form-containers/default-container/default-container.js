@@ -68,7 +68,6 @@ function DefaultContainer(params) {
       try {
         var data = self.detailsEditorViewModel.exports().buildDto();
         data.documentId = currentId;
-        console.log(data);
         params.notifyListenersAsync('submit', data)
           .done(function(data) {
             toastr.success('Save completed successfully');
@@ -103,7 +102,8 @@ function DefaultContainer(params) {
 
 
   function showDetailsView(values) {
-    self.detailsEditorViewModel.documentValues(values || {});
+    var editorVm = self.detailsEditorViewModel.exports();
+    editorVm && editorVm.initializeFormValues(values || {});
     showDetails(true);
   }
 
@@ -112,7 +112,9 @@ function DefaultContainer(params) {
 
   function initializeForDocumentId(docId) {
     if (docId == null) {
-      self.detailsEditorViewModel.documentValues(null);
+      //var editorVm = self.detailsEditorViewModel.exports();
+      //editorVm && editorVm.initializeFormValues({});
+      //self.detailsEditorViewModel.documentValues(null);
       self.detailsEditorViewModel.documentId(null);
       showDetails(false);
     } else if (docId === 'new') {

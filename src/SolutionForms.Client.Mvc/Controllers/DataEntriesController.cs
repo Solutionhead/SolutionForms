@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using BrockAllen.MembershipReboot;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Mvc;
 using SolutionForms.Client.Mvc.Attributes;
 using SolutionForms.Client.Mvc.Helpers;
@@ -82,7 +81,7 @@ namespace SolutionForms.Client.Mvc.Controllers
             {
                 return NotFound();
             }
-            return Ok(new {});
+            return Ok(response);
         }
 
         [HttpPatch("{entityName}/{id}")]
