@@ -91,3 +91,26 @@
     </div>
   </div>
 </section>
+
+<div data-bind="modal: viewState.displayError().title" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header" data-bind="css: { 'bg-warning': viewState.displayError().level === 'warning', 'bg-danger': viewState.displayError().level === 'critical' }">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <h4 class="modal-title">{{ viewState.displayError().title }}</h4>
+      </div>
+      <div class="modal-body">{{{ viewState.displayError().bodyMessage }}}</div>
+      <div class="modal-footer">        
+        {{ #if: viewState.displayError().level === 'critical' }} 
+        <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button> 
+        {{ /if }}
+        
+        {{ #ifnot: viewState.displayError().level === 'critical' }} 
+        <button type="button" class="btn btn-warning" data-dismiss="modal">OK</button>
+        {{ /if }}
+      </div>
+    </div>
+  </div>
+</div>

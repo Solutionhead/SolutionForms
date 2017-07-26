@@ -3,6 +3,8 @@ import toastr from 'toastr';
 import { parseCode } from '../../utils/employeeTicketCodeParser';
 import * as userMessages from '../../resources/userMessages'
 import moment from 'moment';
+import 'App/bindings/ko.bindings.bs-modal';
+import * as service from 'App/services/dataEntriesService';
 
 if (!ko.components.isRegistered('dynamic-form')) {
   ko.components.register('dynamic-form', require('components/dynamic-form-ui/dynamic-form-ui'));
@@ -16,16 +18,17 @@ function ProductionController(params) {
   if (!(this instanceof ProductionController)) {
     return new ProductionController(params);
   }
-
+  
   var self = core.FieldBase.call(this, params);
 
   var ticketScannerVm = ko.observable(),
     toteScannerVm = ko.observable(),
     bypassToteScanner = ko.observable(false),
+    ready = ko.observable(false),
     employeeTickets = [],
     scannedTickets = {},
     scannedTotes = {},
-    ticketCache = {};
+    registeredTicketCache = {};
 
   var enterpriseCodeComplete = ko.pureComputed(function () {
     var vm = self.enterpriseVm();
@@ -111,7 +114,8 @@ function ProductionController(params) {
     }),
     displayToteEntry: ko.pureComputed(() => {
       return self.viewState.showToteStep() && !self.model.toteNumber() && bypassToteScanner();
-    })
+    }),
+    displayError: ko.observable(new validationError())
   }
 
   this.model = {
@@ -145,7 +149,14 @@ function ProductionController(params) {
     acceptEnterpriseCodeCommand: ko.command({
       execute: function () {
         var e = self.model.enterprise();
-        loadWorkTicketsAsync(e.fieldCode, moment(e.productionDate, moment.ISO_8601).format("YYYY-MM-DD"));
+        var prodDate = moment(e.productionDate, moment.ISO_8601).format("YYYY-MM-DD");
+        ready(false);
+        $.when([
+          loadWorkTicketsAsync(e.fieldCode, prodDate),
+          loadProductionResultsAsync(e.fieldCode, prodDate)])
+          .then(() => {
+            ready(true);
+          });
         ticketScannerVm().startScanner();
         self.viewState.showEnterpriseUI(false);
       },
@@ -156,6 +167,7 @@ function ProductionController(params) {
     changeEnterpriseCodeCommand: ko.command({
       execute: function () {
         self.viewState.showEnterpriseUI(true);
+        ready(false);
       },
       canExecute: function () {
         return !self.viewState.showEnterpriseUI();
@@ -178,6 +190,11 @@ function ProductionController(params) {
         data.ticket = self.model.workTicket();
         data.toteNumber = self.model.toteNumber();
         data.toteScanImageData = self.model.toteScanImageData();
+
+        if (!validate(data)) {
+          complete();
+          return $.Deferred().reject();
+        }
         
         return $.ajax("/api/d/productionResults", {
           data: ko.toJSON(data),
@@ -186,7 +203,7 @@ function ProductionController(params) {
           method: 'POST'
         }).done((response) => {
           toastr.success(`Employee: <strong>${data.employee.name}</strong>, Tote: <strong>${data.toteNumber}</strong>`, 'Saved Successfully', { timeOut: 5000 });
-          scannedTickets[data.ticket] = true;
+          scannedTickets[data.ticket.ticketNum] = true;
           scannedTotes[data.toteNumber] = true;
           var preserveEmployee = self.preserveEmployee();
           resetForTicketScan(true);
@@ -201,7 +218,8 @@ function ProductionController(params) {
         });
       },
       canExecute: function (isExecuting) {
-        return !isExecuting &&
+        return ready() == true &&
+          !isExecuting &&
           enterpriseCodeComplete() &&
           self.model.employee() != null &&
           self.model.workTicket() != null &&
@@ -215,6 +233,72 @@ function ProductionController(params) {
     })
   }
 
+  function validate(data) {
+    // has ticket already been scanned?
+    var completedTicket = scannedTickets[data.ticket.ticketNum];
+    if (completedTicket != null) {
+      if (completedTicket.employee.id === data.employee.id && 
+        completedTicket.toteNumber === data.toteNumber) {
+        showError(
+          userMessages.ticketAlreadyProcessedWarningTitle,
+          userMessages.ticketAlreadyProcessedWarningMessage(data.ticket.ticketNum),
+          'warning')
+      } else {
+        showError(
+          userMessages.ticketAlreadyProcessedCriticalTitle,
+          userMessages.ticketAlreadyProcessedCriticalMessage(data.ticket.ticketNum, completedTicket.employee.name, completedTicket.toteNumber),
+          'critical');
+        recordDuplicateAttempt(data, completedTicket);
+      }
+      return false;
+    }
+
+    // has tote already been scanned?
+    var completedTote = scannedTotes[data.toteNumber];
+    if (completedTote != null) {
+      if (completedTote.employee.id === data.employee.id &&
+        completedTote.toteNumber === data.toteNumber) {
+        showError(
+          userMessages.toteAlreadyScannedWarningTitle,
+          userMessages.toteAlreadyScannedWarningMessage(data.toteNumber),
+          'warning'
+        );
+      } else {
+          showError(
+            userMessages.toteAlreadyScannedCriticalTitle,
+            userMessages.toteAlreadyScannedCriticalMessage(data.toteNumber, completedTote.employee.name, completedTote.ticket.ticketNum),
+            'critical'
+          );
+          recordDuplicateAttempt(data, completedTote);
+      }
+      return false;
+    }
+
+    return true;
+  }
+  function showError(title, body, level) {
+    self.viewState.displayError(new validationError(
+      title || 'Validation error occurred',
+      body,
+      level || 'info'))
+  }
+  function recordDuplicateAttempt(duplicate, original) {
+    return service.createAsync('DuplicatePaymentAttempts', {
+      duplicate: {
+        toteNumber: duplicate.toteNumber,
+        employee: duplicate.employee,
+        ticket: duplicate.ticket
+      },
+      original: {
+        toteNumber: original.toteNumber,
+        employee: original.employee,
+        ticket: original.ticket
+      }
+    })
+  }
+  function clearError() {
+    self.viewState.displayError(new validationError());
+  }
   function resetForTicketScan(startScanner) {
     resetForToteScan(false);
     self.model.employee(null);
@@ -225,6 +309,7 @@ function ProductionController(params) {
   function resetForToteScan(startScanner) {
     self.model.toteNumber(null);
     self.model.toteScanImageData(null);
+    clearError();
     startScanner === true && toteScannerVm().startScanner();
   }
   function employeeTicketBarcodeDetected(scannedValue) { 
@@ -267,8 +352,8 @@ function ProductionController(params) {
 
     ticketScannerVm().stopScanner();
 
-    var verifiedTicket = ticketCache[scannedTicket.ticketNum];
-    if (verifiedTicket == null) {
+    var registeredTicket = registeredTicketCache[scannedTicket.ticketNum];
+    if (registeredTicket == null) {
       // ticket has not been registered, select employee
       employee_sub = self.config.employeeLookupConfig.exports().userResponse.subscribe((v) => {
         if (v == null) { return; }
@@ -280,7 +365,7 @@ function ProductionController(params) {
       });
     } else {
       // ticket has been registered
-      self.model.employee(verifiedTicket.employee);
+      self.model.employee(registeredTicket.employee);
       toteScannerVm().startScanner();
     }
     
@@ -332,10 +417,23 @@ function ProductionController(params) {
           productionDate: moment(t.productionDate, 'YYYY-MM-DD'),
           ticketNumber: t.ticketNumber
         };
-        ticketCache[t.ticketNumber] = m;
+        registeredTicketCache[t.ticketNumber] = m;
         return m;
       });
       employeeTickets = mapped;
+    });
+  }
+  function loadProductionResultsAsync(fieldCode, productionDate) {
+    var queryString = `$filter=(fieldCode:"${fieldCode}" AND productionDate:[[${productionDate}]])`
+    return $.ajax({
+      url: `/api/d/index?${encodeURI(`id=ProductionResults%2FbyDateAndField&${queryString}`)}`,
+      dataType: 'json',
+      cache: false
+    }).then((d) => {
+      ko.utils.arrayForEach(d || [], (t) => {
+        scannedTickets[t.ticket.ticketNum] = t;
+        scannedTotes[t.toteNumber] = t;
+      });;
     });
   }
 }
@@ -345,4 +443,12 @@ module.exports = {
   template: require('./production-controller.html'),
   name: 'Production Controller',
   componentName: 'production-controller'
+}
+
+function validationError(title, body, level) {
+  return {
+    title: title,
+    bodyMessage: body,
+    level: level
+  }
 }
