@@ -26,10 +26,18 @@
 
         <section data-bind="visible: viewState.showEmployeeTicketScannerStep">
           <h3><i class="fa fa-barcode"></i> Scan Employee Ticket</h3>
-          <div data-bind="component: { name: 'form-field', params: config.ticketScannerConfig }"></div>
+          <div data-bind="visible: !model.workTicket()">
+            <div data-bind="component: { name: 'form-field', params: config.ticketScannerConfig }"></div>
+          </div>
+          <div data-bind="visible: model.workTicket() && !model.employee()">
+            <h4>No. {{ model.ticketNumber }}</h4>
+            <p class="bg-info"><i class="fa fa-info-circle"></i> This ticket has not been assigned.</p>
+            <div data-bind="component: { name: 'form-field', params: config.employeeLookupConfig }"></div>
+          </div>
         </section>
 
         <section data-bind="visible: viewState.showToteStep">
+          <h4>No. {{ model.ticketNumber }}</h4>
           <div>
             <div>
               <div class="pull-right">
@@ -41,9 +49,20 @@
             </div>
           </div>
 
-          <div data-bind="visible: !model.toteNumber()">
+          <div data-bind="visible: viewState.displayToteScanner">
             <h3><i class="fa fa-barcode"></i> Scan Tote</h3>
             <div data-bind="component: { name: 'form-field', params: config.toteScannerConfig }"></div>
+            <button data-bind="command: commands.toggleToteScanner" class="btn btn-default"><i class="fa fa-keyboard-o"></i> Enter Tote #</button>
+          </div>
+
+          <div data-bind="visible: viewState.displayToteEntry">
+            <h3><i class="fa fa fa-keyboard-o"></i> Enter Tote Number</h3>
+            <div class="input-group">
+              <input data-bind="value: model.toteNumber" placeholder="Enter tote number..." class="form-control" />
+              <span class="input-group-btn">
+                <button data-bind="command: commands.toggleToteScanner" class="btn btn-default"><i class="fa fa-barcode"></i> Scan Barcode</button>
+              </span>
+            </div>
           </div>
 
           <div data-bind="visible: model.toteNumber">
@@ -61,8 +80,13 @@
         </section>
       </div>
 
-      <div class="panel-footer">
+      <div class="panel-footer form-inline">
         <button class="btn btn-primary" data-bind="command: commands.saveProductionEntryCommand"><i class="fa fa-save"></i> Save</button>
+        <div class="checkbox">
+          <label>
+            <input type="checkbox" data-bind="checked: preserveEmployee" /> Next tote is for same employee
+          </label>
+        </div>
       </div>
     </div>
   </div>

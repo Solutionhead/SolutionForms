@@ -35,6 +35,19 @@ function EmployeeTicketAssignment(params) {
     config: {
       "FieldContainerType": "container",
       "captureResultImages": false,
+      "scannerConfig": {
+        numOfWorkers: 1,
+        locator: {
+          halfSample: true,
+          patchSize: "medium"
+        },
+        inputStream: {
+          size: 800
+        },
+        decoder: {
+          readers: ["code_39_reader"]
+        }
+      }
     },
     exports: barcodeScannerVm
   }

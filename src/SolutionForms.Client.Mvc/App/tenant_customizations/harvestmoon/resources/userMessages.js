@@ -4,5 +4,5 @@ export function ticketNotRegisteredMessage(ticketNumber) { return `The ticket ${
 export const ticketNotRegisteredToFieldTitle = "Ticket Not Registered to Field";
 export function ticketNotRegisteredToFieldMessage(ticketNumber, validField, invalidField) { return `The ticket ${ticketNumber} is was assigned to field <strong>${validField}</strong> but scanned at <strong>${invalidField}</strong>.` }
 
-export const ticketNotRegisteredToDateTitle = "Ticket Not Registered for Date";
-export function ticketNotRegisteredToDateMessage(ticketNumber, validDate, invalidDate) { return `The ticket ${ticketNumber} is was assigned for production on <strong>${validDate}</strong> but scanned at <strong>${invalidDate}</strong>.` }
+export const ticketNotRegisteredToDateTitle = "Ticket invalid for Production Date";
+export function ticketNotRegisteredToDateMessage(ticketNumber, validDate, invalidDate) { return `The ticket #${ticketNumber} is was assigned for production on <strong>${validDate}</strong> but scanned at <strong>${invalidDate}</strong>.` }

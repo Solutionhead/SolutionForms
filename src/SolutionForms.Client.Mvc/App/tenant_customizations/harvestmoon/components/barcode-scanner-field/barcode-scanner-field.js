@@ -31,10 +31,6 @@ function BarcodeScannerField(params) {
   this.workingOnTote = false;
   this.isScannerActive = ko.observable(false);
   
-  this.isScannerActive.subscribe(function (val) {
-    console.log(`${getQuaggaConfig().name} ${val ? 'activated' : 'deactivated'}`);
-  })
-
   this.userResponse = value; 
   var resultsCollector = null;
 
@@ -84,15 +80,7 @@ function BarcodeScannerField(params) {
     activateScannerCommand: ko.command({
       execute: function () {
         var config = getQuaggaConfig();
-        navigator.getUserMedia = null; //todo: remove
-        if (config.inputStream.type.toLowerCase() === "livestream") {
-          liveStreamRequested(true);
-          if (!navigator.getUserMedia) {
-            liveStreamSupported(false);
-            config.inputStream.type = "ImageStream";
-          }
-        }
-
+        
         if (config.captureResultImages !== false) {
           resultsCollector = quagga.buildResultsCollector({
             capture: true, // keep track of the image producing this result
@@ -107,7 +95,7 @@ function BarcodeScannerField(params) {
         self.model.scannedImageSource(null);
         self.model.uploadImageSource(null)
         self.isScannerActive(true);
-
+        
         quagga.init(config);
         
         quagga.addHandler('detected', (r) => { self.barcodeDetected(r, resultsCollector); });
@@ -121,16 +109,12 @@ function BarcodeScannerField(params) {
     }),
     decodeSingleImageCommand: ko.command({
       execute: function () {
-        //var input = document.querySelector(`#${self.viewState.uniqueId} input[type=file]`);
-        //if (input.files && input.files.length) {
         var fileSource = self.model.uploadImageSource();
         if(fileSource != null) {
           var config = getQuaggaConfig();
-          //config.src = URL.createObjectURL(input.files[0]);
           config.src = URL.createObjectURL(fileSource);
           tryDecodeImage(config);
         }
-        //tryDecodeImage(getQuaggaConfig(), function () { })
       },
       canExecute: function () {
         return self.viewState.imageStreamMode();
@@ -164,30 +148,44 @@ function BarcodeScannerField(params) {
   });
 
   function getQuaggaConfig() {
-    var config = $.extend({}, scannerConfigOptions, params.fieldConfig.settings.scannerConfig);
+    var config = $.extend(true, {}, scannerConfigOptions, params.fieldConfig.settings.scannerConfig);
     config.inputStream.target = document.querySelector(`#${self.viewState.uniqueId} .scanner-viewport`);
+
+    navigator.getUserMedia = null; //todo: remove
+    if (config.inputStream.type.toLowerCase() === "livestream") {
+      liveStreamRequested(true);
+      if (!navigator.getUserMedia) {
+        liveStreamSupported(false);
+        config.inputStream.type = "ImageStream";
+      }
+    }
+
     return config;
   }
 
   var resolutionOptions = [320, 640, 800, 1280, 1600, 1920];
   function tryDecodeImage(config) {
     quagga.decodeSingle(config, function (result) {
-      // progressive retry if barcode reco fails
       if (!result || !result.codeResult) {
-        var index = ko.utils.arrayIndexOf(resolutionOptions, config.inputStream.size) + 1;
-        if (index >= resolutionOptions.length) {
-          if (config.locator.halfSample === true) {
-            config.locator.halfSample = false;
-            config.inputStream.size = resolutionOptions[0];
-            return tryDecodeImage(config);
-          }
-          toastr.warning('Unable to detect barcode in this image. Please try a different image.');
-          return;
-        }
-
-        config.inputStream.size = resolutionOptions[index];
-        tryDecodeImage(config);
+        toastr.warning('Unable to detect barcode in this image. Please try a different image.');
       }
+
+      // progressive retry if barcode reco fails
+      //if (!result || !result.codeResult) {
+      //  var index = ko.utils.arrayIndexOf(resolutionOptions, config.inputStream.size) + 1;
+      //  if (index >= resolutionOptions.length) {
+      //    if (config.locator.halfSample === true) {
+      //      config.locator.halfSample = false;
+      //      config.inputStream.size = resolutionOptions[0];
+      //      return tryDecodeImage(config);
+      //    }
+      //    toastr.warning('Unable to detect barcode in this image. Please try a different image.');
+      //    return;
+      //  }
+
+      //  config.inputStream.size = resolutionOptions[index];
+      //  tryDecodeImage(config);
+      //}
     });
   }
   function setScannerTimeout() {
@@ -263,6 +261,7 @@ BarcodeScannerField.prototype.DEFAULT_CONFIG = {
 }
 
 const scannerConfigOptions = {
+  numOfWorkers: navigator.hardwareConcurrency,
   locate: true,
   inputStream: {
     name: "Live",
@@ -270,13 +269,7 @@ const scannerConfigOptions = {
     size: 800,
   },
   decoder: {
-    readers: ["code_39_reader"],
-    debug: {
-      drawBoundingBox: true,
-      showFrequency: true,
-      drawScanline: true,
-      showPattern: true
-    }
+    readers: ["code_39_reader"]
   },
   locator: {
     halfSample: true,
