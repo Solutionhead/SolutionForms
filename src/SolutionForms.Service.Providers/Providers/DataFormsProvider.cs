@@ -268,9 +268,9 @@ namespace SolutionForms.Service.Providers.Providers
             ApplicationUser ownerUser, bool awaitIndexing = false)
         {
             var jobject = JObject.FromObject(values);
-            var id =
-                $"{entityName}{_documentStore.Conventions.IdentityPartsSeparator}{_documentStore.DatabaseCommands.NextIdentityFor(entityName)}";
+            var id = $"{entityName}{_documentStore.Conventions.IdentityPartsSeparator}{_documentStore.DatabaseCommands.NextIdentityFor(entityName)}";
             jobject.Add(DatabaseConstants.IdPropertyName, id);
+            jobject.Add(DatabaseConstants.CreatedTimestamp, DateTime.UtcNow);
             await SaveEntryAsync(tenant, entityName, ownerUser, jobject, id);
             if (awaitIndexing)
             {
@@ -435,12 +435,16 @@ namespace SolutionForms.Service.Providers.Providers
         public const string PutRouteName = "PutDynamicEntityQueryRoute";
         public const string IdPropertyName = "Id";
         public const string UserNamePropertyName = "Last-Modified-By";
+        public const string CreatedTimestamp = "Created_TimeStamp";
     }
     public static class UserIdentityHelper
     {
         public static void SetUserIdentity(JObject target, ApplicationUser user)
         {
-            target.Add(DatabaseConstants.UserNamePropertyName, user.ID);
+            target.Add(DatabaseConstants.UserNamePropertyName, JObject.FromObject(new {
+                UserId = user.Id,
+                Username = user.Username
+            }));
         }
     }
 
