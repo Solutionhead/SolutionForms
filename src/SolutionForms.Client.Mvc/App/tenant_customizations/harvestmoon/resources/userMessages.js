@@ -14,7 +14,7 @@ export function ticketAlreadyProcessedWarningMessage(ticketNum) {
 
 export const ticketAlreadyProcessedCriticalTitle = "WARNING: Ticket already scanned";
 export function ticketAlreadyProcessedCriticalMessage(ticketNum, employeeName, toteNum) {
-  return `The ticket <strong>${ticketNum}</strong> has already been processed for <strong>${employeeName}</strong> on tote <strong>${toteNum}</strong>. Please notify supervisor about possible fradulent activity.`
+  return `The ticket <strong>${ticketNum}</strong> has already been processed for <strong>${employeeName}</strong> on tote <strong>${toteNum}</strong>. Please notify supervisor about possible fraudulent activity.`
 }
 
 export const toteAlreadyScannedWarningTitle = "Tote already scanned";
@@ -22,5 +22,5 @@ export function toteAlreadyScannedWarningMessage(toteNumber) { return `The tote 
 
 export const toteAlreadyScannedCriticalTitle = "WARNING: Tote scanned for another employee";
 export function toteAlreadyScannedCriticalMessage(toteNumber, employeeName, ticketNum) {
-  return `The tote <strong>${toteNumber}</strong> has already been recorded for <strong>${employeeName}</strong> on ticket number <strong>${ticketNum}</strong>. Please notify supervisor about possible fradulent activity.`;
+  return `The tote <strong>${toteNumber}</strong> has already been recorded for <strong>${employeeName}</strong> on ticket number <strong>${ticketNum}</strong>. Please notify supervisor about possible fraudulent activity.`;
 }

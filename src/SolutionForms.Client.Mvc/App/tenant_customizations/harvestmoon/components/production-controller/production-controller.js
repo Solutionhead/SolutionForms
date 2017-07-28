@@ -20,6 +20,7 @@ function ProductionController(params) {
   }
   
   var self = core.FieldBase.call(this, params);
+  self.versionNumber = "1.0.0.4";
 
   var ticketScannerVm = ko.observable(),
     toteScannerVm = ko.observable(),
@@ -29,7 +30,7 @@ function ProductionController(params) {
     scannedTickets = {},
     scannedTotes = {},
     registeredTicketCache = {};
-
+  
   var enterpriseCodeComplete = ko.pureComputed(function () {
     var vm = self.enterpriseVm();
     if (!vm || !vm.isReady()) return false;
@@ -68,12 +69,15 @@ function ProductionController(params) {
       },
       exports: ticketScannerVm
     },
+    ticketScannerConfig2: {
+      value: ko.observable()
+    },
     toteScannerConfig: {
       inputType: 'barcode-scanner',
       config: {
         "FieldContainerType": "container",
         "captureResultImages": true,
-        "onBarcodeDetected": toteBarcodeDetected,
+        "onBarcodeDetected": toteBarcodeImageDetected,
         "scannerConfig": {
           locator: {
             halfSample: true,
@@ -95,10 +99,39 @@ function ProductionController(params) {
       inputType: 'employee-lookup',
       exports: ko.observable(),
       fieldContext: ko.observable(),
-    }
+    },
   }
+  
+  self.enterpriseVm.subscribe(function (vm) {
+    if (vm && vm.setFieldValues) {
+      var cachedValue = localStorage.getItem('enterpriseData') || '{}';
+      var initialValues = JSON.parse(cachedValue);
+      if (initialValues.ProductionDate == null || !moment(initialValues.cacheDate, 'YYYY-MM-DD').isSame(moment(), 'day')) {
+        initialValues.ProductionDate = moment().format('YYYY-MM-DD');
+      } else {
+
+      }
+      vm.setFieldValues(initialValues);
+    }
+  });
+
+  var ticketScannerValue = ko.pureComputed(self.config.ticketScannerConfig2.value)
+    .extend({ rateLimit: { timeout: 800, method: 'notifyWhenChangesStop' } });
+
+  ticketScannerValue.subscribe((val) => {
+    setTimeout(() => {
+      employeeTicketBarcodeDetected(val);
+    }, 0);
+  });
 
   this.viewState = {
+    mode: ko.observable(),
+    useQuaggaScanner: ko.pureComputed(() => {
+      var useQuagga = self.viewState.mode() === 'camera';
+      return useQuagga;
+    }),
+    focusTicketScanner: ko.observable(),
+    focusToteScanner: ko.observable(),
     showEnterpriseUI: ko.observable(true),
     showEmployeeTicketScannerStep: ko.pureComputed(() => {
       return !self.viewState.showEnterpriseUI() &&
@@ -113,11 +146,31 @@ function ProductionController(params) {
       return self.viewState.showToteStep() && !self.model.toteNumber() && !bypassToteScanner();
     }),
     displayToteEntry: ko.pureComputed(() => {
-      return self.viewState.showToteStep() && !self.model.toteNumber() && bypassToteScanner();
+      var toteStep = self.viewState.showToteStep() && !self.model.toteNumber() && bypassToteScanner();
+      if (toteStep && !self.viewState.useQuaggaScanner()) {
+        setTimeout(() => { self.viewState.focusToteScanner(true); }, 0)
+      }
+      return toteStep;
     }),
-    displayError: ko.observable(new validationError())
+    displayToteAcknowledgement: ko.pureComputed(() => {
+      return self.model.toteNumber() != null;
+    }).extend({ rateLimit: { timeout: 800, method: 'notifyWhenChangesStop' } }),
+    displayError: ko.observable(new validationError()),
   }
 
+  this.viewState.useQuaggaScanner.subscribe(function (useQuagga) {
+    if (useQuagga) {
+      if (self.viewState.showEmployeeTicketScannerStep()) {
+        startTicketScanner();
+      } else if (self.viewState.showToteStep()) {
+        startToteScanner();
+      }
+    } else {
+      bypassToteScanner(true);
+    }
+  });
+  this.viewState.useQuaggaScanner.notifySubscribers();
+  
   this.model = {
     enterprise: ko.computed(function () {
       var vm = self.enterpriseVm();
@@ -132,6 +185,7 @@ function ProductionController(params) {
       return {
         fieldCode: field.FieldCode || '',
         productionDate: pDate,
+        mode: mode,
         activity: mode.Activity || '',
         farmName: field.Farm['FarmName'] || '',
         field: field
@@ -140,7 +194,7 @@ function ProductionController(params) {
     employee: ko.observable(),
     ticketNumber: ko.observable(),
     workTicket: ko.observable(),
-    toteNumber: ko.observable(),
+    toteNumber: ko.observable().extend({ rateLimit: { timeout: 800, method: 'notifyWhenChangesStop' } }),
     toteScanImageData: ko.observable(),
     field: ko.observable()
   };
@@ -154,11 +208,15 @@ function ProductionController(params) {
         $.when([
           loadWorkTicketsAsync(e.fieldCode, prodDate),
           loadProductionResultsAsync(e.fieldCode, prodDate)])
-          .then(() => {
-            ready(true);
-          });
-        ticketScannerVm().startScanner();
+          .then(() => { ready(true); });
+        startTicketScanner();
         self.viewState.showEnterpriseUI(false);
+        localStorage.setItem('enterpriseData', ko.toJSON({
+          Field: e.field,
+          ProductionDate: prodDate,
+          Mode: e.mode,
+          cacheDate: moment().format('YYYY-MM-DD')
+        }))
       },
       canExecute: function () {
         return enterpriseCodeComplete();
@@ -211,7 +269,6 @@ function ProductionController(params) {
             self.model.employee(data.employee);
           }
         }).fail(() => {
-          console.log(arguments);
           toastr.fail(`An error occurred when attempting to save.`, 'Save failed');
         }).always(() => {
           complete();
@@ -228,7 +285,7 @@ function ProductionController(params) {
     }),
     toggleToteScanner: ko.command({
       execute: function () {
-        bypassToteScanner(!bypassToteScanner());
+        bypassToteScanner(!bypassToteScanner()); 
       }
     })
   }
@@ -299,18 +356,36 @@ function ProductionController(params) {
   function clearError() {
     self.viewState.displayError(new validationError());
   }
+  function startTicketScanner() {
+    self.viewState.useQuaggaScanner() ?
+      ticketScannerVm().startScanner() :
+      setTimeout(() => self.viewState.focusTicketScanner(true), 0);
+  }
+  function stopTicketScanner() {
+    self.viewState.useQuaggaScanner() && ticketScannerVm().stopScanner();
+  }
+  function startToteScanner() {
+    self.viewState.useQuaggaScanner() ?
+      toteScannerVm().startScanner() :
+      setTimeout(() => self.viewState.focusToteScanner(true), 0);
+  }
+  function stopToteScanner() {
+    toteScannerVm() && toteScannerVm().stopScanner();
+  }
   function resetForTicketScan(startScanner) {
     resetForToteScan(false);
     self.model.employee(null);
     self.model.workTicket(null);
     self.model.ticketNumber(null);
-    startScanner === true && ticketScannerVm().startScanner();
+    //self.config.employeeLookupConfig.fieldContext().setValue(null)
+    self.config.ticketScannerConfig2.value(null);
+    startScanner === true && startTicketScanner();
   }
   function resetForToteScan(startScanner) {
     self.model.toteNumber(null);
     self.model.toteScanImageData(null);
     clearError();
-    startScanner === true && toteScannerVm().startScanner();
+    startScanner === true && startToteScanner();
   }
   function employeeTicketBarcodeDetected(scannedValue) { 
     if (!scannedValue) { return; }
@@ -321,6 +396,7 @@ function ProductionController(params) {
       }
     } catch (ex) {
       toastr.warning(`The value <strong>${scannedValue}</strong> was not recognized as a valid ticket code.`, 'Invalid Barcode Scanned');
+      resetForTicketScan(true);
       return;
     }
     
@@ -331,6 +407,7 @@ function ProductionController(params) {
       toastr.error(
         userMessages.ticketNotRegisteredToFieldMessage(scannedTicket.ticketNum, enterprise.fieldCode, scannedTicket.fieldCode),
         userMessages.ticketNotRegisteredToFieldTitle);
+      resetForTicketScan(true);
       return;
     }
 
@@ -346,11 +423,12 @@ function ProductionController(params) {
           mProdDateEnterprise.format('YYYY-MM-DD'),
           mProdDate.format('YYYY-MM-DD')),
         userMessages.ticketNotRegisteredToDateTitle);
+      resetForTicketScan(true);
       return;
     }
     scannedTicket.productionDate = mProdDate.format('YYYY-MM-DD');
 
-    ticketScannerVm().stopScanner();
+    stopTicketScanner();
 
     var registeredTicket = registeredTicketCache[scannedTicket.ticketNum];
     if (registeredTicket == null) {
@@ -359,23 +437,24 @@ function ProductionController(params) {
         if (v == null) { return; }
 
         self.model.employee(v);
-        toteScannerVm().startScanner();
+        startToteScanner();
         employee_sub.dispose();
         //todo: handle cleanup of this subscription when a new ticket is scanned
       });
     } else {
       // ticket has been registered
       self.model.employee(registeredTicket.employee);
-      toteScannerVm().startScanner();
+      startToteScanner();
     }
     
-    self.model.ticketNumber(scannedTicket.ticketNum); //todo: remove this variable
-    self.model.workTicket(scannedTicket);    
+    self.model.ticketNumber(scannedTicket.ticketNum);
+    self.model.workTicket(scannedTicket);
+    return true;
   }
 
   var workingOnTote = false;
   var lastToteScanned;
-  function toteBarcodeDetected(code, resultsCollector) {
+  function toteBarcodeImageDetected(code, resultsCollector) {
     if (!code || workingOnTote || code === lastToteScanned) {
       return;
     }
@@ -398,9 +477,9 @@ function ProductionController(params) {
     }
 
     workingOnTote = false;
-    toteScannerVm().stopScanner();
+    stopToteScanner();
   }
-
+  
   return self;
   
   function loadWorkTicketsAsync(fieldCode, productionDate) {

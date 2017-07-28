@@ -118,12 +118,26 @@ DynamicFormUIViewModel.prototype.loadFormById = function (formId) {
     });
 }
 DynamicFormUIViewModel.prototype.setFieldValues = function (data) {
-  var vals = data || {};
+  var vals = data || {},
+    self = this;
 
-  if (typeof vals === "string") { vals = ko.utils.parseJson(vals) || {}; }
-  ko.utils.arrayForEach(this.fields(), function (f) {
-    f.setValue(vals[f.exportName]);
-  });
+  if (this.isReady()) {
+    setValues();
+  } else {
+    var sub = this.isReady.subscribe((ready) => {
+      if (ready === true) {
+        setValues();
+        sub.dispose();
+      }
+    });
+  }
+
+  function setValues() {
+    if (typeof vals === "string") { vals = ko.utils.parseJson(vals) || {}; }
+    ko.utils.arrayForEach(self.fields(), function (f) {
+      f.setValue(vals[f.exportName]);
+    });
+  }
 }
 DynamicFormUIViewModel.prototype.getFieldByName = function (fieldName) {
   return ko.utils.arrayFirst(this.fields(), function (f) {

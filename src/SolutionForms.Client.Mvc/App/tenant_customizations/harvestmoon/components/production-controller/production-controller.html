@@ -1,4 +1,16 @@
-﻿<section class="col-sm-8 col-sm-offset-2 col-md-6  col-md-offest-3 col-lg-6 col-lg-offset-3">
+﻿<div class="row">
+  <div class="col-xs-12 text-right">
+    <label class="">Mode</label>
+    <select data-bind="value: viewState.mode" class="input-sm">
+      <option value="scanner">Use Scanner</option>
+      <option value="camera">Use Camera</option>
+    </select>
+  </div>
+</div>
+
+<div class="row"><div class="col-sm-12">&nbsp;</div></div>
+
+<section class="col-sm-8 col-sm-offset-2 col-md-6  col-md-offset-3 col-lg-6 col-lg-offset-3">
   <div data-bind="visible: viewState.showEnterpriseUI">
     <h1>Enterprise Code</h1>
     <dynamic-form params="formId: 'enterprise', exports: enterpriseVm"></dynamic-form>
@@ -27,7 +39,16 @@
         <section data-bind="visible: viewState.showEmployeeTicketScannerStep">
           <h3><i class="fa fa-barcode"></i> Scan Employee Ticket</h3>
           <div data-bind="visible: !model.workTicket()">
-            <div data-bind="component: { name: 'form-field', params: config.ticketScannerConfig }"></div>
+
+            <div data-bind="visible: viewState.useQuaggaScanner">
+              <div data-bind="component: { name: 'form-field', params: config.ticketScannerConfig }"></div>
+            </div>
+
+            <div data-bind="visible: !viewState.useQuaggaScanner()">
+              <input data-bind="textInput: config.ticketScannerConfig2.value, hasFocus: viewState.focusTicketScanner" 
+                     placeholder="Scan employee ticket..."
+                     class="form-control" />
+            </div>
           </div>
           <div data-bind="visible: model.workTicket() && !model.employee()">
             <h4>No. {{ model.ticketNumber }}</h4>
@@ -52,20 +73,20 @@
           <div data-bind="visible: viewState.displayToteScanner">
             <h3><i class="fa fa-barcode"></i> Scan Tote</h3>
             <div data-bind="component: { name: 'form-field', params: config.toteScannerConfig }"></div>
-            <button data-bind="command: commands.toggleToteScanner" class="btn btn-default"><i class="fa fa-keyboard-o"></i> Enter Tote #</button>
+            <button data-bind="command: commands.toggleToteScanner" class="btn btn-default"><i class="fa fa-barcode"></i> Scan or Enter Tote #</button>
           </div>
 
           <div data-bind="visible: viewState.displayToteEntry">
-            <h3><i class="fa fa fa-keyboard-o"></i> Enter Tote Number</h3>
+            <h3><i class="fa fa fa-barcode"></i> Tote Number</h3>
             <div class="input-group">
-              <input data-bind="value: model.toteNumber" placeholder="Enter tote number..." class="form-control" />
+              <input data-bind="value: model.toteNumber, hasFocus: viewState.focusToteScanner" placeholder="Scan or enter tote number..." class="form-control" />
               <span class="input-group-btn">
-                <button data-bind="command: commands.toggleToteScanner" class="btn btn-default"><i class="fa fa-barcode"></i> Scan Barcode</button>
+                <button data-bind="command: commands.toggleToteScanner" class="btn btn-default"><i class="fa fa-video-camera"></i> Use Camera</button>
               </span>
             </div>
           </div>
 
-          <div data-bind="visible: model.toteNumber">
+          <div data-bind="visible: viewState.displayToteAcknowledgement">
             <div>
               <div id="tote-reco-image" class="thumbnail" style="text-align: center">
                 <img src="{{ model.toteScanImageData }}" />
@@ -112,5 +133,11 @@
         {{ /if }}
       </div>
     </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="well-sm col-sm-12 text-center">
+    Version {{ versionNumber }}
   </div>
 </div>
