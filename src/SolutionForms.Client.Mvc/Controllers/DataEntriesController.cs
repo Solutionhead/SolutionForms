@@ -12,9 +12,11 @@ using SolutionForms.Core;
 using SolutionForms.Service.Providers.Models;
 using SolutionForms.Service.Providers.Parameters;
 using SolutionForms.Service.Providers.Providers;
+using Microsoft.AspNetCore.Http;
 
 namespace SolutionForms.Client.Mvc.Controllers
 {
+
     [ApiRoute(controllerNameOverride: "d")]
     [MigrateToOss]
     public class DataEntriesController : Controller
@@ -34,17 +36,18 @@ namespace SolutionForms.Client.Mvc.Controllers
         }
         
         [HttpGet("index/{indexName?}", Order = 0)]
-        public async Task<ActionResult> GetByIndex(string id = null)
+        public async Task<IActionResult> GetByIndex(string indexName = null)
         {
             var queryParams = HttpContext.Request.Query.ToDictionary(q => q.Key, q => q.Value.ToString());
-            return Json(await _dataFormsProvider.GetDataEntriesByIndexName(Tenant, id, queryParams));
+            return Ok(await _dataFormsProvider.GetDataEntriesByIndexName(Tenant, indexName, queryParams));
         }
 
         [HttpGet("{entityName}", Order = 1)]
-        public async Task<ActionResult> Get(string entityName)
+        public async Task<IActionResult> Get(string entityName)
         {
             var queryParams = HttpContext.Request.Query.Select(q => new KeyValuePair<string, string>(q.Key, q.Value));
-            return Json(await _dataFormsProvider.GetDataEntriesByEntityName(Tenant, entityName, queryParams));
+            var results = await _dataFormsProvider.GetDataEntriesByEntityName(Tenant, entityName, queryParams);
+            return Ok(results);
         }
         
         /// <summary>

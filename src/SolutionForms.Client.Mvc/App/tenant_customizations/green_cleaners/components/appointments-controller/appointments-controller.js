@@ -303,7 +303,7 @@ AppointmentsController.prototype.fetchEvents = function (startDate, endDate, cli
     }
 
     return $.ajax({
-      url: `/api/d/index?id=appointments%2FbyDateRange&$filter=${cursor.query}&$top=${cursor.pageSize}&$skip=${cursor.index}&$includes=ClientId`,
+      url: `/api/d/index?indexName=appointments%2FbyDateRange&$filter=${cursor.query}&$top=${cursor.pageSize}&$skip=${cursor.index}&$includes=ClientId`,
       dataType: 'json',
       cache: false
     })

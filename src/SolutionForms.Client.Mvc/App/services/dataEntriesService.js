@@ -8,7 +8,12 @@
   const queryOptions = $.extend({}, defaultOptions, options);
 
   const queryFn = function fetchPage(skip, take) {
-    return fetchDataAsync(buildApiRouteForEntityName(entityName, options), skip, take);
+    return fetchDataAsync(
+      buildApiRouteForEntityName(entityName, options),
+      {
+        skip: skip,
+        take: take
+      });
   }
 
   return fetchAllDataPagesAsync(queryFn, queryOptions.queryPageSize);
@@ -16,9 +21,11 @@
 
 export function getDataByDataSourceName(dataSourceName, options) {
   options = $.extend({}, defaultOptions, options);
-
-  //todo: enable retrieval from local cached data
-  return fetchDataAsync(buildApiRouteForEntityName(dataSourceName, options));
+  return fetchDataAsync(buildApiRouteForEntityName(dataSourceName, options), options);
+}
+export function getDataByIndexName(indexName, options) {
+  options = $.extend({}, defaultOptions, options);
+  return fetchDataAsync(buildApiRouteForIndexName(indexName, options), options);
 }
 
 export function createAsync(entityName, values, awaitIndexing) {
@@ -53,28 +60,36 @@ export function deleteAsync(entityName, awaitIndexing) {
 function buildApiRouteForEntityName(entityName, options) {
   return `/api/d/${ entityName }${ buildQueryStringOptions( options ) }`;
 }
+function buildApiRouteForIndexName(indexName, options) {
+  return `/api/d/index${buildQueryStringOptions(options, `indexName=${indexName}`)}`;
+}
 
-function buildQueryStringOptions(options) {
+
+function buildQueryStringOptions(options, initialQS) {
   if (options == null) return '';
 
-  var qs = '';
-  if ( options.filter ) {
-    qs = appendQueryStringParam(qs, '$filter', options.filter);
-  }
-  if ( options.skipCount ) {
-    qs = appendQueryStringParam(qs, '$skip', options.skipCount);
-  }
-  if ( options.queryPageSize ) {
-    qs = appendQueryStringParam(qs, '$top', options.queryPageSize);
-  }
-  if ( options.transformWith ) {
-    qs = appendQueryStringParam(qs, '$transformWith', options.transformWith);
-  }
-  if ( options.awaitIndexing ) {
-    qs = appendQueryStringParam( qs, 'awaitIndexing', options.awaitIndexing );
-  }
+  var qs = initialQS || '';
+  appendQueryStringParamIfExists('filter', '$filter');
+  appendQueryStringParamIfExists('$filter', '$filter');
 
-  return qs.length ? `?${ qs }` : '';
+  appendQueryStringParamIfExists('skip', '$skip');
+  appendQueryStringParamIfExists('$skip', '$skip');
+
+  appendQueryStringParamIfExists('top', '$top');
+  appendQueryStringParamIfExists('$top', '$top');
+
+  appendQueryStringParamIfExists('awaitIndexing', 'awaitIndexing');
+
+  appendQueryStringParamIfExists('transformWith', '$transformWith');
+  appendQueryStringParamIfExists('$transformWith', '$transformWith');
+
+  return qs.length ? `?${qs}` : '';
+
+  function appendQueryStringParamIfExists(memberName, paramName) {
+    if (options[memberName] != null) {
+      qs = appendQueryStringParam(qs, paramName, options[memberName]);
+    }
+  }
 }
 
 function appendQueryStringParam(qs, key, val) {
@@ -86,12 +101,9 @@ function appendQueryStringParam(qs, key, val) {
   return qs;
 }
 
-function fetchDataAsync(apiRoute, skip, take) {
-  skip = skip || defaultOptions.skipCount;
-  take = take || defaultOptions.queryPageSize;
-  return $.ajax(`${ apiRoute }${ apiRoute.indexOf('?') === -1 ? '?' : '&' }$skip=${ skip }&$top=${ take }`, {
-      cache: false
-  });
+function fetchDataAsync(apiRoute, options) {
+  var opts = $.extend({}, defaultOptions, options);
+  return $.ajax(`${ apiRoute }${ apiRoute.indexOf('?') === -1 ? '?' : '&' }$skip=${ opts.skip }&$top=${ opts.take }`, opts);
 }
 
 function fetchAllDataPagesAsync(queryFn, pageSize, skipCount, dfd, resultContainer) {
@@ -117,5 +129,7 @@ function fetchAllDataPagesAsync(queryFn, pageSize, skipCount, dfd, resultContain
 
 var defaultOptions = {
   skipCount: 0,
-  queryPageSize: 100
+  queryPageSize: 100,
+  cache: false,
+  accepts: null
 }

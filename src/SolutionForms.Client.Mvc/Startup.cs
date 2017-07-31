@@ -9,6 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 using SolutionForms.Client.Mvc.Authorization;
+using SolutionForms.Client.Mvc.Formatters;
 using SolutionForms.Client.Mvc.Helpers;
 using SolutionForms.Client.Mvc.Middleware.Multitenancy;
 using SolutionForms.Service.Providers.Middleware;
@@ -56,8 +57,11 @@ namespace SolutionForms.Client.Mvc
                 //config.Filters.Add(new Microsoft.AspNetCore.Mvc.RequireHttpsAttribute());
 #if RELEASE
                 // this causes issues when running the app locally, currently there appears to be an isse VS 2015 debugging a website with SSL
-                config.Filters.Add(new Microsoft.AspNetCore.Mvc.RequireHttpsAttribute());
 #endif
+                config.Filters.Add(new Microsoft.AspNetCore.Mvc.RequireHttpsAttribute());
+
+                config.OutputFormatters.Add(new CsvOutputFormatter());
+                config.RespectBrowserAcceptHeader = true;
             }).AddJsonOptions(opt => opt.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver());
 
             services.AddAuthorization(options =>

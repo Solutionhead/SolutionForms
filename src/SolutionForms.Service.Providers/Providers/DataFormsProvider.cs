@@ -215,9 +215,10 @@ namespace SolutionForms.Service.Providers.Providers
         {
             var query = new IndexQuery
             {
-                Query = queryParams.ContainsKey("$filter") ? queryParams["$filter"] : null
+                Query = queryParams.ContainsKey("$filter") ? queryParams["$filter"] : null,
+                ResultsTransformer = queryParams.ContainsKey("$transformWith") ? queryParams["$transformWith"] : null
             };
-
+            
             int pageSize;
             if (queryParams.ContainsKey("$top") && int.TryParse(queryParams["$top"], out pageSize))
             {

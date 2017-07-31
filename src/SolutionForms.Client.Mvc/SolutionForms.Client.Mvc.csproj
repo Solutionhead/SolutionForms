@@ -60,6 +60,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="1.1.2" />
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="1.1.2" />
     <PackageReference Include="AutoMapper" Version="4.2.1" />
+    <PackageReference Include="ServiceStack.Text" Version="4.5.12" />
     <PackageReference Include="Stripe.net" Version="6.3.2" />
   </ItemGroup>
 
