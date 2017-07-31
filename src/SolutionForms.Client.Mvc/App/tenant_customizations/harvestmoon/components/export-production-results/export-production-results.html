@@ -1,0 +1,30 @@
+﻿<style>
+  .form-inline .form-group {
+    margin-left: 0;
+    margin-right: 0;
+  }
+</style>
+
+<section class="form-inline">
+  <div class="form-group">
+    <label for="startDateFilter">Start Date</label>
+    <input data-bind="datepicker: true, value: filters.startDate" id="startDateFilter" class="form-control" />
+  </div>
+
+  <div class="form-group">
+    <label for="endDateFilter">End Date</label>
+    <input data-bind="datepicker: true, value: filters.endDate" id="endDateFilter" class="form-control" />
+  </div>
+
+  <button class="btn btn-primary" data-bind="command: commands.loadProductionResultsCommand">Load Results</button>
+</section>
+
+<div data-bind="visible: csvData() != null" class="form-group" style="padding: 10px 15px">
+  <h3>Results</h3>
+  <textarea data-bind="value: csvData" class="form-control" id="exportedDataText"></textarea>
+
+  <div>
+    <button data-bind="command: commands.copyResultsToClipboardCommand" class="btn btn-default"><i class="fa fa-clipboard"></i> Copy Results</button>
+    <button data-bind="command: commands.copyResultsWithoutHeaderToClipboardCommand" class="btn btn-default"><i class="fa fa-clipboard"></i> Copy Results without Header</button>
+  </div>
+</div>
