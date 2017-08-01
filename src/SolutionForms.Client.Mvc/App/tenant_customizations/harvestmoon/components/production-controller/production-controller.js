@@ -20,7 +20,7 @@ function ProductionController(params) {
   }
   
   var self = core.FieldBase.call(this, params);
-  self.versionNumber = "1.0.0.5";
+  self.versionNumber = "1.0.0.6";
   
   var ticketScannerVm = ko.observable(),
     toteScannerVm = ko.observable(),

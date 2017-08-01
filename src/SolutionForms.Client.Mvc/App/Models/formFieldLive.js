@@ -39,15 +39,15 @@ Field.prototype.DEFAULTS = {
 }
 
 Field.prototype.setValue = function (val) {
-    var input = this;
-    if (input.context.peek() == undefined) {
-        var sub = input.context.subscribe(function(ctx) {
+    var me = this;
+    if (me.context.peek() == undefined) {
+        var sub = me.context.subscribe(function(ctx) {
             setContextValue(ctx, val);
             sub.dispose();
             sub = null;
         });
     } else {
-        setContextValue(input.context(), val);
+        setContextValue(me.context(), val);
     }
 
     function setContextValue(context, value) {

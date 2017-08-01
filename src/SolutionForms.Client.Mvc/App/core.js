@@ -146,8 +146,8 @@ function FieldBase(params) {
 
   FieldBase.prototype.setupValidators.call(self, self.settings);
     
-  if (ko.isWritableObservable(params.context)) {
-    params.context(self);
+  if (ko.isWritableObservable(input.context)) {
+    input.context(self);
   }
 
   if (!(typeof self.setValue === "function")) {

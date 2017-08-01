@@ -23,7 +23,7 @@ function BarcodeScannerField(params) {
     return new BarcodeScannerField(params);
   }
 
-  const settings = $.extend({}, BarcodeScannerField.prototype.DEFAULT_CONFIG, params.fieldConfig.settings);
+  const settings = $.extend({}, BarcodeScannerField.prototype.DEFAULT_CONFIG, params.input.settings);
 
   var timeout = null;
   var value = ko.observable();
@@ -148,7 +148,7 @@ function BarcodeScannerField(params) {
   });
 
   function getQuaggaConfig() {
-    var config = $.extend(true, {}, scannerConfigOptions, params.fieldConfig.settings.scannerConfig);
+    var config = $.extend(true, {}, scannerConfigOptions, params.input.settings.scannerConfig);
     config.inputStream.target = document.querySelector(`#${self.viewState.uniqueId} .scanner-viewport`);
 
     navigator.getUserMedia = null; //todo: remove

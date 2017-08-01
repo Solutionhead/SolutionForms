@@ -1,19 +1,10 @@
-﻿{{ #if: displayWithLabel }}
-<div class="form-group" data-bind="validationElement: fieldParams.fieldConfig.validationElement()">
+﻿<div class="form-group" data-bind="validationElement: fieldParams.fieldConfig.validationElement()">
+  {{ #if: displayWithLabel }}
   <label class="col-sm-2" data-bind="text: labelText"></label>
-  <div class="col-sm-10" data-bind="component: { name: inputType, params: fieldParams }"></div>
-  <div data-bind="if: fieldParams.fieldConfig.helpText" class="col-sm-10 col-sm-offset-2">
+  {{ /if }}
+  <div class="col-sm-10" data-bind="component: { name: inputType, params: { input: fieldParams.fieldConfig, context: fieldParams.fieldConfig.context, exports: fieldParams.exports } }"></div>
+  <div data-bind="if: fieldParams.fieldConfig.helpText, css: { 'col-sm-10 col-sm-offset-2': displayWithLabel }">
     <span class="help-block" data-bind="text: fieldParams.fieldConfig.helpText"></span>
   </div>
   <div class="sr-only" data-bind="validationMessage: fieldParams.fieldConfig.validationElement()"></div>
 </div>
-{{ /if }}
-
-{{ #if: displayWithoutLabel }}
-<div data-bind="component: { name: inputType, params: fieldParams }, 
-                validationElement: fieldParams.fieldConfig.validationElement()"></div>
-<div data-bind="if: fieldParams.fieldConfig.helpText">
-  <span class="help-block" data-bind="text: fieldParams.fieldConfig.helpText"></span>
-</div>
-<div class="sr-only" data-bind="validationMessage: fieldParams.fieldConfig.validationElement()"></div>
-{{ /if }}

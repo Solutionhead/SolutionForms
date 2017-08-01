@@ -1,4 +1,8 @@
-﻿var Field = require('models/formFieldLive');
+﻿/* NOTE: This component needs to align with the `dynamic-form-ui` component or else core
+ * functionality (Field and FieldBase) will not work.
+ */
+
+var Field = require('models/formFieldLive');
 
 function FormField(params) {
   if (!(this instanceof FormField)) { return new FormField(params); }
@@ -15,7 +19,8 @@ function FormField(params) {
   self.fieldParams = {
     fieldConfig: new Field({
       settings: params.config,
-      exports: params.fieldContext || null
+      exports: params.fieldContext || null,
+      valueContext: params.context || null
     }),
     exports: params.exports
   }
