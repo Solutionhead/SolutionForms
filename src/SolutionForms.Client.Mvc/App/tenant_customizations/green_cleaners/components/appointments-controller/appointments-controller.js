@@ -330,7 +330,7 @@ AppointmentsController.prototype.lookupClients = function(searchTerm, callback) 
   searchTerm = prepareFilterString(searchTerm);
   $.ajax({
     dataType: "json",
-    url: `/api/d/index?id=${encodeURI("clients/byName")}&$filter=Name:*${encodeURI(searchTerm)}*`,
+    url: `/api/d/index?indexName=${encodeURI("clients/byName")}&$filter=Name:*${encodeURI(searchTerm)}*`,
     cache: false
   }).done(callback)
   .fail(() => { toastr.error("Failed to return clients")});

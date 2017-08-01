@@ -20,7 +20,7 @@ function ProductionController(params) {
   }
   
   var self = core.FieldBase.call(this, params);
-  self.versionNumber = "1.0.0.4";
+  self.versionNumber = "1.0.0.5";
   
   var ticketScannerVm = ko.observable(),
     toteScannerVm = ko.observable(),
@@ -261,8 +261,8 @@ function ProductionController(params) {
           method: 'POST'
         }).done((response) => {
           toastr.success(`Employee: <strong>${data.employee.name}</strong>, Tote: <strong>${data.toteNumber}</strong>`, 'Saved Successfully', { timeOut: 5000 });
-          scannedTickets[data.ticket.ticketNum] = true;
-          scannedTotes[data.toteNumber] = true;
+          scannedTickets[data.ticket.ticketNum] = data;
+          scannedTotes[data.toteNumber] = data;
           var preserveEmployee = self.preserveEmployee();
           resetForTicketScan(true);
           if (preserveEmployee) {
@@ -377,7 +377,7 @@ function ProductionController(params) {
     self.model.employee(null);
     self.model.workTicket(null);
     self.model.ticketNumber(null);
-    //self.config.employeeLookupConfig.fieldContext().setValue(null)
+    self.config.employeeLookupConfig.fieldContext().setValue(null)
     self.config.ticketScannerConfig2.value(null);
     startScanner === true && startTicketScanner();
   }
@@ -485,7 +485,7 @@ function ProductionController(params) {
   function loadWorkTicketsAsync(fieldCode, productionDate) {
     var queryString = `$filter=(fieldCode:"${fieldCode}" AND productionDate:[[${productionDate}]])`
     return $.ajax({
-      url: `/api/d/index?${encodeURI(`id=EmployeeTickets%2FbyDateAndField&${queryString}`)}`,
+      url: `/api/d/index?${encodeURI(`indexName=EmployeeTickets%2FbyDateAndField&${queryString}`)}`,
       dataType: 'json',
       cache: false
     }).then((d) => {
@@ -505,7 +505,7 @@ function ProductionController(params) {
   function loadProductionResultsAsync(fieldCode, productionDate) {
     var queryString = `$filter=(fieldCode:"${fieldCode}" AND productionDate:[[${productionDate}]])`
     return $.ajax({
-      url: `/api/d/index?${encodeURI(`id=ProductionResults%2FbyDateAndField&${queryString}`)}`,
+      url: `/api/d/index?${encodeURI(`indexName=ProductionResults%2FbyDateAndField&${queryString}`)}`,
       dataType: 'json',
       cache: false
     }).then((d) => {

@@ -12,12 +12,16 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="bower_modules\**" />
     <Compile Remove="wwwroot\js\**" />
     <Compile Remove="wwwroot\lib\**" />
+    <Content Remove="bower_modules\**" />
     <Content Remove="wwwroot\js\**" />
     <Content Remove="wwwroot\lib\**" />
+    <EmbeddedResource Remove="bower_modules\**" />
     <EmbeddedResource Remove="wwwroot\js\**" />
     <EmbeddedResource Remove="wwwroot\lib\**" />
+    <None Remove="bower_modules\**" />
     <None Remove="wwwroot\js\**" />
     <None Remove="wwwroot\lib\**" />
   </ItemGroup>

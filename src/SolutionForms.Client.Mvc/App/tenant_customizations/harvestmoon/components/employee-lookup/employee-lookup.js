@@ -24,23 +24,7 @@ function EmployeeLookup(params) {
 
   this.lookupValue = self.userResponse;
   this.employees = ko.observableArray([]);
-
-  //this.initEmployeeScanner = function () {
-  //  self.currentEntry().employee(null);
-  //  var config = configOptions;
-  //  config.inputStream.target = document.querySelector('#employee-scanner');
-  //  quagga.init(config);
-  //  quagga.addHandler('detected', self.employeeBarcodeDetected);
-  //}
-
-  //setTimeout(self.initEmployeeScanner, 0);
-
-  //const modes = {
-  //  lookup: 'lookup',
-  //  select: 'select'
-  //};
-  //var mode = ko.observable(modes.lookup);
-
+  
   var isLookupMode = ko.observable(true);
   this.displayLookup = ko.pureComputed(function () {
     return isLookupMode();
@@ -62,7 +46,7 @@ function EmployeeLookup(params) {
 
 EmployeeLookup.prototype.loadEmployees = function () {
   var employees = [];
-  fetch('employees', { '$transformWith': 'Employees/Active' })
+  fetch('employees', { '$transformWith': 'Employees%2FActive' })
     .done((r) => {
       ko.utils.arrayPushAll(this.employees(), ko.utils.arrayMap(r, (d) => {
         return {
@@ -73,39 +57,6 @@ EmployeeLookup.prototype.loadEmployees = function () {
       this.employees.notifySubscribers();
     })
 
-}
-
-const configOptions = {
-  locate: true,
-  inputStream: {
-    name: "Live",
-    type: "LiveStream",
-    target: document.querySelector('#scanner-container'),
-    //size: 400,
-    //area: {
-    //  top: "10%",
-    //  right: "10%",
-    //  bottom: "30%",
-    //  left: "10%"
-    //},
-    //constraints: {
-    //  width: "330",
-    //  height: "200"
-    //}
-  },
-  decoder: {
-    readers: ["code_39_reader"],
-    debug: {
-      drawBoundingBox: true,
-      showFrequency: true,
-      drawScanline: true,
-      showPattern: true
-    }
-  },
-  locator: {
-    halfSample: true,
-    patchSize: "medium"
-  }
 }
 
 module.exports = {

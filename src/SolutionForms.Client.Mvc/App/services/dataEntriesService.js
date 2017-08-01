@@ -130,6 +130,5 @@ function fetchAllDataPagesAsync(queryFn, pageSize, skipCount, dfd, resultContain
 var defaultOptions = {
   skipCount: 0,
   queryPageSize: 100,
-  cache: false,
-  accepts: null
+  cache: false
 }

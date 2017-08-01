@@ -22,8 +22,7 @@ namespace SolutionForms.Client.Mvc.Controllers
 
         public DataFormsController(DataFormsProvider dataFormsProvider)
         {
-            if(dataFormsProvider == null) {  throw new ArgumentNullException(nameof(dataFormsProvider));}
-            _dataFormsProvider = dataFormsProvider;
+            _dataFormsProvider = dataFormsProvider ?? throw new ArgumentNullException(nameof(dataFormsProvider));
         }
 
         #region API actions
