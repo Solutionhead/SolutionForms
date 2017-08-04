@@ -98,7 +98,7 @@ ExportProductionResults.prototype.loadProductionResults = function (completedCal
     '$filter': `(ProductionDate: [${startDate} TO ${endDate}])`,
     cache: false,
     accepts: {
-      csv: 'application/csv'
+      csv: 'text/csv'
     },
     dataType: 'csv',
     converters: {

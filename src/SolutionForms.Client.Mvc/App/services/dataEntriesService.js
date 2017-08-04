@@ -19,9 +19,15 @@
   return fetchAllDataPagesAsync(queryFn, queryOptions.queryPageSize);
 }
 
-export function getDataByDataSourceName(dataSourceName, options) {
+
+export function getDataByDataSourceName(dataSourceName, id, options) {
+  if (arguments.length === 2) {
+    options = id;
+    id = null;
+  }
+
   options = $.extend({}, defaultOptions, options);
-  return fetchDataAsync(buildApiRouteForEntityName(dataSourceName, options), options);
+  return fetchDataAsync(buildApiRouteForEntityName(dataSourceName, id, options), options);
 }
 export function getDataByIndexName(indexName, options) {
   options = $.extend({}, defaultOptions, options);
@@ -33,7 +39,7 @@ export function createAsync(entityName, values, awaitIndexing) {
   if ( awaitIndexing === true ) {
     opts.awaitIndexing = true;
   }
-  const url = buildApiRouteForEntityName( entityName, opts );
+  const url = buildApiRouteForEntityName( entityName, null, opts );
 
   return $.ajax( url, {
     data: typeof values === "object" ? ko.toJSON(values) : values,
@@ -57,8 +63,8 @@ export function deleteAsync(entityName, awaitIndexing) {
   });
 }
 
-function buildApiRouteForEntityName(entityName, options) {
-  return `/api/d/${ entityName }${ buildQueryStringOptions( options ) }`;
+function buildApiRouteForEntityName(entityName, id, options) {
+  return `/api/d/${ entityName }/${ id || '' }${ buildQueryStringOptions( options ) }`;
 }
 function buildApiRouteForIndexName(indexName, options) {
   return `/api/d/index${buildQueryStringOptions(options, `indexName=${indexName}`)}`;
@@ -103,7 +109,7 @@ function appendQueryStringParam(qs, key, val) {
 
 function fetchDataAsync(apiRoute, options) {
   var opts = $.extend({}, defaultOptions, options);
-  return $.ajax(`${ apiRoute }${ apiRoute.indexOf('?') === -1 ? '?' : '&' }$skip=${ opts.skip }&$top=${ opts.take }`, opts);
+  return $.ajax(`${ apiRoute }`, opts);
 }
 
 function fetchAllDataPagesAsync(queryFn, pageSize, skipCount, dfd, resultContainer) {

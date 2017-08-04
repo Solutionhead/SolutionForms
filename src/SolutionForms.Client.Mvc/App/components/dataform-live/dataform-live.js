@@ -82,7 +82,7 @@ DataFormLive.prototype.initFromConfig = function (jsonConfig) {
 
   var plugins = ko.utils.arrayMap(config.plugins || [], function (path) {
     try {
-      return require('plugins/' + path)();
+      return require('plugins/' + path);
     } catch (e) {
       toastr.error('Plugin failed to load: ' + path);
     }

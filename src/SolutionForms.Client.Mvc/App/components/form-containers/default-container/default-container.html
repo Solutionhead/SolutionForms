@@ -1,7 +1,18 @@
 ﻿<div class="container panel" style="margin-top: 10px;">
-  <h1 data-bind="text: $parent.formTitle"></h1>
 
-  <button data-bind="command: initNewEntryCommand" class="btn btn-default">Create New</button>
+  <div class="btn-toolbar" role="toolbar" aria-label="record commands">
+    <div class="btn-group" role="group" aria-label="group">
+      <button data-bind="command: initNewEntryCommand" class="btn btn-default">
+        <i class="fa fa-plus"></i> Create New
+      </button>
+
+      <button class="btn btn-primary" data-bind="command: commands.downloadAsCsvCommand">
+        <i class="fa fa-file-excel-o"></i> Download All Records
+      </button>
+    </div>
+  </div>
+
+  <h1 data-bind="text: $parent.formTitle"></h1>
 
   <section data-bind="visible: showTableView">
     <div data-bind="component: {name: 'data-table', params: dataTableViewModel}"></div>

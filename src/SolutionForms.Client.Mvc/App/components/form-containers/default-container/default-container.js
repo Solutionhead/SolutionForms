@@ -1,5 +1,7 @@
-﻿var page = require('page'),
-  toastr = require('toastr'),
+﻿import moment from 'moment';
+import toastr from 'toastr';
+import { fetch as fetchRecords } from 'plugins/getDataFromLocalStorePlugin';
+var page = require('page'),
   tableComponentName = 'data-table',
   editorComponentName = 'details-editor';
 
@@ -27,6 +29,8 @@ function DefaultContainer(params) {
     showDetails = ko.observable(false),
     currentId;
 
+  this.entityName = null; 
+
   self.showDetailsView = ko.pureComputed(function() {
     return showDetails() === true;
   });
@@ -50,7 +54,7 @@ function DefaultContainer(params) {
 
   self.closeDetailsCommand = ko.command({
     execute: function() {
-      page(`/Forms/${ko.unwrap(params.formId)}`);
+      page(`/Forms/${ko.unwrap(self.formId)}`);
     },
     canExecute: function() {
       return showDetails() === true;
@@ -101,6 +105,15 @@ function DefaultContainer(params) {
   });
 
 
+  this.commands = {
+    downloadAsCsvCommand: ko.asyncCommand({
+      execute: function (complete) {
+        return self.downloadAllRecordsAsCsv(complete);
+      }
+    })
+  }
+
+
   function showDetailsView(values) {
     var editorVm = self.detailsEditorViewModel.exports();
     editorVm && editorVm.initializeFormValues(values || {});
@@ -109,6 +122,8 @@ function DefaultContainer(params) {
 
   params.documentId.subscribe(initializeForDocumentId);
   initializeForDocumentId(params.documentId.peek());
+
+  self.parseConfig(params.config);
 
   function initializeForDocumentId(docId) {
     if (docId == null) {
@@ -133,11 +148,82 @@ function DefaultContainer(params) {
   function navigateToSelectedItemDetails(values) {
     showDetailsView(values);
     currentId = values.Id;
-    page(`/Forms/${ko.unwrap(params.formId)}/${currentId}`);
+    page(`/Forms/${ko.unwrap()}/${currentId}`);
   }
 
   return self;
 }
+
+DefaultContainer.prototype.parseConfig = function (input) {
+  var values = input || {},
+    self = this;
+
+  if (typeof values === "string") { values = ko.parseJSON(values) || {}; }
+  if (values.dataSource == undefined || values.dataSource.documentName == undefined) {
+    throw new Error("Invalid configuration data: Missing or invalid dataSource property.");
+  }
+  this.entityName = values.dataSource.documentName;
+}
+
+DefaultContainer.prototype.downloadAllRecordsAsCsv = function (complete) {
+    var self = this,
+      entityName = this.entityName,
+      results = '';
+
+    fetchData(0, 300);
+
+    function fetchData(skip, take) {
+      return fetchRecords({
+        entityName: entityName,
+        skip: skip || 0,
+        top: take || 300,
+        accepts: {
+          csv: 'application/csv'
+        },
+        dataType: 'csv',
+        converters: {
+          'text csv': function (result) {
+            return result;
+          }
+        }
+      })
+        .done((data) => {
+          if (!data) {
+            // all data has been downloaded
+            triggerDownload(results);
+            complete();
+            return;
+          }
+
+          //data.replace(/\r\n/g, /\n/);
+          if (results != '') {
+            //remove header row from first line
+            data = data.substr(data.match(/.*\n/).index + 1);
+          }
+
+          results += data;
+          skip += take;
+          return fetchData(skip, take);
+        })
+        .fail(() => {
+          toastr.error(`An error occurred while attempting to download CSV file.`, 'Failed to download CSV')
+          complete();
+        });
+    }
+
+    function triggerDownload(data) {
+      if (!data.match(/^data:text\/csv/i)) {
+        data = 'data:text/csv;charset=utf-8,' + data;
+      }
+      var link = document.createElement('a');
+      link.setAttribute('href', encodeURI(data));
+      link.setAttribute('download', `${encodeURI(self.entityName)}_${moment().format('YYYYMMDD-HHmmss-SSSSSS')}.csv`);
+      link.click();
+      link = null;
+
+      window.open(encodeURI(data));
+    }
+  }
 
 module.exports = {
   viewModel: DefaultContainer,

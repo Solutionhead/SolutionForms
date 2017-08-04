@@ -1,21 +1,7 @@
-﻿var $ = require('jquery'),
-    _ = require('underscore');
+﻿import { getDataByDataSourceName as fetchByEntity } from 'App/services/dataEntriesService';
 
-function GetDataFromLocalStorePlugin() {
-    if (!(this instanceof GetDataFromLocalStorePlugin)) { return new GetDataFromLocalStorePlugin(); }
-
-    var plugin = this;
-
-    plugin.fetch = function(args) {
-      var entityName = ko.unwrap(args.entityName);
-      var id = args.id;
-      return $.ajax({
-        url: '/api/d/' + entityName + '/' + (id == undefined ? '' : id),
-        cache: false
-      });
-    }
-
-    return plugin;
+export function fetch(args) {
+  args = args || {};
+  var entityName = ko.unwrap(args.entityName);
+  return fetchByEntity(entityName, args.id, args);
 }
-
-module.exports = GetDataFromLocalStorePlugin;

@@ -3,54 +3,86 @@ using Microsoft.AspNetCore.Mvc;
 using SolutionForms.Client.Mvc.Helpers;
 using Microsoft.AspNetCore.Mvc.Formatters;
 using System.Text;
+using System.IO;
 using Microsoft.Net.Http.Headers;
 using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json.Linq;
 using System.Collections;
 using System;
+using ServiceStack;
 
 namespace SolutionForms.Client.Mvc.Formatters
 {
-    public class CsvOutputFormatter : TextOutputFormatter
+    public class CsvFileStreamOutputFormatter : IOutputFormatter
     {
-        public CsvOutputFormatter()
+        const string MEDIA_TYPE = "application/csv";
+
+        public bool CanWriteResult(OutputFormatterCanWriteContext context)
         {
-            SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("application/csv"));
-            SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse("text/csv"));
+            return context?.ContentType.ToString().Equals(MEDIA_TYPE) ?? false;
+        }
+
+        public async Task WriteAsync(OutputFormatterWriteContext context)
+        {
+            if (context == null)
+            {
+                throw new ArgumentNullException(nameof(context));
+            }
+
+            var response = context.HttpContext.Response;
+            response.ContentType = MEDIA_TYPE;
+
+            using (var writer = context.WriterFactory(response.Body, Encoding.UTF8))
+            {
+                await writer.WriteAsync(CsvOutputFormatterHelper.ConvertContentToCsv(context));
+            }
+        }
+    }
+
+    public class CsvTextOutputFormatter : TextOutputFormatter
+    {
+        const string MEDIA_TYPE = "text/csv";
+
+        public CsvTextOutputFormatter()
+        {
+            SupportedMediaTypes.Add(MediaTypeHeaderValue.Parse(MEDIA_TYPE));
             SupportedEncodings.Add(Encoding.UTF8);
             SupportedEncodings.Add(Encoding.Unicode);
         }
 
         public override async Task WriteResponseBodyAsync(OutputFormatterWriteContext context, Encoding selectedEncoding)
         {
-            var response = context.HttpContext.Response;
-            string jsonString;
-
             try
             {
-                if (context.Object is JsonResult)
-                {
-                    jsonString = (context.Object as JsonResult).ToString();
-                }
-                else if (context.Object as IEnumerable != null)
-                {
-                    jsonString = JArray.FromObject(context.Object).ToString();
-                }
-                else
-                {
-                    jsonString = JObject.FromObject(context.Object).ToString();
-                }
-                await response.WriteAsync(JsonHelper.JsonToCSV(jsonString, true));
+                context.HttpContext.Response.ContentType = MEDIA_TYPE;
+                await context.HttpContext.Response.WriteAsync(CsvOutputFormatterHelper.ConvertContentToCsv(context));
             }
             catch (Exception ex)
             {
                 throw;
             }
         }
+    }
 
-        public override bool CanWriteResult(OutputFormatterCanWriteContext context)
+    public static class CsvOutputFormatterHelper
+    {
+        public static string ConvertContentToCsv(OutputFormatterWriteContext context, bool limitStringSize = true)
         {
-            return base.CanWriteResult(context);
+            string jsonString;
+
+            if (context.Object is JsonResult)
+            {
+                jsonString = (context.Object as JsonResult).ToString();
+            }
+            else if (context.Object as IEnumerable != null)
+            {
+                jsonString = JArray.FromObject(context.Object).ToString();
+            }
+            else
+            {
+                jsonString = JObject.FromObject(context.Object).ToString();
+            }
+            return JsonHelper.JsonToCSV(jsonString, limitStringSize);
         }
     }
 }

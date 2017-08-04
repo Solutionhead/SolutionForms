@@ -62,4 +62,4 @@ function SaveToLocalDocumentStorePlugin() {
   return plugin;
 }
 
-module.exports = SaveToLocalDocumentStorePlugin;
+module.exports = SaveToLocalDocumentStorePlugin();

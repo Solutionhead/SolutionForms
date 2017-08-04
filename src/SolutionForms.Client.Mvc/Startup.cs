@@ -52,15 +52,11 @@ namespace SolutionForms.Client.Mvc
                 var policy = new AuthorizationPolicyBuilder()
                     .RequireAuthenticatedUser()
                     .Build();
-                config.Filters.Add(new AuthorizeFilter(policy));
-
-                //config.Filters.Add(new Microsoft.AspNetCore.Mvc.RequireHttpsAttribute());
-#if RELEASE
-                // this causes issues when running the app locally, currently there appears to be an isse VS 2015 debugging a website with SSL
-#endif
+                config.Filters.Add(new AuthorizeFilter(policy));                
                 config.Filters.Add(new Microsoft.AspNetCore.Mvc.RequireHttpsAttribute());
 
-                config.OutputFormatters.Add(new CsvOutputFormatter());
+                config.OutputFormatters.Add(new CsvFileStreamOutputFormatter());
+                config.OutputFormatters.Add(new CsvTextOutputFormatter());
                 config.RespectBrowserAcceptHeader = true;
             }).AddJsonOptions(opt => opt.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver());
 
