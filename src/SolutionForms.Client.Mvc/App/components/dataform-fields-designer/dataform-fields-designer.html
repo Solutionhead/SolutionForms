@@ -19,14 +19,17 @@
         </div>
       </div>
 
-      <!-- ko if: config().inputType() -->
+      {{ #if: config().inputType() }}
       <!-- the below with binding causes live element to be rebuilt when the config value is changed -->
       <div data-bind="visible: !isActive(), click: $parent.activateField" class="dataform-designer-container">
         <div class="form-fieldset" data-bind="with: config">
-          <div data-bind="component: { name: inputType, params: { config: $data.config, settings: $data.settings,  input: $data, context: ko.observable() } }"></div>
+          <div class="form-group">
+            <label class="control-label">{{ displayName }}</label>
+            <div data-bind="component: { name: inputType, params: { config: config, settings: settings,  input: $data, context: ko.observable() } }" class="row"></div>
+          </div>
         </div>
       </div>
-      <!-- /ko -->
+      {{ /if }}
     </div>
   </div>
 </div>
