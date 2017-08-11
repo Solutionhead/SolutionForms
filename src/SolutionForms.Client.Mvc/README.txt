@@ -8,6 +8,8 @@
 127.0.0.1		solutionforms.local
 127.0.0.1		test.solutionforms.local
 
+> Note: If you create a new organization, you will need to add the sub domain to the hosts file in order to access the subdomain from localhost. To avoid experiencing an error during registration of your new organization, update the hosts file before creating the org. 
+
 2. Change the application's binding configuration to handle all requests to the assigned port.
 	a. Open the applicationhost.config file found in the `.vs/config` folder of the solution's root directory.
 	b. Find the `site` node with the name "SolutionForms.Client.Mvc" (search text: <site name="SolutionForms.Client.Mvc")
@@ -17,6 +19,6 @@
 		* **NOTE: Don't change the port number! Visual Studio may have issued a different port number. Keep the port number issued.**
 		
 3. If IIS is currently running, stop it by right-clicking the icon in the task tray and clicking Exit.
-4. From cmd propmt running in admin mode, enter the following command: netsh http add urlacl url=http://*:52794/ user=everyone
+_(Not sure whether this is still required)_ 4. From cmd propmt running in admin mode, enter the following command: `netsh http add urlacl url=http://*:52794/ user=everyone`
 
 > Note: You can skip step #4 if you run VS in Administrator mode otherwise the website won't start due to permissions errors.
